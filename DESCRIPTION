@@ -1,0 +1,12 @@
+Package: GSCAR
+Type: Package
+Title: GSCAR: Geneset Context Analysis R Platform
+Version: 0.99.1
+Date: 2014-1-26
+Author: Zhicheng Ji, Hongkai Ji
+Maintainer: Zhicheng Ji <zji4@jhu.edu>
+Description: GSCAR takes as input several lists of activated and repressed genes. GSCAR then searches through a compendium of publicly available gene expression profiles for biological contexts that are enriched with a specified pattern of gene expression. GSCAR provides both traditional R functions and interactive, user-friendly user interface. 
+License: GPL(>=2)
+LazyLoad: yes
+Imports: graphics
+Depends: shiny, sp, GSCARdata, gplots, ggplot2, reshape2, RColorBrewer, brew, markdown, knitr
