@@ -12,7 +12,7 @@ shinyUI(pageWithSidebar(
       headerPanel('GSCA: Gene Set Context Analysis'),
       
       sidebarPanel(
-            helpText(a("Show User Manual",href="GSCARmanual.pdf",target="_blank")),
+            helpText(a("Show User Manual",href="GSCAmanual.pdf",target="_blank")),
             wellPanel(
                   radioButtons("Mainmethod","Main Menu",
                          list("Input Geneset Data"="Input",
@@ -114,16 +114,16 @@ shinyUI(pageWithSidebar(
                              )
             ),
              
-            conditionalPanel(condition="input.Mainmethod=='GSCAR'",
+            conditionalPanel(condition="input.Mainmethod=='GSCA'",
                              wellPanel(
-                                    radioButtons("GSCARmethod","",
-                                                list("Default Enrichment Region Selection"="GSCARdefault",
-                                                     "Interactive Enrichment Region Selection"="GSCARinteractive")
+                                    radioButtons("GSCAmethod","",
+                                                list("Default Enrichment Region Selection"="GSCAdefault",
+                                                     "Interactive Enrichment Region Selection"="GSCAinteractive")
                                     ),
                                     wellPanel(
-                                          conditionalPanel(condition="input.GSCARmethod=='GSCARinteractive'",
+                                          conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",
                                                            helpText("Choose your interested region"),
-                                                           wellPanel(uiOutput("InputGSCARsidebar"))),
+                                                           wellPanel(uiOutput("InputGSCAsidebar"))),
                                           uiOutput("plotenrichedareaui"),
                                           uiOutput("heatmapthreerowvui"),
                                           helpText("Context Cutoff and Display options"),
@@ -136,17 +136,17 @@ shinyUI(pageWithSidebar(
                                                 conditionalPanel(condition="input.Inputcontexttype=='Toprank'",
                                                       uiOutput("InputNslider")),
                                                 conditionalPanel(condition="input.Inputcontexttype=='Specify'",
-                                                      uiOutput("InputGSCARspecifycontextui"))
+                                                      uiOutput("InputGSCAspecifycontextui"))
                                           )
                                     )
                              )
             ),
             conditionalPanel(condition="input.Mainmethod=='Download'",
                              wellPanel(
-                                    radioButtons("Downloadregionselect","Select Genedata Acitivity Region",choices=c("GSCARdefault","GSCARinteractive")),
+                                    radioButtons("Downloadregionselect","Select Genedata Acitivity Region",choices=c("GSCAdefault","GSCAinteractive")),
                                     wellPanel(
                                           selectInput("Downloadranktabletype","Select File Type",choices=c("csv","txt")),
-                                          textInput("Downloadranktablefilename","Enter File Name","GSCAR Ranking Table"),
+                                          textInput("Downloadranktablefilename","Enter File Name","GSCA Ranking Table"),
                                           p(downloadButton("Downloadranktable","Save Ranking Table"))
                                     ),
                                     uiOutput("Downloadsidebarui")
@@ -157,7 +157,7 @@ shinyUI(pageWithSidebar(
       mainPanel(
             conditionalPanel(condition="input.Mainmethod=='Input'",
                               tabsetPanel(
-                                   tabPanel("Current Geneset Data",uiOutput("OutputCurrentGenedatawarnui"),dataTableOutput("OutputCurrentGenedata"),br(h4("All genedata in GSCAR:")),textOutput("OutputGenedataname")),
+                                   tabPanel("Current Geneset Data",uiOutput("OutputCurrentGenedatawarnui"),dataTableOutput("OutputCurrentGenedata"),br(h4("All genedata in GSCA:")),textOutput("OutputGenedataname")),
                                    tabPanel("All Geneset Data", dataTableOutput("OutputAllGenedata")), 
                                    tabPanel("All Geneset Pattern", dataTableOutput("OutputAllPattern"))
                               )
@@ -166,13 +166,13 @@ shinyUI(pageWithSidebar(
                               dataTableOutput("OutputDataSummary"),
                               uiOutput("Outputmissinggenesetreport")
             ),
-            conditionalPanel(condition="input.Mainmethod=='GSCAR'",
+            conditionalPanel(condition="input.Mainmethod=='GSCA'",
                              tabsetPanel(
                                     tabPanel("Plot",            
-                                             conditionalPanel(condition="input.GSCARmethod=='GSCARdefault'",uiOutput("GSCARdefaultplot")),  
-                                             conditionalPanel(condition="input.GSCARmethod=='GSCARinteractive'",uiOutput("GSCARinteractiveplot"))
+                                             conditionalPanel(condition="input.GSCAmethod=='GSCAdefault'",uiOutput("GSCAdefaultplot")),  
+                                             conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",uiOutput("GSCAinteractiveplot"))
                                     ),
-                                    tabPanel("Ranking Table",dataTableOutput("GSCARrankingtable"))
+                                    tabPanel("Ranking Table",dataTableOutput("GSCArankingtable"))
                               )                
             ),
             conditionalPanel(condition="input.Mainmethod=='Download'",
@@ -182,7 +182,7 @@ shinyUI(pageWithSidebar(
                              )
             ),
             conditionalPanel(condition="input.Mainmethod=='About'",
-                             p('GSCAR: Geneset Context Analysis R Platform'),
+                             p('GSCA: Geneset Context Analysis R Platform'),
                              p('Current Version: 0.99.1.'),
                              p('Release Date: 2014-1-27'),
                              p('Author: Zhicheng Ji,Hongkai Ji'),

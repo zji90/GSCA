@@ -15,7 +15,7 @@ annotatePeaks(inputfile, genome, up = NULL, down = NULL)
     A data.frame where each row corresponds to a peak. The first column is the chromosome on which the peak is found (e.g., chr1) and the second and third columns are the peak starting and ending sites.
 }
   \item{genome}{
-    Should be one of 'hg19', 'hg18', 'mm9', or 'mm8' genome. More genomes may be supported in future versions of GSCAR.
+    Should be one of 'hg19', 'hg18', 'mm9', or 'mm8' genome. More genomes may be supported in future versions of GSCA.
 }
   \item{up}{
     Region upstream of the TSS. A gene will be annotated to a peak if the region upstream to downstream of each gene TSS, as defined by the up and down arguments, overlap with the peak.
@@ -41,7 +41,7 @@ Zhicheng Ji, Hongkai Ji
 \examples{
 ### Read in example ChIP-seq analyzed data output from GSE11431
 ### for Oct4 in ESCs directly downloaded from NCBI GEO
-path <- system.file("extdata",package="GSCAR")
+path <- system.file("extdata",package="GSCA")
 inputfile <- read.delim(paste(path,"GSM288346_ES_Oct4.txt",sep="/"),
                         header=FALSE,stringsAsFactors=FALSE)
 

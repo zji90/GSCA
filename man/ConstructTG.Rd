@@ -4,14 +4,14 @@
 Construct target genes for a TF using TF-bound genes and differentially expressed genes from ChIP-chip or ChIP-seq and TF perturbation gene expression data.
 }
 \description{
-This function requires users to first analyze their own ChIP-chip and ChIP-seq data to detect significant peaks and then annotate the peaks with their corresponding regulated target genes using the annotatePeaks function in the GSCAR package. Users must also use the limma package to detect differentially expressed genes in their gene expression data (preprocessing and noramzliation can be done with any algorithm the user desires), then the resulting output needs to be annotated into Entrez GeneIDs. Finally, with both inputs ConstructTG will identify the activated and repressed TF target genes.
+This function requires users to first analyze their own ChIP-chip and ChIP-seq data to detect significant peaks and then annotate the peaks with their corresponding regulated target genes using the annotatePeaks function in the GSCA package. Users must also use the limma package to detect differentially expressed genes in their gene expression data (preprocessing and noramzliation can be done with any algorithm the user desires), then the resulting output needs to be annotated into Entrez GeneIDs. Finally, with both inputs ConstructTG will identify the activated and repressed TF target genes.
 }
 \usage{
 ConstructTG(annonPeaksOut, limmaOut)
 }
 \arguments{
   \item{annonPeaksOut}{
-    Output from the annotatePeaks function in the GSCAR package. Contains the genes that correspond to the significant peaks detected from TF ChIP-chip or ChIP-seq data.
+    Output from the annotatePeaks function in the GSCA package. Contains the genes that correspond to the significant peaks detected from TF ChIP-chip or ChIP-seq data.
 }
   \item{limmaOut}{
     Differential expression output from the limma package, and requires the first column of the data.frame to contain the EntrezGeneIDs that match the microarray probeset IDs.
@@ -34,7 +34,7 @@ Zhicheng Ji, Hongkai Ji
 \examples{
 ### Read in example ChIP-seq analyzed data output from GSE11431
 ### for Oct4 in ESCs directly downloaded from NCBI GEO
-path <- system.file("extdata",package="GSCAR")
+path <- system.file("extdata",package="GSCA")
 chipxfile <- read.delim(paste(path,"GSM288346_ES_Oct4.txt",sep="/"),
                         header=FALSE,stringsAsFactors=FALSE)
 

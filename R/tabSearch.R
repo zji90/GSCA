@@ -1,5 +1,4 @@
-tabSearch <-
-function(keyword,chipdata,option="OR"){
+tabSearch <- function(keyword,chipdata,option="OR"){
     if(chipdata == "hgu133a") {
         if (!require(Affyhgu133aExpr)) {
             stop("Affyhgu133aExpr Package is not found")
@@ -8,7 +7,7 @@ function(keyword,chipdata,option="OR"){
             tab <- Affyhgu133aExprtab
         }
     } else if(chipdata == "moe430"){
-          if (!require(Affyhgu133aExpr)) {
+          if (!require(Affymoe430Expr)) {
                 stop("Affymoe430Expr Package is not found")
           } else {
                 data(Affymoe430Exprtab)

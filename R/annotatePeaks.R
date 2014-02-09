@@ -1,9 +1,8 @@
-annotatePeaks <-
-function(inputfile, genome, up=NULL, down=NULL){
+annotatePeaks <- function(inputfile, genome, up=NULL, down=NULL){
     ## Check up and down
     if(is.null(up) | is.null(down)) stop("Missing up or down args.")
       
-    path <- system.file("extdata",package="GSCAR")
+    path <- system.file("extdata",package="GSCA")
     load(paste0(path,"/allreffile.rda"))
     
     ### Read in genome file

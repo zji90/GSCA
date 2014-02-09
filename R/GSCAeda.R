@@ -1,21 +1,17 @@
-GSCAReda <-
-      function(genedata,pattern,chipdata,SearchOutput,Pval.co=0.05,Ordering="Average",Title=NULL,outputdir=NULL) {
+GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,Pval.co=0.05,Ordering="Average",Title=NULL,outputdir=NULL) {
             if(nrow(SearchOutput)==0) stop("No SearchOutput specified.")
-            require(ggplot2)
-            require(reshape2)
-            require(RColorBrewer)
             ###presettings
             genedata[,1] <- as.character(genedata[,1])
             pattern[,1] <- as.character(pattern[,1])
             if (!is.null(outputdir)) {
                   if (!grepl("/$",outputdir))
                         outputdir <- paste0(outputdir,"/")
-                  plotfilepath <- paste0(outputdir,"GSCAReda_plot.pdf")
-                  datafilepath <- paste0(outputdir,"GSCAReda_data.csv")
-                  resfilepath <- paste0(outputdir,"GSCAReda_result.csv")
+                  plotfilepath <- paste0(outputdir,"GSCAeda_plot.pdf")
+                  datafilepath <- paste0(outputdir,"GSCAeda_data.csv")
+                  resfilepath <- paste0(outputdir,"GSCAeda_result.csv")
             }
             
-            #setting path of package GSCARdata
+            #setting path of data package
             path <- system.file("extdata",package=paste0("Affy",chipdata,"Expr"))
             #read in gene names
             compengene <- sub(".rda","",list.files(path))
@@ -28,7 +24,7 @@ GSCAReda <-
                         tab <- Affyhgu133aExprtab
                   }
             } else if(chipdata == "moe430"){
-                  if (!require(Affyhgu133aExpr)) {
+                  if (!require(Affymoe430Expr)) {
                         stop("Affymoe430Expr Package is not found")
                   } else {
                         data(Affymoe430Exprtab)
@@ -232,7 +228,7 @@ GSCAReda <-
                   }
             }
             
-            #### GSCAR Results with given contexts
+            #### GSCA Results with given contexts
             ttT <- table(tmpTypes)
             sT <- sum(ttT)
             bgT <- table(tab$SampleType)

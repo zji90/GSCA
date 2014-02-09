@@ -1,5 +1,4 @@
-ConstructTG <-
-function(annonPeaksOut,limmaOut){
+ConstructTG <- function(annonPeaksOut,limmaOut){
 
     chip <- unique(unlist(strsplit(as.character(
                    annonPeaksOut[,"EntrezGeneID"]),",")))

@@ -1,12 +1,10 @@
-GSCARplot <- function(GSCARoutput,N=5,plotfile=NULL,Title=NULL){
+GSCAplot <- function(GSCAoutput,N=5,plotfile=NULL,Title=NULL){
       
-      require(gplots)
-      
-      Ranking <- GSCARoutput$Ranking
-      Score <- GSCARoutput$Score
-      Cutoff <- GSCARoutput$Cutoff
-      selectsample <- GSCARoutput$SelectedSample
-      chipdata <- GSCARoutput$Chipdata
+      Ranking <- GSCAoutput$Ranking
+      Score <- GSCAoutput$Score
+      Cutoff <- GSCAoutput$Cutoff
+      selectsample <- GSCAoutput$SelectedSample
+      chipdata <- GSCAoutput$Chipdata
       STYLES <- c(15:18,3)
       COLORS <- brewer.pal(5,"Set1")
 
@@ -30,7 +28,7 @@ GSCARplot <- function(GSCARoutput,N=5,plotfile=NULL,Title=NULL){
       
       if(!is.null(plotfile)) 
             pdf(plotfile)
-
+      
       if (nrow(Score) == 1) {
             ###single geneset plot
             if(!(N %in% 1:5))
@@ -46,20 +44,27 @@ GSCARplot <- function(GSCARoutput,N=5,plotfile=NULL,Title=NULL){
             title(Title,outer=TRUE)
             par(mfrow=c(1,1),oma=c(0,0,0,0))
       } else if (nrow(Score) == 2) {
-            plot(Score[1,],Score[2,],xlab=rownames(Score)[1],ylab=rownames(Score)[2],col="#00000022",pch=20,main=Title)
-            if(!(N %in% 1:5)) 
-                  N <- min(5,nrow(Ranking))
+            plot(Score[1,],Score[2,],xlab=rownames(Score)[1],ylab=rownames(Score)[2],col="#00000022",cex=0.8,pch=20,main=Title)
             toprankingsample <- NULL
             for(i in 1:N) {
                   INDEX <- Ranking[i,"SampleType"]
-                  points(Score[1,][tab$SampleType %in% INDEX],Score[2,][tab$SampleType %in% INDEX],
-                        col=COLORS[i],pch=STYLES[i],cex=0.75,bg=COLORS[i])
                   toprankingsample <- union(toprankingsample,which(tab$SampleType %in% INDEX))
             }
+            points(Score[1,setdiff(selectsample,toprankingsample)],Score[2,setdiff(selectsample,toprankingsample)],pch=20,cex=0.8)
             abline(v=Cutoff[1], h=Cutoff[2], lty=2)
-            points(Score[1,setdiff(selectsample,toprankingsample)],Score[2,setdiff(selectsample,toprankingsample)],pch=20)
+            if(!(N %in% 1:5)) 
+                  N <- min(5,nrow(Ranking))
+            for(i in 1:N) {
+                  INDEX <- Ranking[i,"SampleType"]
+                  points(Score[1,][tab$SampleType %in% INDEX],Score[2,][tab$SampleType %in% INDEX],
+                        col=COLORS[i],pch=STYLES[i],bg=COLORS[i])
+            }
             leg.txt <- c(substr(Ranking[1:N,"SampleType"],1,25),"Selected Samples","Not Selected Samples")
-            legend("topleft",legend=leg.txt,pch=c(STYLES[1:(length(leg.txt)-2)],20,20),pt.bg=c(COLORS[1:(length(leg.txt)-2)],"black","#00000022"),col=c(COLORS[1:(length(leg.txt)-2)],"black","#00000022"),cex=0.8)
+            if (length(leg.txt)==2) {
+                  legend("topleft",legend=leg.txt,pch=c(20,20),pt.bg=c("black","#00000022"),col=c("black","#00000022"),cex=0.8)                        
+            } else {
+                  legend("topleft",legend=leg.txt,pch=c(STYLES[1:(length(leg.txt)-2)],20,20),pt.bg=c(COLORS[1:(length(leg.txt)-2)],"black","#00000022"),col=c(COLORS[1:(length(leg.txt)-2)],"black","#00000022"),cex=0.8)     
+            }
       } else {
             colcolorall <- rep("cyan",ncol(Score))
             colcolorall[selectsample] <- "blue"

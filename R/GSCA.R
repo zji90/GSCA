@@ -1,9 +1,9 @@
-GSCAR <- function(genedata,pattern,chipdata,Pval.co=0.05,directory=NULL) {
+GSCA <- function(genedata,pattern,chipdata,Pval.co=0.05,directory=NULL) {
 
       ###presettings
       genedata[,1] <- as.character(genedata[,1])
       pattern[,1] <- as.character(pattern[,1])
-      #setting path of package GSCARdata
+      #setting path of data package
       path <- system.file("extdata",package=paste0("Affy",chipdata,"Expr"))
       #read in gene names
       compengene <- sub(".rda","",list.files(path))
@@ -16,7 +16,7 @@ GSCAR <- function(genedata,pattern,chipdata,Pval.co=0.05,directory=NULL) {
                   tab <- Affyhgu133aExprtab
             }
       } else if(chipdata == "moe430"){
-            if (!require(Affyhgu133aExpr)) {
+            if (!require(Affymoe430Expr)) {
                   stop("Affymoe430Expr Package is not found")
             } else {
                   data(Affymoe430Exprtab)
@@ -166,7 +166,7 @@ GSCAR <- function(genedata,pattern,chipdata,Pval.co=0.05,directory=NULL) {
               Temp <- tabSearch(expiddex[k],chipdata)
               if(nrow(Temp) > 1){
             dir.create(filepath)
-              GSCAReda(genedata,pattern,chipdata=chipdata,
+              GSCAeda(genedata,pattern,chipdata=chipdata,
                          SearchOutput=Temp,Pval.co=Pval.co,
                          Ordering="Average",Title=expiddex[k],
                        outputdir=filepath)
