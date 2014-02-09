@@ -99,13 +99,10 @@ GSCAplot(Octoutput,N=5,plotfile=NULL,Title="GSCA plot of Oct4 in ESC")
 ## for the Oct4 analyses in ESCs, just specify a file directory.
 ## Check GSCAeda for more details.
 
-\dontrun{
-Octoutput <- GSCA(Octgenedata,Octpattern,"moe430",Pval.co=0.05,directory="DIR")
-}
+Octoutput <- GSCA(Octgenedata,Octpattern,"moe430",Pval.co=0.05,directory=tempdir())
 
-## All output will be stored in the directory, where DIR should be your
-## desired output folder. This process may be time-consuming and 
-## generate a lot of files. Alternatively, see GSCAeda for
-## more info on manual alternatives.
+## All output will be stored in the specified directory.
+## This process may be time-consuming and generate a lot of files. 
+## Alternatively, see GSCAeda for more info on manual alternatives.
 }
 \keyword{ GSCA }

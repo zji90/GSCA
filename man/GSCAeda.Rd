@@ -73,11 +73,8 @@ GSE7123out <- tabSearch("GSE7123","hgu133a")
 ## Run GSCAeda
 GSCAeda(Statgenedata,Statpattern,"hgu133a",GSE7123out,Pval.co=0.05,Ordering="Average",Title=NULL,outputdir=NULL) 
 
-## To save the results, instead of displaying in R console, replace "DIR" with your directory
+## To save the results, instead of displaying in R console, specifiy an outputdir argument
 
-\dontrun{
-GSCAeda(Statgenedata,Statpattern,"hgu133a",GSE7123out,Pval.co=0.05,Ordering="Average",Title=NULL,outputdir="DIR") 
-}
-
+GSCAeda(Statgenedata,Statpattern,"hgu133a",GSE7123out,Pval.co=0.05,Ordering="Average",Title=NULL,outputdir=tempdir())
 }
 \keyword{ GSCAeda }

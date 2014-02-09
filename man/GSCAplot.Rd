@@ -63,12 +63,9 @@ GSCAplot(threeout)
 ## range of x-axis, changing titles or altering display of enriched
 ## biological contexts, please check out the interactive user interface.
 
-\dontrun{
-GSCAplot(oneout,plotfile="FILE",N=2,Title="Demo of one geneset plot")
-GSCAplot(twoout,plotfile="FILE",Title="Demo of two genesets plot")
-GSCAplot(threeout,plotfile="FILE",Title="Demo of three genesets plot")
-}
-
+GSCAplot(oneout,plotfile=tempfile("plot",fileext=".pdf"),N=2,Title="Demo of one geneset plot")
+GSCAplot(twoout,plotfile=tempfile("plot",fileext=".pdf"),Title="Demo of two genesets plot")
+GSCAplot(threeout,plotfile=tempfile("plot",fileext=".pdf"),Title="Demo of three genesets plot")
 
 }
 \keyword{ GSCAplot}
