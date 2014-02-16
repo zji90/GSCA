@@ -8,10 +8,26 @@
 
 library(shiny)
 
+sidebarPanel3 <- function (...) 
+{
+      div(class = "span2", tags$form(class = "well", ...))
+}
+
 shinyUI(pageWithSidebar(
+      
       headerPanel('GSCA: Gene Set Context Analysis'),
       
-      sidebarPanel(
+      sidebarPanel3(
+            
+            tags$head(
+            #      tags$style(type="text/css", "label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }"),
+            #      tags$style(type="text/css", "select { max-width: 200px; }"),
+            #      tags$style(type="text/css", "textarea { max-width: 70px; }")
+            #      tags$style(type="text/css", ".jslider { max-width: 200px; }"),
+            #     tags$style(type='text/css', ".well { max-width: 310px; }"),
+            #      tags$style(type='text/css', ".span4 { max-width: 310px; }")
+            ),
+            
             helpText(a("Show User Manual",href="GSCAmanual.pdf",target="_blank")),
             wellPanel(
                   radioButtons("Mainmethod","Main Menu",
@@ -31,7 +47,7 @@ shinyUI(pageWithSidebar(
                                                      "Upload Geneset File"="InputuploadGeneset"
                                                 )
                                    ),   
-                                   uiOutput("InputGenesetnameui"),
+                                   textInput("InputGenesetname","Input Geneset Name","Geneset 1"),
                                    conditionalPanel(condition="input.InputGenesetmethod == 'InputspecifyGeneset'",
                                                     helpText("Multiple Entrez GeneID should be seperated by ;"),
                                                     textInput("InputActGeneID","Specify Activated Entrez GeneID"),
@@ -155,6 +171,10 @@ shinyUI(pageWithSidebar(
       ),
       
       mainPanel(
+            conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                             tags$h5("GSCA status: Calculating...Please Wait...")),
+            conditionalPanel(condition="!$('html').hasClass('shiny-busy')",
+                             tags$h5("GSCA status: idle")),
             conditionalPanel(condition="input.Mainmethod=='Input'",
                               tabsetPanel(
                                    tabPanel("Current Geneset Data",uiOutput("OutputCurrentGenedatawarnui"),dataTableOutput("OutputCurrentGenedata"),br(h4("All genedata in GSCA:")),textOutput("OutputGenedataname")),
@@ -168,7 +188,7 @@ shinyUI(pageWithSidebar(
             ),
             conditionalPanel(condition="input.Mainmethod=='GSCA'",
                              tabsetPanel(
-                                    tabPanel("Plot",            
+                                    tabPanel("Plot",
                                              conditionalPanel(condition="input.GSCAmethod=='GSCAdefault'",uiOutput("GSCAdefaultplot")),  
                                              conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",uiOutput("GSCAinteractiveplot"))
                                     ),
@@ -182,9 +202,9 @@ shinyUI(pageWithSidebar(
                              )
             ),
             conditionalPanel(condition="input.Mainmethod=='About'",
-                             p('GSCA: Geneset Context Analysis R Platform'),
+                             p('GSCA: Gene Set Context Analysis'),
                              p('Current Version: 0.99.1.'),
-                             p('Release Date: 2014-1-27'),
+                             p('Release Date: 2014-2-15'),
                              p('Author: Zhicheng Ji,Hongkai Ji'),
                              p('Maintainer: Zhicheng Ji <zji4@jhu.edu>')
                              )
