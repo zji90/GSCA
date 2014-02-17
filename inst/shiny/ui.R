@@ -10,7 +10,7 @@ library(shiny)
 
 sidebarPanel3 <- function (...) 
 {
-      div(class = "span2", tags$form(class = "well", ...))
+      div(class = "span3", tags$form(class = "well", ...))
 }
 
 shinyUI(pageWithSidebar(
