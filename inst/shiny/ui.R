@@ -126,7 +126,8 @@ shinyUI(pageWithSidebar(
             conditionalPanel(condition="input.Mainmethod=='Select'",
                              wellPanel(
                                     uiOutput("Summarydataselect"),
-                                    uiOutput("Summarycompselectui")
+                                    uiOutput("Summarycompselectui"),
+                                    uiOutput("Summarycompinfo")
                              )
             ),
              
@@ -138,8 +139,7 @@ shinyUI(pageWithSidebar(
                                     ),
                                     wellPanel(
                                           conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",
-                                                           helpText("Choose your interested region"),
-                                                           wellPanel(uiOutput("InputGSCAsidebar"))),
+                                                           uiOutput("InputGSCAsidebar")),
                                           uiOutput("plotenrichedareaui"),
                                           uiOutput("heatmapthreerowvui"),
                                           helpText("Context Cutoff and Display options"),
@@ -190,6 +190,7 @@ shinyUI(pageWithSidebar(
                              tabsetPanel(
                                     tabPanel("Plot",
                                              conditionalPanel(condition="input.GSCAmethod=='GSCAdefault'",uiOutput("GSCAdefaultplot")),  
+                                             uiOutput("testui"),
                                              conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",uiOutput("GSCAinteractiveplot"))
                                     ),
                                     tabPanel("Ranking Table",dataTableOutput("GSCArankingtable"))

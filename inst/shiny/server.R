@@ -155,22 +155,47 @@ shinyServer(function(input, output, session) {
             if (require(Affyhgu133aExpr)) {
                   complist <- c(complist,"Affymetrix Human hgu133a Array (GPL96)"="hgu133a")
             } 
-            if (require(Affymoe430Expr)) {
-                  complist <- c(complist,"Affymetrix Mouse 430 2.0 Array (GPL1261)"="moe430")
-            }        
+            if (require(Affymoe4302Expr)) {
+                  complist <- c(complist,"Affymetrix Mouse 430 2.0 Array (GPL1261)"="moe4302")
+            }
+            if (require(Affyhgu133Plus2Expr)) {
+                  complist <- c(complist,"Affymetrix Human Genome U133 Plus 2.0 Array (GPL570)"="hgu133Plus2")
+            }
+            if (require(Affyhgu133A2Expr)) {
+                  complist <- c(complist,"Affymetrix Human Genome U133A 2.0 Array (GPL571)"="hgu133A2")
+            }
             radioButtons("Summarycompselect","Select Compendium", complist)
       })
       
+      output$Summarycompinfo <- renderUI({
+            if (!is.null(input$Summarycompselect)) {
+                  if(input$Summarycompselect=="moe4302"){
+                        helpText("This compendium contains 9444 human profiles on 20630 genes")
+                  } else if (input$Summarycompselect=="hgu133a"){
+                        helpText("This compendium contains 11778 human profiles on 12495 genes")
+                  } else if (input$Summarycompselect=="hgu133Plus2"){
+                        helpText("This compendium contains 5153 human profiles on 19944 genes")
+                  } else if (input$Summarycompselect=="hgu133A2"){
+                        helpText("This compendium contains 313 human profiles on 12494 genes")
+                  }    
+            }
+      })
       
       #Update Maindata information
       observe({   
             if (!is.null(input$Summarycompselect)) {
-            if(input$Summarycompselect=="moe430"){
-                  data(Affymoe430Exprtab)
-                  Maindata$tab <- Affymoe430Exprtab
+            if(input$Summarycompselect=="moe4302"){
+                  data(Affymoe4302Exprtab)
+                  Maindata$tab <- Affymoe4302Exprtab
             } else if (input$Summarycompselect=="hgu133a"){
                   data(Affyhgu133aExprtab)
                   Maindata$tab <- Affyhgu133aExprtab
+            } else if (input$Summarycompselect=="hgu133Plus2"){
+                  data(Affyhgu133Plus2Exprtab)
+                  Maindata$tab <- Affyhgu133Plus2Exprtab
+            } else if (input$Summarycompselect=="hgu133A2"){
+                  data(Affyhgu133A2Exprtab)
+                  Maindata$tab <- Affyhgu133A2Exprtab
             }
             if (!is.null(Rawdata$genedata)) {
                   path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
@@ -284,11 +309,11 @@ shinyServer(function(input, output, session) {
                                           posgene <- Maindata$genedata[Maindata$genedata[,1] == singlegeneset & Maindata$genedata[,3] == "1",2]
                                           neggene <- Maindata$genedata[Maindata$genedata[,1] == singlegeneset & Maindata$genedata[,3] == "-1",2]
                                           n.GSup <- length(posgene)
-                                          GSup <- rep(0, nrow(Maindata$tab))  
+                                          GSup <- rep(0, nrow(Maindata$tab))
                                           for (i in posgene) {
                                                 path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
                                                 load(paste0(path,"/",i,".rda"))
-                                                GSup <- GSup + Expr
+                                                GSup <- GSup + e
                                           }
                                           GSup <- GSup / n.GSup
                                           n.GSdown <- length(neggene)
@@ -296,7 +321,7 @@ shinyServer(function(input, output, session) {
                                           for (i in neggene) {
                                                 path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
                                                 load(paste0(path,"/",i,".rda"))
-                                                GSdown <- GSdown + Expr
+                                                GSdown <- GSdown + e
                                           }
                                           GSdown <- GSdown / n.GSdown
                                           if(length(posgene) > 0 & length(neggene) > 0) {
@@ -402,14 +427,13 @@ shinyServer(function(input, output, session) {
                                     p(actionButton('reset', 'Reset'))
                               )
                         } else {             
-                              tagList(radioButtons("ThreeCutoffType","Choose Cutoff Type",
-                                                   list("Sample"="Sample","Value"="Value")),
-                                      conditionalPanel(condition="input.ThreeCutoffType == 'Value'",
+                              tagList(
+                                    checkboxInput("Threecutoffvalue","Select sample by exact value"),
+                                      conditionalPanel(condition="input.Threecutoffvalue == 1",
                                                        lapply(1:Maindata$dim, function(i) {
                                                              sliderInput(inputId = paste0("GSCAthreevalueslider",i), label = Maindata$patterndata[i,1], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(min(Maindata$GSCAscore[i,]), max(Maindata$GSCAscore[i,])))
                                                        })
-                                      ),
-                                      p(actionButton("GSCAinteractivethreeupdate","Update Sample Selection"))
+                                      )
                               )
                         }
                   }
@@ -464,7 +488,7 @@ shinyServer(function(input, output, session) {
                   } else if (Maindata$dim == 2) {
                         Maindata$selectsample <- inpoly$tf
                   } else {
-                        if (!is.null(input$GSCAinteractivethreeupdate) & !is.null(input$ThreeCutoffType)) 
+                        if (!is.null(input$GSCAinteractivethreeupdate)) 
                               if (input$GSCAinteractivethreeupdate>0) {
                                     isolate({
                                           Maindata$selectsample <- GSCAthreeinfo$selectsample
@@ -605,9 +629,9 @@ shinyServer(function(input, output, session) {
                                   helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found",""))
                               )      
                         } else {
-                              tagList(                                    
-                                    conditionalPanel(condition="input.ThreeCutoffType == 'Sample'",
-                                                     helpText("Select sample range using sliders. The range would be the union set of multiple sliders"),
+                              tagList(          
+                                    conditionalPanel(condition="input.Threecutoffvalue == 0",
+                                                     helpText("Select sample range using sliders. The range would be the union set of multiple sliders."),
                                                      actionButton("GSCAthreesampleaddslider","Add Slider"),
                                                      actionButton("GSCAthreesampledeleteslider","Delete Slider"),
                                                      tags$div(class="row-fluid",
@@ -627,8 +651,9 @@ shinyServer(function(input, output, session) {
                                     tags$div(class="row-fluid",
                                              tags$div(class="span11",p(plotOutput("GSCAinteractiveplotthreecolbarunder",height=20)))
                                     ),
-                                    checkboxInput("GSCAinteractiveplotthreeheatmapzoomincheck","Heatmap Zoom in"),
-                                    conditionalPanel("input.GSCAinteractiveplotthreeheatmapzoomincheck==1",
+                                    conditionalPanel(condition="input.Threecutoffvalue == 0",
+                                                     checkboxInput("GSCAinteractiveplotthreeheatmapzoomincheck","Heatmap Zoom in & precise sample selection")),
+                                    conditionalPanel("input.GSCAinteractiveplotthreeheatmapzoomincheck==1 && input.Threecutoffvalue == 0",
                                                      helpText("Select zoom in sample range"),
                                                      tags$div(class="row-fluid",
                                                             tags$div(class="span1",textInput("GSCAinteractiveplotthreeheatmapzoominrowone","From",value="0")),
@@ -636,6 +661,7 @@ shinyServer(function(input, output, session) {
                                                             tags$div(class="span1",textInput("GSCAinteractiveplotthreeheatmapzoominrowtwo","To",value="0")),
                                                             tags$style(type='text/css', "#GSCAinteractiveplotthreeheatmapzoominrowtwo { width: 70px; }")
                                                      ),
+                                                     p(actionButton("GSCAinteractiveplotthreeheatmapzoominupdate","Update range to current slider")),
                                                      tags$div(class="row-fluid",
                                                               tags$div(class="span11",plotOutput("GSCAinteractiveplotthreeheatmapzoominplot")),
                                                               tags$div(class="span1",plotOutput("GSCAinteractiveplotthreeheatmapzoominplotlab"))
@@ -645,6 +671,21 @@ shinyServer(function(input, output, session) {
                                     plotOutput("GSCAinteractiveplotthreeplus"))
                         }
                   }      
+      })
+
+      observe({
+            if (!is.null(input$GSCAinteractiveplotthreeheatmapzoominupdate) && input$GSCAinteractiveplotthreeheatmapzoominupdate>0) {
+                  isolate({
+                        threesampleslidervalue[GSCAthreeinfo$sampleslidernum,1] <<- as.numeric(input$GSCAinteractiveplotthreeheatmapzoominrowone)
+                        threesampleslidervalue[GSCAthreeinfo$sampleslidernum,2] <<- as.numeric(input$GSCAinteractiveplotthreeheatmapzoominrowtwo)
+                        eval(parse(text=paste0("updateSliderInput(session,\"GSCAthreesampleslider",GSCAthreeinfo$sampleslidernum,"\",value=as.numeric(c(input$GSCAinteractiveplotthreeheatmapzoominrowone,input$GSCAinteractiveplotthreeheatmapzoominrowtwo)))")))
+                  })
+            }
+      })
+      
+      output$testui <- renderUI({
+            if (!is.null(Maindata$dim) && Maindata$dim >= 3 && input$GSCAmethod=='GSCAinteractive')
+                  p(actionButton("GSCAinteractivethreeupdate","Update Sample Selection"))
       })
       
       GSCAthreeinfo <- reactiveValues()
@@ -811,16 +852,15 @@ shinyServer(function(input, output, session) {
       })
       
       observe({
-            if (!is.null(input$ThreeCutoffType)) {
-                  if (input$ThreeCutoffType == 'Sample') {
+            if (!is.null(input$Threecutoffvalue)) {
+                  if (input$Threecutoffvalue == F) {
                         selectsample <- NULL
                         for (i in 1:GSCAthreeinfo$sampleslidernum) {
                               if(!is.null(eval(parse(text=paste0("input$GSCAthreesampleslider",i,"[1]"))))) 
                                     eval(parse(text=paste0("selectsample <- union(selectsample,Maindata$GSCAclust$order[input$GSCAthreesampleslider",i,"[1]:input$GSCAthreesampleslider",i,"[2]])")))
                         }
                         GSCAthreeinfo$selectsample <- selectsample
-                        
-                  } else if (input$ThreeCutoffType == 'Value') {
+                  } else {
                         selectsample <- 1:ncol(Maindata$GSCAscore)
                         for (i in 1:Maindata$dim) {
                               eval(parse(text=paste0("selectsample <- intersect(selectsample,which(input$GSCAthreevalueslider",i,"[1]<Maindata$GSCAscore[",i,",] & input$GSCAthreevalueslider",i,"[2]>Maindata$GSCAscore[",i,",]))")))
@@ -883,7 +923,7 @@ shinyServer(function(input, output, session) {
             par(mar=c(0,0,0,0))
             rowone <- as.numeric(input$GSCAinteractiveplotthreeheatmapzoominrowone)
             rowtwo <- as.numeric(input$GSCAinteractiveplotthreeheatmapzoominrowtwo)
-            if (rowone+rowtwo>0 && rowone < rowtwo) {
+            if (rowone+rowtwo>0 && rowone < rowtwo && max(rowone,rowtwo) <= ncol(Maindata$GSCAscore)) {
                   if (input$heatmapthreerowv) {
                         rowInd <- order.dendrogram(Maindata$GSCArowclust)
                         image(1:(rowtwo-rowone+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[rowone:rowtwo]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101))
