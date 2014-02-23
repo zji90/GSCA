@@ -7,18 +7,21 @@ GSCA
 The function takes as input several lists of activated and repressed genes. It then searches through a compendium of publicly available gene expression profiles for biological contexts that are enriched with a specified pattern of gene expression.
 }
 \usage{
-GSCA(genedata,pattern,chipdata,Pval.co=0.05,directory=NULL)
+GSCA(genedata,pattern,chipdata,scaledata=F,Pval.co=0.05,directory=NULL)
 }
 \arguments{
 \item{genedata}{
-      A data.frame with three columns specifying the input genesets. Each row specifies an activated or repressed gene in a geneset. First column: character value of geneset name specified by the user, could be any name easy to remember e.g. GS1,GS2,...; Second column: numeric value of Entrez GeneID of the gene; Third column: numeric value of 1,-1 indicating whether gene is activated or repressed. 1 for activated gene and -1 for repressed gene. Here, activated gene means that increases in expression of the gene also increases the overall activity of the whole geneset, while increases in expression of the repressed genes will decrease the overall activity of the whole geneset.
+      A data.frame with three columns specifying the input genesets. Each row specifies an activated or repressed gene in a geneset. First column: character value of geneset name specified by the user, could be any name easy to remember e.g. GS1,GS2,...; Second column: numeric value of Entrez GeneID of the gene; Third column: numeric value of single gene weight when calculating the activity level of the whole geneset. Positive values for activated gene and negative values for repressed gene. Here, activated gene means that increases in expression of the gene also increases the overall activity of the whole geneset, while increases in expression of the repressed genes will decrease the overall activity of the whole geneset.
 }
 \item{pattern}{
       A data.frame with four columns indicating the activity patterns corresponding to the given genedata. Each row specifies activity pattern for one geneset. First column: character value of the same geneset name used in genedata, each geneset name in genedata should appear exactly once in this column. Second column: character value of whether high or low activity of the whole geneset is interested. "High" stands for high activity and "Low" stands for low activity. Third column: character value of which cutoff type is going to be used. 3 cutoff types can be specified: "Norm", "Quantile", or "Exprs". If cutoff type is "Norm", then the fourth column should be specified as p-value between 0 and 1, where the geneset expression cutoff will correspond to the specified p-value (one-sided) based on a fitted normal distribution; If cutoff type is "Quantile", then the fourth column should be specified as a desired quantile between 0 and 1, where the geneset expression cutoff will correspond to the specified quantile. Finally, if cutoff type is "Exprs", the geneset expression cutoff will be equal to the value given in the fourth column. Fourth column: numeric value of cutoff value based on different cutoff types specified in the third column.
 }
 
 \item{chipdata}{
-    A character value of either 'hgu133a' or 'moe430'. This argument specifies which compendium to use. Requires the corresponding data package.
+    A character value of 'hgu133a', 'hgu133A2', 'hgu133Plus2' or 'moe4302'. This argument specifies which compendium to use. Requires the corresponding data package.
+}
+\item{scaledata}{
+logical value indicating whether expression data for each gene should be scaled across samples to have mean 0 and variance 1.
 }
  \item{Pval.co}{
     A numeric value specifying the adjusted p-value cutoff. Only the biological contexts with significant enrichment above the adjusted p-value cutoff will be reported in the final ranked table output.
@@ -73,7 +76,7 @@ data(Oct4ESC_TG)
 ## easily start up the analysis.
 activenum <- length(Oct4ESC_TG[[1]])
 repressnum <- length(Oct4ESC_TG[[2]])
-Octgenedata <- data.frame(gsname=c("GS1",rep("GS2",activenum+repressnum)),gene=c(18999,Oct4ESC_TG[[1]],Oct4ESC_TG[[2]]),actrep=c(rep(1,1+activenum),rep(-1,repressnum)),stringsAsFactors=FALSE)
+Octgenedata <- data.frame(gsname=c("GS1",rep("GS2",activenum+repressnum)),gene=c(18999,Oct4ESC_TG[[1]],Oct4ESC_TG[[2]]),weight=c(rep(1,1+activenum),rep(-1,repressnum)),stringsAsFactors=FALSE)
 
 ## We are interested in the pattern that TF and its target genes are all highly expressed.
 ## We also need to define how high the cutoffs should be such
@@ -83,9 +86,9 @@ Octgenedata <- data.frame(gsname=c("GS1",rep("GS2",activenum+repressnum)),gene=c
 ## exactly once in the first column
 Octpattern <- data.frame(gsname=c("GS1","GS2"),acttype="High",cotype="Norm",cutoff=0.1,stringsAsFactors=FALSE)
 
-## Lastly, we specify the chipdata to be "moe430" and the significance of enriched
+## Lastly, we specify the chipdata to be "moe4302" and the significance of enriched
 ## biological contexts must be at least 0.05 to be reported.
-Octoutput <- GSCA(Octgenedata,Octpattern,"moe430",Pval.co=0.05)
+Octoutput <- GSCA(Octgenedata,Octpattern,"moe4302",Pval.co=0.05)
 
 ## The first item in the list 'Octoutput[[1]]' contains the ranked table, which
 ## can then be saved. Additionally, we may be interested in plotting the results
@@ -99,7 +102,7 @@ GSCAplot(Octoutput,N=5,plotfile=NULL,Title="GSCA plot of Oct4 in ESC")
 ## for the Oct4 analyses in ESCs, just specify a file directory.
 ## Check GSCAeda for more details.
 
-Octoutput <- GSCA(Octgenedata,Octpattern,"moe430",Pval.co=0.05,directory=tempdir())
+Octoutput <- GSCA(Octgenedata,Octpattern,"moe4302",Pval.co=0.05,directory=tempdir())
 
 ## All output will be stored in the specified directory.
 ## This process may be time-consuming and generate a lot of files. 

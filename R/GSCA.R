@@ -1,4 +1,4 @@
-GSCA <- function(genedata,pattern,chipdata,Pval.co=0.05,directory=NULL) {
+GSCA <- function(genedata,pattern,chipdata,scaledata=F,Pval.co=0.05,directory=NULL) {
 
       ###presettings
       genedata[,1] <- as.character(genedata[,1])
@@ -15,15 +15,29 @@ GSCA <- function(genedata,pattern,chipdata,Pval.co=0.05,directory=NULL) {
                   data(Affyhgu133aExprtab)
                   tab <- Affyhgu133aExprtab
             }
-      } else if(chipdata == "moe430"){
-            if (!require(Affymoe430Expr)) {
-                  stop("Affymoe430Expr Package is not found")
+      } else if(chipdata == "moe4302"){
+            if (!require(Affymoe4302Expr)) {
+                  stop("Affymoe4302Expr Package is not found")
             } else {
-                  data(Affymoe430Exprtab)
-                  tab <- Affymoe430Exprtab
+                  data(Affymoe4302Exprtab)
+                  tab <- Affymoe4302Exprtab
+            }
+      } else if(chipdata == "hgu133A2"){
+            if (!require(Affyhgu133A2Expr)) {
+                  stop("Affyhgu133A2Expr Package is not found")
+            } else {
+                  data(Affyhgu133A2Exprtab)
+                  tab <- Affyhgu133A2Exprtab
+            }
+      } else if(chipdata == "hgu133Plus2"){
+            if (!require(Affyhgu133Plus2Expr)) {
+                  stop("Affyhgu133Plus2Expr Package is not found")
+            } else {
+                  data(Affyhgu133Plus2Exprtab)
+                  tab <- Affyhgu133Plus2Exprtab
             }
       } else {
-            stop("Please enter valid name for chipdata. Current Supported chipdata: 'hgu133a' and 'moe430'")
+            stop("Please enter valid name for chipdata. Current Supported chipdata: 'hgu133a', 'moe4302', 'hgu133Plus2', 'hgu133A2'")
       }
       
       tabsamplename <- tab$SampleName
@@ -47,33 +61,20 @@ GSCA <- function(genedata,pattern,chipdata,Pval.co=0.05,directory=NULL) {
       names(genesetcutoff) <- names(genesettotalgenenum) <- names(genesetmissinggene)  <- genesetname
       for (genesetid in 1:length(genesetname)) {
             ###Scoring geneset activity
-            singlegeneset <- genesetname[genesetid]
-            posgene <- intersect(compengene,genedata[singlegeneset == genedata[,1]&genedata[,3]==1,2])
-            neggene <- intersect(compengene,genedata[singlegeneset == genedata[,1]&genedata[,3]==-1,2])
-            n.GSup <- length(posgene)
-            GSup <- rep(0, nrow(tab))  
-            for (i in posgene) {
-                  load(paste0(path,"/",i,".rda"))
-                  GSup <- GSup + Expr
+            singlegeneset <- genesetname[genesetid]           
+            currentgeneset <- genedata[genedata[,1] == singlegeneset & genedata[,2] %in% compengene,]
+            score <- rep(0, nrow(tab))
+            for (i in 1:nrow(currentgeneset)) {
+                  load(paste0(path,"/",currentgeneset[i,2],".rda"))
+                  if (scaledata)
+                        e <- scale(e)
+                  score <- score + currentgeneset[i,3]*e
             }
-            GSup <- GSup / n.GSup
-            n.GSdown <- length(neggene)
-            GSdown <- rep(0, nrow(tab))  
-            for (i in neggene) {
-                  load(paste0(path,"/",i,".rda"))
-                  GSdown <- GSdown + Expr
-            }
-            GSdown <- GSdown / n.GSdown
+            score <- score/nrow(currentgeneset)
+            
             missinggene <- setdiff(genedata[singlegeneset == genedata[,1],2],compengene)
             genesetmissinggene[genesetid] <- length(missinggene)
-            genesettotalgenenum[genesetid] <- n.gene <- length(posgene)+length(neggene)
-            if(length(posgene) > 0 & length(neggene) > 0) {
-                 score <- GSup*n.GSup/n.gene-GSdown*n.GSdown/n.gene
-            } else if (length(posgene) > 0) {
-                 score <- GSup
-            } else {
-                 score <- -1*GSdown
-            }
+            genesettotalgenenum[genesetid] <- length(genedata[,1] == singlegeneset && genedata[,2] %in% compengene)
             activity[genesetid,] <- score
             ###Find samples matching the given pattern
             singlepattern <- pattern[pattern[,1]==singlegeneset,]
