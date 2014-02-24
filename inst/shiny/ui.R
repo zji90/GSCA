@@ -193,7 +193,7 @@ shinyUI(pageWithSidebar(
                                             uiOutput("GSCAinteractiveplotthreezoominallpartsui")
                                    ),
                                    tabPanel("Ranking Table",dataTableOutput("GSCArankingtable")),
-                                   tabPanel("3D scatterplot",helpText("Only available with three genesets"),webGLOutput("RGLplot",height="800px"))
+                                   tabPanel("3D scatterplot",helpText("Should have X11 installed on your computer; Only available with three genesets"),webGLOutput("RGLplot",height="800px"))
                              )                
             ),
             conditionalPanel(condition="input.Mainmethod=='Download'",

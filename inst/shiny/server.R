@@ -239,7 +239,7 @@ shinyServer(function(input, output, session) {
       output$Summarycompinfo <- renderUI({
             if (!is.null(input$Summarycompselect)) {
                   if(input$Summarycompselect=="moe4302"){
-                        p(helpText("This compendium contains 9444 human profiles on 20630 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL1261",target="_blank"))
+                        p(helpText("This compendium contains 9444 mouse profiles on 20630 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL1261",target="_blank"))
                   } else if (input$Summarycompselect=="hgu133a"){
                         p(helpText("This compendium contains 11778 human profiles on 12495 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL96",target="_blank"))
                   } else if (input$Summarycompselect=="hgu133Plus2"){
