@@ -164,16 +164,20 @@ shinyServer(function(input, output, session) {
       output$OutputAllPattern <- renderDataTable(Rawdata$patterndata)
       
       output$Indigenesetnameui <- renderUI({
+            if (!is.null(Rawdata$genedata)) {
             namelist <- list()
             for (i in unique(Rawdata$genedata$Genesetname))
                   eval(parse(text=paste0("namelist <- c(namelist,`",i,"`=i)")))
             checkboxGroupInput("Indigenesetname","Choose Geneset Name",namelist)
+            }
       })
       
       output$Indigeneset <- renderDataTable({
+            if (!is.null(Rawdata$genedata)) { 
             tmp <- Rawdata$genedata[Rawdata$genedata[,1] %in% input$Indigenesetname,]
             if (nrow(tmp) > 0)
                   tmp
+            }
       })
       
       output$OutputGenedataname <- renderText({
@@ -311,7 +315,7 @@ shinyServer(function(input, output, session) {
       #When reentering GSCA page, GSCAmethod should be set to GSCAdefault
       observe({
             if (input$Mainmethod == "Input" | input$Mainmethod == "Select" | input$Mainmethod == "Download")
-                  updateRadioButtons(session,"GSCAmethod",choices=list("Default Enrichment Region Selection"="GSCAdefault","Interactive Enrichment Region Selection"="GSCAinteractive"),selected="Default Enrichment Region Selection")
+                  updateRadioButtons(session,"GSCAmethod",choices=list("Precise pattern selection"="GSCAdefault","Interactive pattern selection"="GSCAinteractive"),selected="Precise pattern selection")
       })
       
       #Function to calculate enriched samples
@@ -462,7 +466,7 @@ shinyServer(function(input, output, session) {
             maxval <- min(30,nrow(Maindata$Ranking))
             defaultval <- min(5,nrow(Maindata$Ranking))
             if (maxval > 0)
-                  sliderInput("InputN","Number of Top Ranking Context Displayed",min=0,max=maxval,value=defaultval,step=1)
+                  sliderInput("InputN","Number of top ranked context to display",min=0,max=maxval,value=defaultval,step=1)
       })
       
       output$InputGSCAsidebar <- renderUI({
@@ -707,7 +711,7 @@ shinyServer(function(input, output, session) {
                         } else {
                               tagList(          
                                     conditionalPanel(condition="input.Threecutoffvalue == 0",
-                                                     helpText("Select sample range using sliders. The range would be the union set of multiple sliders."),
+                                                     helpText("Select sample range using sliders. The range would be the union set of multiple sliders. Click 'Update Sample Selection' button on the left sidepanel after selection finishes."),
                                                      actionButton("GSCAthreesampleaddslider","Add Slider"),
                                                      actionButton("GSCAthreesampledeleteslider","Delete Slider"),
                                                      tags$div(class="row-fluid",
@@ -1195,7 +1199,7 @@ shinyServer(function(input, output, session) {
       
       #####3D scatterplot
       output$RGLplot <- renderWebGL({
-            if (Maindata$dim == 3) {
+            if (!is.null(Maindata$dim) && Maindata$dim == 3) {
                   dotcolor <- rep("gray",ncol(Maindata$GSCAscore))
                   dotcolor[Maindata$selectsample] <- "black"
                   i <- 1
@@ -1304,7 +1308,7 @@ shinyServer(function(input, output, session) {
       
       observe({
             if (input$Mainmethod=='Download') {
-                  if (input$Downloadregionselect == 'GSCAdefault') {
+                  if (input$Downloadregionselect == 'Precise') {
                         Maindata$downloadsample <- Maindata$defaultsample
                         Maindata$downloadcontext <- Maindata$defaultcontext
                         Maindata$downloadranking <- Maindata$defaultranking
@@ -1372,7 +1376,7 @@ shinyServer(function(input, output, session) {
                   colone <- NULL
             par(mfrow=c(as.numeric(input$InputN)+1,1),oma=c(0,0,2,0))
             hist(Maindata$GSCAscore,xlab=input$Downloadxlabone,ylab=input$Downloadylabone,xlim=as.numeric(c(input$Downloadxlimminone,input$Downloadxlimmaxone)),col=colone,main="All Biological contexts")
-            if (input$Downloadregionselect == 'GSCAdefault') {
+            if (input$Downloadregionselect == 'Precise') {
                   abline(v=Maindata$cutoffval[1], lty=2)      
             } else {
                   abline(v=c(input$GSCAoneslider[1],input$GSCAoneslider[2]), lty=2)
@@ -1380,7 +1384,7 @@ shinyServer(function(input, output, session) {
             if (!is.null(Maindata$downloadcontext)) {
                   for(INDEX in Maindata$downloadcontext) {
                         hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlab=input$Downloadxlabone,ylab=input$Downloadylabone,xlim=as.numeric(c(input$Downloadxlimminone,input$Downloadxlimmaxone)),col=colone,main=substr(INDEX,1,25))
-                        if (input$Downloadregionselect == 'GSCAdefault') {
+                        if (input$Downloadregionselect == 'Precise') {
                               abline(v=Maindata$cutoffval[1], lty=2)      
                         } else {
                               abline(v=c(input$GSCAoneslider[1],input$GSCAoneslider[2]), lty=2)
@@ -1392,7 +1396,7 @@ shinyServer(function(input, output, session) {
       
       downloadtwofunc <- function() {
             cortext <- paste0("Correlation: ",round(Maindata$twocorr,3),"; ","Correlation p-value: ",round(Maindata$twocorrp,3),"; ","Slope: ",round(Maindata$twoslope,3),"; ","Slope p-value: ",round(Maindata$twoslopep,3))
-            if (input$Downloadregionselect == 'GSCAdefault') {
+            if (input$Downloadregionselect == 'Precise') {
                   plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],col="#00000022",pch=20,cex=0.7,xlab=input$Downloadxlabtwo,ylab=input$Downloadylabtwo,xlim = as.numeric(c(input$Downloadxlimmintwo,input$Downloadxlimmaxtwo)), ylim = as.numeric(c(input$Downloadylimmintwo,input$Downloadylimmaxtwo)),main=input$Downloadmaintitletwo)
                   toprankingsample <- NULL
                   if (!is.null(Maindata$downloadcontext)) {

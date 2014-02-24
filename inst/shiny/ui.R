@@ -71,9 +71,9 @@ shinyUI(pageWithSidebar(
                                                                    'Single Quote'="'"),
                                                                  'Double Quote')
                                    ),
-                                   h4("Input Activity Pattern"),
+                                   h4("Input Precise Pattern"),
                                    helpText("Multiple uploaded genesets share the same pattern"),
-                                   selectInput("Inputgenesetpatternactivity","Geneset Regulatory Pattern",
+                                   selectInput("Inputgenesetpatternactivity","Choose Pattern",
                                                list("High activity" = "High",
                                                     "Low activity" = "Low")),
                                    selectInput("Inputgenesetpatterncotype","Cutoff Type",
@@ -135,8 +135,8 @@ shinyUI(pageWithSidebar(
             conditionalPanel(condition="input.Mainmethod=='GSCA'",
                              wellPanel(
                                    radioButtons("GSCAmethod","",
-                                                list("Default Enrichment Region Selection"="GSCAdefault",
-                                                     "Interactive Enrichment Region Selection"="GSCAinteractive")
+                                                list("Precise pattern selection"="GSCAdefault",
+                                                     "Interactive pattern selection"="GSCAinteractive")
                                    ),
                                    wellPanel(
                                          conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",
@@ -149,8 +149,8 @@ shinyUI(pageWithSidebar(
                                                textInput("Inputpvalco","Enrichment P-value cutoff","0.05"),
                                                textInput("Inputfoldchangeco","Enrichment Foldchange cutoff","1.5"),
                                                radioButtons("Inputcontexttype","Choose Biological Context displaying Method",
-                                                            list("Display top ranked Contexts"="Toprank",
-                                                                 "Specify Contexts"="Specify")),
+                                                            list("Display top ranked contexts"="Toprank",
+                                                                 "Display specified contexts"="Specify")),
                                                conditionalPanel(condition="input.Inputcontexttype=='Toprank'",
                                                                 uiOutput("InputNslider")),
                                                conditionalPanel(condition="input.Inputcontexttype=='Specify'",
@@ -161,7 +161,7 @@ shinyUI(pageWithSidebar(
             ),
             conditionalPanel(condition="input.Mainmethod=='Download'",
                              wellPanel(
-                                   radioButtons("Downloadregionselect","Select Genedata Acitivity Region",choices=c("GSCAdefault","GSCAinteractive")),
+                                   radioButtons("Downloadregionselect","Choose pattern of interest type",choices=c("Precise","Interactive")),
                                    wellPanel(
                                          selectInput("Downloadranktabletype","Select File Type",choices=c("csv","txt")),
                                          textInput("Downloadranktablefilename","Enter File Name","GSCA Ranking Table"),
@@ -204,7 +204,7 @@ shinyUI(pageWithSidebar(
             ),
             conditionalPanel(condition="input.Mainmethod=='About'",
                              p('GSCA: Gene Set Context Analysis'),
-                             p('Current Version: 0.99.1.'),
+                             p('Current Version: 0.99.1'),
                              p('Release Date: 2014-2-15'),
                              p('Author: Zhicheng Ji,Hongkai Ji'),
                              p('Maintainer: Zhicheng Ji <zji4@jhu.edu>')
