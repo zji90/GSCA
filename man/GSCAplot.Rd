@@ -40,22 +40,22 @@ Zhicheng Ji, Hongkai Ji
 \examples{
 ## Constructing genedata and pattern.
 ## Example of mouse gene Gli1,Gli2 and Gli3, all members of GLI-Kruppel family. Their corresponding Entrez GeneID are 14632,14633 and 14634.
-gligenedata <- data.frame(gsname=c("Gli1","Gli2","Gli3"),gene=c(14632,14633,14634),actrep=1,stringsAsFactors=FALSE)
+gligenedata <- data.frame(gsname=c("Gli1","Gli2","Gli3"),gene=c(14632,14633,14634),weight=1,stringsAsFactors=FALSE)
 glipattern <- data.frame(gsname=c("Gli1","Gli2","Gli3"),acttype="High",cotype="Norm",cutoff=0.1,stringsAsFactors=FALSE)
 
 ## Case of one geneset: a set of histograms
 ## Note that for N too large sometimes there is figure margins too large error.
 ## Decrease N or try to enlarge the plotting area in R console.
-oneout <- GSCA(gligenedata[1,],glipattern[1,],"moe430")
+oneout <- GSCA(gligenedata[1,],glipattern[1,],"moe4302")
 GSCAplot(oneout,N=2)
 
 ## Case of two genesets: a scatterplot
-twoout <- GSCA(gligenedata[-3,],glipattern[-3,],"moe430")
+twoout <- GSCA(gligenedata[-3,],glipattern[-3,],"moe4302")
 GSCAplot(twoout)
 
 ## Case of three genesets: two heatmaps, press Enter to switch to the second heatmap
 ## May take some time, be patient
-threeout <- GSCA(gligenedata,glipattern,"moe430")
+threeout <- GSCA(gligenedata,glipattern,"moe4302")
 GSCAplot(threeout)
 
 ## Same plots in designated file path, FILE, which is a pdf file.

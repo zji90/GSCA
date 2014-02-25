@@ -65,7 +65,7 @@ repressnum <- length(Oct4ESC_TG[[2]])
 Octgenedata <- data.frame(
       gsname=c("TF",rep("TG",activenum+repressnum)),
       gene=c(18999,Oct4ESC_TG[[1]],Oct4ESC_TG[[2]]),
-      weight=c(rep(1,1+activenum),rep(-1,repressnum)),
+      actrep=c(rep(1,1+activenum),rep(-1,repressnum)),
       stringsAsFactors=FALSE)
 @
 
@@ -82,7 +82,7 @@ Octpattern <- data.frame(
 We are now ready to run the GSCA function. We specify chipdata as "moe430" and Pvalue cutoff as default: 0.05.
 
 <<echo=TRUE>>=
-displayoct <- Octoutput <- GSCA(Octgenedata,Octpattern,"moe4302",Pval.co=0.05,directory=NULL)
+displayoct <- Octoutput <- GSCA(Octgenedata,Octpattern,"moe430",Pval.co=0.05,directory=NULL)
 displayoct[[1]]$SampleType <- substr(displayoct[[1]]$SampleType,1,25)
 head(displayoct[[1]]) ## Partial results of the ranking table
 @
@@ -111,7 +111,7 @@ data(STAT1_TG) ### Note, only activated (+) STAT1 target genes were found
 Then we construct genedata and pattern required by GSCA.
 <<echo=TRUE>>=
 Statgenenum <- length(STAT1_TG)
-Statgenedata <- data.frame(gsname=c("TF",rep("TG",Statgenenum)),gene=c(6772,STAT1_TG),weight=1,stringsAsFactors=FALSE)
+Statgenedata <- data.frame(gsname=c("TF",rep("TG",Statgenenum)),gene=c(6772,STAT1_TG),actrep=1,stringsAsFactors=FALSE)
 Statpattern <- data.frame(gsname=c("TF","TG"),acttype="High",cotype="Norm",cutoff=0.1,stringsAsFactors=FALSE)
 @
 

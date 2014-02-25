@@ -5,15 +5,10 @@ Version: 0.99.1
 Date: 2014-2-9
 Author: Zhicheng Ji, Hongkai Ji
 Maintainer: Zhicheng Ji <zji4@jhu.edu>
-Description: GSCA takes as input several lists of activated and
-        repressed genes. GSCA then searches through a compendium of
-        publicly available gene expression profiles for biological
-        contexts that are enriched with a specified pattern of gene
-        expression. GSCA provides both traditional R functions and
-        interactive, user-friendly user interface.
+Description: GSCA takes as input several lists of activated and repressed genes. GSCA then searches through a compendium of publicly available gene expression profiles for biological contexts that are enriched with a specified pattern of gene expression. GSCA provides both traditional R functions and interactive, user-friendly user interface. 
 License: GPL(>=2)
 LazyLoad: yes
 Imports: graphics
 Depends: shiny, sp, gplots, ggplot2, reshape2, RColorBrewer
-Suggests: Affyhgu133aExpr, Affymoe430Expr
+Suggests: Affyhgu133aExpr, Affymoe4302Expr, Affyhgu133A2Expr, Affyhgu133Plus2Expr
 biocViews: GeneExpression, Enrichment, Visualization, GUI

@@ -1,4 +1,4 @@
-GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,Pval.co=0.05,Ordering="Average",Title=NULL,outputdir=NULL) {
+GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,scaledata=F,Pval.co=0.05,Ordering="Average",Title=NULL,outputdir=NULL) {
             if(nrow(SearchOutput)==0) stop("No SearchOutput specified.")
             ###presettings
             genedata[,1] <- as.character(genedata[,1])
@@ -23,17 +23,32 @@ GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,Pval.co=0.05,Ordering
                         data(Affyhgu133aExprtab)
                         tab <- Affyhgu133aExprtab
                   }
-            } else if(chipdata == "moe430"){
-                  if (!require(Affymoe430Expr)) {
-                        stop("Affymoe430Expr Package is not found")
+            } else if(chipdata == "moe4302"){
+                  if (!require(Affymoe4302Expr)) {
+                        stop("Affymoe4302Expr Package is not found")
                   } else {
-                        data(Affymoe430Exprtab)
-                        tab <- Affymoe430Exprtab
+                        data(Affymoe4302Exprtab)
+                        tab <- Affymoe4302Exprtab
+                  }
+            } else if(chipdata == "hgu133A2"){
+                  if (!require(Affyhgu133A2Expr)) {
+                        stop("Affyhgu133A2Expr Package is not found")
+                  } else {
+                        data(Affyhgu133A2Exprtab)
+                        tab <- Affyhgu133A2Exprtab
+                  }
+            } else if(chipdata == "hgu133Plus2"){
+                  if (!require(Affyhgu133Plus2Expr)) {
+                        stop("Affyhgu133Plus2Expr Package is not found")
+                  } else {
+                        data(Affyhgu133Plus2Exprtab)
+                        tab <- Affyhgu133Plus2Exprtab
                   }
             } else {
-                  stop("Please enter valid name for chipdata. Current Supported chipdata: 'hgu133a' and 'moe430'")
+                  stop("Please enter valid name for chipdata. Current Supported chipdata: 'hgu133a', 'moe4302', 'hgu133Plus2', 'hgu133A2'")
             }
-            tabsamplename <- tab$SampleName
+            
+            tabsamplename <- tab$SampleID
             tab$SampleType <- substr(tab$SampleType,1,25)
             SearchOutput$SampleType <- substr(SearchOutput$SampleType,1,25)
             #check whether each geneset has at least one gene on the compendium
@@ -51,37 +66,24 @@ GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,Pval.co=0.05,Ordering
             selectsample <- 1:nrow(tab)
             activity <- matrix(0,nrow = length(genesetname),ncol = nrow(tab))
             rownames(activity) <- genesetname
-            genesetcutoff <- genesettotalTG <- genesetmissingTG <- rep(0,length(genesetname))
-            names(genesetcutoff) <- names(genesettotalTG) <- names(genesetmissingTG)  <- genesetname
+            genesetcutoff <- genesettotalgenenum <- genesetmissinggene <- rep(0,length(genesetname))
+            names(genesetcutoff) <- names(genesettotalgenenum) <- names(genesetmissinggene)  <- genesetname
             for (genesetid in 1:length(genesetname)) {
                   ###Scoring geneset activity
                   singlegeneset <- genesetname[genesetid]
-                  posgene <- intersect(compengene,genedata[singlegeneset == genedata[,1]&genedata[,3]==1,2])
-                  neggene <- intersect(compengene,genedata[singlegeneset == genedata[,1]&genedata[,3]==-1,2])
-                  n.GSup <- length(posgene)
-                  GSup <- rep(0, nrow(tab))  
-                  for (i in posgene) {
-                        load(paste0(path,"/",i,".rda"))
-                        GSup <- GSup + Expr
+                  currentgeneset <- genedata[genedata[,1] == singlegeneset & genedata[,2] %in% compengene,]
+                  score <- rep(0, nrow(tab))
+                  for (i in 1:nrow(currentgeneset)) {
+                        load(paste0(path,"/",currentgeneset[i,2],".rda"))
+                        if (scaledata)
+                              e <- scale(e)
+                        score <- score + currentgeneset[i,3]*e
                   }
-                  GSup <- GSup / n.GSup
-                  n.GSdown <- length(neggene)
-                  GSdown <- rep(0, nrow(tab))  
-                  for (i in neggene) {
-                        load(paste0(path,"/",i,".rda"))
-                        GSdown <- GSdown + Expr
-                  }
-                  GSdown <- GSdown / n.GSdown
+                  score <- score/nrow(currentgeneset)
+                  
                   missinggene <- setdiff(genedata[singlegeneset == genedata[,1],2],compengene)
-                  genesetmissingTG[genesetid] <- length(missinggene)
-                  genesettotalTG[genesetid] <- n.gene <- length(posgene)+length(neggene)
-                  if(length(posgene) > 0 & length(neggene) > 0) {
-                        score <- GSup*n.GSup/n.gene-GSdown*n.GSdown/n.gene
-                  } else if (length(posgene) > 0) {
-                        score <- GSup
-                  } else {
-                        score <- -1*GSdown
-                  }
+                  genesetmissinggene[genesetid] <- length(missinggene)
+                  genesettotalgenenum[genesetid] <- length(genedata[,1] == singlegeneset && genedata[,2] %in% compengene)
                   activity[genesetid,] <- score
                   ###Find samples matching the given pattern
                   singlepattern <- pattern[pattern[,1]==singlegeneset,]
@@ -122,7 +124,6 @@ GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,Pval.co=0.05,Ordering
             }
             
             colnames(activity) <- tabsamplename
-            
             ExpID <- tab[selectsample,"ExperimentID"]
             tmpTypes <- tab[selectsample,"SampleType"]           
             
@@ -146,9 +147,8 @@ GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,Pval.co=0.05,Ordering
             eact <- activity[,(tab$ExperimentID %in% GSE |
                                      tab$ExperimentID %in% GSE2) &
                                    tab$SampleType %in% SampleNames]
-            
             ExpressionTab <- NULL
-            ExpressionTab <- tab[tab$SampleName %in% colnames(eact),]
+            ExpressionTab <- tab[tab$SampleID %in% colnames(eact),]
             ExpressionTab <- data.frame(ExpressionTab,t(eact))
             #### Choice of ordering (Default is average rank)
             if (length(unique(ExpressionTab$SampleType)) == 1) {
@@ -165,7 +165,8 @@ GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,Pval.co=0.05,Ordering
                   stop("No ordering specified. Must be one of the geneset name or 'Average'.")
             }
             }
-            Expressionmelt <- melt(ExpressionTab[,-(1:3)],id.vars="SampleType")
+            print(str(ExpressionTab))
+            Expressionmelt <- melt(ExpressionTab[,-(1:2)],id.vars="SampleType")
             Expressionmelt$SampleType <- factor(Expressionmelt$SampleType,levels=Expressionorder)
             gboxplot <- ggplot(data = Expressionmelt, aes(x=variable, y=value)) + 
                   geom_boxplot(aes(fill=SampleType))+facet_grid(.~SampleType) +

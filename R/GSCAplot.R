@@ -15,16 +15,31 @@ GSCAplot <- function(GSCAoutput,N=5,plotfile=NULL,Title=NULL){
                   data(Affyhgu133aExprtab)
                   tab <- Affyhgu133aExprtab
             }
-      } else if(chipdata == "moe430"){
-            if (!require(Affyhgu133aExpr)) {
-                  stop("Affymoe430Expr Package is not found")
+      } else if(chipdata == "moe4302"){
+            if (!require(Affymoe4302Expr)) {
+                  stop("Affymoe4302Expr Package is not found")
             } else {
-                  data(Affymoe430Exprtab)
-                  tab <- Affymoe430Exprtab
+                  data(Affymoe4302Exprtab)
+                  tab <- Affymoe4302Exprtab
+            }
+      } else if(chipdata == "hgu133A2"){
+            if (!require(Affyhgu133A2Expr)) {
+                  stop("Affyhgu133A2Expr Package is not found")
+            } else {
+                  data(Affyhgu133A2Exprtab)
+                  tab <- Affyhgu133A2Exprtab
+            }
+      } else if(chipdata == "hgu133Plus2"){
+            if (!require(Affyhgu133Plus2Expr)) {
+                  stop("Affyhgu133Plus2Expr Package is not found")
+            } else {
+                  data(Affyhgu133Plus2Exprtab)
+                  tab <- Affyhgu133Plus2Exprtab
             }
       } else {
-            stop("Please enter valid name for chipdata. Current Supported name: 'hgu133a' and 'moe430'")
+            stop("Please enter valid name for chipdata. Current Supported chipdata: 'hgu133a', 'moe4302', 'hgu133Plus2', 'hgu133A2'")
       }
+      
       
       if(!is.null(plotfile)) 
             pdf(plotfile)

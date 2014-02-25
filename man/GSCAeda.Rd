@@ -8,19 +8,22 @@ GSCAeda is used to further study GSCA significant predictions in more detail to 
    The output of GSCAeda are multiple plots displaying the geneset activity values and genes of interest in the input biological contexts. Also included are the usual GSCA analysis results table showing the enrichment of each contexts for the geneset activity pattern of interest, t-test results (t-statistics and p-values) for all pair-wise combinations of inputted contexts in each geneset, and a summary of raw geneset activity values for each context of interest. Users can then use the raw geneset activity values for further statistical analyses if desired.
 }
 \usage{
-GSCAeda(genedata,pattern,chipdata,SearchOutput,Pval.co=0.05,Ordering="Average",Title=NULL,outputdir=NULL) 
+GSCAeda(genedata,pattern,chipdata,SearchOutput,scaledata=F,Pval.co=0.05,Ordering="Average",Title=NULL,outputdir=NULL) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 \item{genedata}{
-      A data.frame with three columns specifying the input genesets. Each row specifies an activated or repressed gene in a geneset. First column: character value of geneset name specified by the user, could be any name easy to remember e.g. GS1,GS2,...; Second column: numeric value of Entrez GeneID of the gene; Third column: numeric value of 1,-1 indicating whether gene is activated or repressed. 1 for activated gene and -1 for repressed gene. Here, activated gene means that increases in expression of the gene also increases the overall activity of the whole geneset, while increases in expression of the repressed genes will decrease the overall activity of the whole geneset.
+      A data.frame with three columns specifying the input genesets. Each row specifies an activated or repressed gene in a geneset. First column: character value of geneset name specified by the user, could be any name easy to remember e.g. GS1,GS2,...; Second column: numeric value of Entrez GeneID of the gene; Third column: numeric value of single gene weight when calculating the activity level of the whole geneset. Positive values for activated gene and negative values for repressed gene. Here, activated gene means that increases in expression of the gene also increases the overall activity of the whole geneset, while increases in expression of the repressed genes will decrease the overall activity of the whole geneset.
 }
 \item{pattern}{
       A data.frame with four columns indicating the activity patterns corresponding to the given genedata. Each row specifies activity pattern for one geneset. First column: character value of the same geneset name used in genedata, each geneset name in genedata should appear exactly once in this column. Second column: character value of whether high or low activity of the whole geneset is interested. "High" stands for high activity and "Low" stands for low activity. Third column: character value of which cutoff type is going to be used. 3 cutoff types can be specified: "Norm", "Quantile", or "Exprs". If cutoff type is "Norm", then the fourth column should be specified as p-value between 0 and 1, where the geneset expression cutoff will correspond to the specified p-value (one-sided) based on a fitted normal distribution; If cutoff type is "Quantile", then the fourth column should be specified as a desired quantile between 0 and 1, where the geneset expression cutoff will correspond to the specified quantile. Finally, if cutoff type is "Exprs", the geneset expression cutoff will be equal to the value given in the fourth column. Fourth column: numeric value of cutoff value based on different cutoff types specified in the third column.
 }
 
 \item{chipdata}{
-    A character value of either 'hgu133a' or 'moe430'. This argument specifies which compendium to use. Requires the corresponding data package.
+    A character value of 'hgu133a', 'hgu133A2', 'hgu133Plus2' or 'moe4302'. This argument specifies which compendium to use. Requires the corresponding data package.
+}
+\item{scaledata}{
+logical value indicating whether expression data for each gene should be scaled across samples to have mean 0 and variance 1.
 }
   \item{SearchOutput}{
     Output of the tabSearch function. More specifically, a data frame where the 1st column is the ExperimentIDs (GSE ids), the 2nd column is the SampleTypes, and the 3rd column is the sample count for each SampleType.
@@ -64,7 +67,7 @@ data(STAT1_TG)
 
 ## Construct genedata and pattern using the same way as GSCA
 Statgenenum <- length(STAT1_TG)
-Statgenedata <- data.frame(gsname=c("GS1",rep("GS2",Statgenenum)),gene=c(6772,STAT1_TG),actrep=1,stringsAsFactors=FALSE)
+Statgenedata <- data.frame(gsname=c("GS1",rep("GS2",Statgenenum)),gene=c(6772,STAT1_TG),weight=1,stringsAsFactors=FALSE)
 Statpattern <- data.frame(gsname=c("GS1","GS2"),acttype="High",cotype="Norm",cutoff=0.1,stringsAsFactors=FALSE)
 
 ## Find all contexts in human compendium from GSE7123

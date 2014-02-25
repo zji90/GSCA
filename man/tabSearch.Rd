@@ -1,7 +1,7 @@
 \name{tabSearch}
 \alias{tabSearch}
 \title{
-Searches through the Affymetrix Human hgu133a Array (GPL96) or Affymetrix Mouse 430 2.0 Array (GPL1261) compendium data for biological contexts of interest.
+Searches through GPL96, GPL1261, GPL570 or GPL571 compendium data for biological contexts of interest.
 }
 \description{
 tabSearch requires users to provide keyword(s), the species, and either 'AND' or 'OR'. Then the function uses grep and the keywords to iteratively search for biological contexts or experiment IDs that match the keywords, where 'AND' requires all recovered contexts to satisfiy all keywords and 'OR' requires all recovered contexts to match at least one keyword.
@@ -14,7 +14,7 @@ tabSearch(keyword, chipdata, option = "OR")
     A character vector of biological context words or experiment IDs. e.g. 'liver' or 'GSE7123'.
 }
   \item{chipdata}{
-    A character value of either 'hgu133a' or 'moe430'. This argument specifies which compendium to use. Requires the corresponding data package.
+    A character value of 'hgu133a', 'hgu133A2', 'hgu133Plus2' or 'moe4302'. This argument specifies which compendium to use. Requires the corresponding data package.
 }
   \item{option}{
     Either 'AND' or 'OR' to specify whether the recovered contexts need to be found by ALL keywords (AND) or found by at least one keyword (OR).
@@ -39,10 +39,10 @@ library(GSCA)
 ## Search for all contexts in GSE7123 in hgu133a
 tabSearch("GSE7123","hgu133a")
 
-## Search for all contexts labeled 'fetal' or 'liver' in moe430
-tabSearch(c("Fetal","Liver"),"moe430")
+## Search for all contexts labeled 'fetal' or 'liver' in moe4302
+tabSearch(c("Fetal","Liver"),"moe4302")
 
-## Search for all contexts labeled 'fetal liver' AND in GSE13044 in moe430
-tabSearch(c("Fetal Liver","GSE13044"),"moe430","AND")
+## Search for all contexts labeled 'fetal liver' AND in GSE13044 in moe4302
+tabSearch(c("Fetal","GSE13044"),"moe4302","AND")
 } 
 \keyword{ search }
