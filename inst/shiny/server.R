@@ -624,7 +624,7 @@ shinyServer(function(input, output, session) {
       
       output$GSCAdefaultplottwo <- renderPlot({  
             if (Maindata$dim == 2) {
-                  plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],col="#00000022",pch=20,xlab=Maindata$patterndata[1,1],cex=0.7,ylab=Maindata$patterndata[2,1])
+                  plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],col="#00000022",pch=20,xlab=Maindata$patterndata[1,1],cex=0.7,ylab=Maindata$patterndata[2,1],cex.lab=1.5,ylim=c(min(Maindata$GSCAscore[2,]),1.15*max(Maindata$GSCAscore[2,])))
                   toprankingsample <- NULL
                   if (!is.null(Maindata$GSCAcontext)) {
                         for(INDEX in Maindata$GSCAcontext) {
@@ -782,7 +782,7 @@ shinyServer(function(input, output, session) {
       output$GSCAinteractiveplottwo <- renderPlot({  
             if (Maindata$dim == 2) { 
                   inputcoords <- get.coords()
-                  plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],pch=20, xlim = range(Maindata$GSCAscore[1,]), ylim = range(Maindata$GSCAscore[2,]),xlab=Maindata$patterndata[1,1],ylab=Maindata$patterndata[2,1])
+                  plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],pch=20, xlab=Maindata$patterndata[1,1],ylab=Maindata$patterndata[2,1],cex.lab=1.5)
                   if (input$reset != resetvalue) {
                         polycord <<- NULL
                         polynum <<- 1
@@ -851,7 +851,7 @@ shinyServer(function(input, output, session) {
       output$GSCAinteractiveplottwoplus <- renderPlot({  
             if (Maindata$dim == 2) { 
                   if (sum(inpoly$tf) != 0) {
-                        plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,], xlim = range(Maindata$GSCAscore[1,]), ylim = range(Maindata$GSCAscore[2,]),xlab=Maindata$patterndata[1,1],ylab=Maindata$patterndata[2,1],pch=20,cex=0.7,col="#00000022")            
+                        plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],ylim=c(min(Maindata$GSCAscore[2,]),1.15*max(Maindata$GSCAscore[2,])),xlab=Maindata$patterndata[1,1],ylab=Maindata$patterndata[2,1],pch=20,cex=0.7,col="#00000022",cex.lab=1.5)            
                         for (j in 1:polynum) {
                               tmpcord <- polycord[polycord[,3]==j,]
                               if (is.matrix(tmpcord)) {
@@ -1397,7 +1397,7 @@ shinyServer(function(input, output, session) {
       downloadtwofunc <- function() {
             cortext <- paste0("Correlation: ",round(Maindata$twocorr,3),"; ","Correlation p-value: ",round(Maindata$twocorrp,3),"; ","Slope: ",round(Maindata$twoslope,3),"; ","Slope p-value: ",round(Maindata$twoslopep,3))
             if (input$Downloadregionselect == 'Precise') {
-                  plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],col="#00000022",pch=20,cex=0.7,xlab=input$Downloadxlabtwo,ylab=input$Downloadylabtwo,xlim = as.numeric(c(input$Downloadxlimmintwo,input$Downloadxlimmaxtwo)), ylim = as.numeric(c(input$Downloadylimmintwo,input$Downloadylimmaxtwo)),main=input$Downloadmaintitletwo)
+                  plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],col="#00000022",pch=20,cex=0.7,xlab=input$Downloadxlabtwo,ylab=input$Downloadylabtwo,xlim = as.numeric(c(input$Downloadxlimmintwo,input$Downloadxlimmaxtwo)), ylim = as.numeric(c(input$Downloadylimmintwo,input$Downloadylimmaxtwo)),main=input$Downloadmaintitletwo,cex.lab=1.5)
                   toprankingsample <- NULL
                   if (!is.null(Maindata$downloadcontext)) {
                         for(INDEX in Maindata$downloadcontext) {
