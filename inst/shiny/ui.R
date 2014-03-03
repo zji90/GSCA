@@ -28,6 +28,7 @@ shinyUI(pageWithSidebar(
                   #      tags$style(type='text/css', ".span4 { max-width: 310px; }")
             ),
             
+            helpText(a("Youtube short video demo",href="https://www.youtube.com/watch?v=1OeZ1PAUMhw",target="_blank")),
             helpText(a("Show User Manual",href="GSCAmanual.pdf",target="_blank")),
             wellPanel(
                   radioButtons("Mainmethod","Main Menu",
