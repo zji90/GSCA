@@ -211,6 +211,14 @@ shinyServer(function(input, output, session) {
             })
       })
       
+      output$Savegenedatafile <- downloadHandler(
+            filename = function() { "Genesetfile.csv" },
+            content = function(file) {
+                  tmp <- data.frame(ENTREZ_ID=Rawdata$genedata[,2],weight=Rawdata$genedata[,3],Genesetname=Rawdata$genedata[,1])
+                  write.csv(tmp,file,row.names=F)     
+            }
+      )
+      
       ######  Mainmethod : Summary  ######
       
       Maindata <- reactiveValues()
@@ -592,7 +600,7 @@ shinyServer(function(input, output, session) {
                         } else if (Maindata$dim == 2) {
                               div(align="center",
                                   helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
-                                  plotOutput("GSCAdefaultplottwo",width=800,height=800),
+                                  plotOutput("GSCAdefaultplottwo",width=900,height=900),
                                   helpText(paste0("Correlation: ",Maindata$twocorr)),
                                   helpText(paste0("Pearson Correlation Test p-value: ",Maindata$twocorrp)),
                                   helpText(paste0("Regression Slope: ",Maindata$twoslope)),
@@ -611,11 +619,11 @@ shinyServer(function(input, output, session) {
       output$GSCAdefaultplotone <- renderPlot({
             if (Maindata$dim == 1) {
                   par(mfrow=c(length(Maindata$GSCAcontext)+1,1),oma=c(0,0,2,0))
-                  hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All Biological contexts")
+                  hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All sample in the compendium",cex.main=2)
                   abline(v=Maindata$cutoffval[1], lty=2)
                   if (!is.null(Maindata$GSCAcontext))
                         for(INDEX in Maindata$GSCAcontext) {
-                              hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlim=range(Maindata$GSCAscore),main=substr(INDEX,1,25),xlab="Sample Score")
+                              hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlim=range(Maindata$GSCAscore),main=substr(INDEX,1,25),xlab="Sample Score",cex.main=2)
                               abline(v=Maindata$cutoffval[1], lty=2)
                         }
                   GSCAstatus$status <- 0
@@ -704,8 +712,8 @@ shinyServer(function(input, output, session) {
                               )
                         } else if (Maindata$dim == 2) {
                               div(align="center",
-                                  plotOutput("GSCAinteractiveplottwo",clickId="coords",width=800,height=800),
-                                  plotOutput("GSCAinteractiveplottwoplus",width=800,height=800),
+                                  plotOutput("GSCAinteractiveplottwo",clickId="coords",width=900,height=900),
+                                  plotOutput("GSCAinteractiveplottwoplus",width=900,height=900),
                                   helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found",""))
                               )      
                         } else {
@@ -761,11 +769,11 @@ shinyServer(function(input, output, session) {
       output$GSCAinteractiveplotone <- renderPlot({
             if (Maindata$dim == 1) {
                   par(mfrow=c(as.numeric(input$InputN)+1,1),oma=c(0,0,2,0))
-                  hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All Biological contexts")
+                  hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All sample in the compendium",cex.main=2)
                   abline(v=c(input$GSCAoneslider[1],input$GSCAoneslider[2]), lty=2)
                   if (!is.null(Maindata$GSCAcontext)) {
                         for(INDEX in Maindata$GSCAcontext) {
-                              hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlim=range(Maindata$GSCAscore),main=substr(INDEX,1,25),xlab="Sample Score")
+                              hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlim=range(Maindata$GSCAscore),main=substr(INDEX,1,25),xlab="Sample Score",cex.main=2)
                               abline(v=c(input$GSCAoneslider[1],input$GSCAoneslider[2]), lty=2)
                         }     
                   }
@@ -779,6 +787,15 @@ shinyServer(function(input, output, session) {
             data.frame(x=input$coords$x, y=input$coords$y)
       })
       
+      observe({
+            if (!is.null(Maindata$GSCAscore)) {
+                  inpoly$tf <- rep(F,ncol(Maindata$GSCAscore))
+                  polycord <<- NULL
+                  polynum <<- 1
+                  actiontaken <<- 1
+            }
+      })
+
       output$GSCAinteractiveplottwo <- renderPlot({  
             if (Maindata$dim == 2) { 
                   inputcoords <- get.coords()
@@ -809,7 +826,7 @@ shinyServer(function(input, output, session) {
                               inpoly$tf <- rep(F,ncol(Maindata$GSCAscore))
                               for (j in 1:polynum) {
                                     tmpcord <- polycord[polycord[,3]==j,]
-                                    if (is.matrix(tmpcord)) {
+                                    if (is.matrix(tmpcord) && nrow(tmpcord) > 1) {
                                           inpoly$tf[which(as.logical(point.in.polygon(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],tmpcord[,1],tmpcord[,2])))] <- T
                                     }
                               }
@@ -854,7 +871,7 @@ shinyServer(function(input, output, session) {
                         plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],ylim=c(min(Maindata$GSCAscore[2,]),1.15*max(Maindata$GSCAscore[2,])),xlab=Maindata$patterndata[1,1],ylab=Maindata$patterndata[2,1],pch=20,cex=0.7,col="#00000022",cex.lab=1.5)            
                         for (j in 1:polynum) {
                               tmpcord <- polycord[polycord[,3]==j,]
-                              if (is.matrix(tmpcord)) {
+                              if (is.matrix(tmpcord) && nrow(tmpcord) > 2) {
                                     for (i in 1:(nrow(tmpcord)-1)) 
                                           lines(c(tmpcord[i,1],tmpcord[i+1,1]),c(tmpcord[i,2],tmpcord[i+1,2]),type="l",col="blue",lty=2,lwd=2)
                                     lines(c(tmpcord[1,1],tmpcord[nrow(tmpcord),1]),c(tmpcord[1,2],tmpcord[nrow(tmpcord),2]),type="l",col="blue",lty=2,lwd=2)
@@ -1266,12 +1283,12 @@ shinyServer(function(input, output, session) {
                                     selectInput("Downloadplotthreeplotonetype","Select File Type for Heatmap One",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
                                     textInput("Downloadplotthreeplotonefilename","Enter File Name","GSCA Heatmap One"),
                                     textInput("Downloadplotthreeplotonefilewidth","Enter plot width (inches)",20),
-                                    textInput("Downloadplotthreeplotonefileheight","Enter plot height (inches)",10),
+                                    textInput("Downloadplotthreeplotonefileheight","Enter plot height (inches)",8),
                                     p(downloadButton("Downloadplotthreeplotone","Save Heatmap One")),
                                     selectInput("Downloadplotthreeplottwotype","Select File Type for Heatmap Two",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
                                     textInput("Downloadplotthreeplottwofilename","Enter File Name","GSCA Heatmap Two"),
                                     textInput("Downloadplotthreeplottwofilewidth","Enter plot width (inches)",20),
-                                    textInput("Downloadplotthreeplottwofileheight","Enter plot height (inches)",10),
+                                    textInput("Downloadplotthreeplottwofileheight","Enter plot height (inches)",8),
                                     p(downloadButton("Downloadplotthreeplottwo","Save Heatmap Two"))
                               ),
                               wellPanel(
@@ -1342,7 +1359,7 @@ shinyServer(function(input, output, session) {
                   if (Maindata$dim == 1) {
                         plotOutput("downloadonerenderplot",height=300*(as.numeric(input$InputN)+1))
                   } else if (Maindata$dim == 2) {
-                        plotOutput("downloadtworenderplot",height=800)
+                        plotOutput("downloadtworenderplot",width=900,height=900)
                   } else {
                         tagList(
                               h4("Heatmap One"),
@@ -1586,6 +1603,5 @@ shinyServer(function(input, output, session) {
                   dev.off()
             }
       )
-
 
 })
