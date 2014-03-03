@@ -121,7 +121,9 @@ shinyUI(pageWithSidebar(
                                    uiOutput("Inputgenesetdeleteui"),
                                    p(actionButton("Inputgenesetdelete","Delete selected genedata")),
                                    p(actionButton("Inputgenesetreset","Reset all genedata"))
-                             )
+                             ),
+                             p(downloadButton("Savegenedatafile","Save current genedata as csv file"))
+                             
             ),
             
             conditionalPanel(condition="input.Mainmethod=='Select'",
@@ -162,6 +164,7 @@ shinyUI(pageWithSidebar(
             ),
             conditionalPanel(condition="input.Mainmethod=='Download'",
                              wellPanel(
+                                   h4("Download GSCA outputs"),
                                    radioButtons("Downloadregionselect","Choose pattern of interest type",choices=c("Precise","Interactive")),
                                    wellPanel(
                                          selectInput("Downloadranktabletype","Select File Type",choices=c("csv","txt")),

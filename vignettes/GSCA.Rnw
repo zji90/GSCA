@@ -38,7 +38,7 @@ GSCA analysis is performed using the GSCA function, which requires the following
 (2) \texttt{pattern}, A data.frame with four columns indicating the activity patterns corresponding to the given genedata. Each row specifies activity pattern for one geneset. First column: character value of the same geneset name used in genedata, each geneset name in genedata should appear exactly once in this column. Second column: character value of whether high or low activity of the whole geneset is interested. "High" stands for high activity and "Low" stands for low activity. Third column: character value of which cutoff type is going to be used. 3 cutoff types can be specified: "Norm", "Quantile", or "Exprs". If cutoff type is "Norm", then the fourth column should be specified as p-value between 0 and 1, where the geneset expression cutoff will correspond to the specified p-value (one-sided) based on a fitted normal distribution; If cutoff type is "Quantile", then the fourth column should be specified as a desired quantile between 0 and 1, where the geneset expression cutoff will correspond to the specified quantile. Finally, if cutoff type is "Exprs", the geneset expression cutoff will be equal to the value given in the fourth column. Fourth column: numeric value of cutoff value based on different cutoff types specified in the third column.
 \\[2ex]
 \noindent
-(3) \texttt{chipdata}, Compendium data in which the analysis is performed. Two data sets are possible: 'moe430' or 'hgu133a'. Based on the input, one of two currently available compendiums of publicly available gene expression profiles, from GPL96 for human or from GPL1261 for mouse, will be loaded. The gene expression compendium data is downloaded from NCBI GEO (Barret et al. 2007).
+(3) \texttt{chipdata}, Compendium data in which the analysis is performed. Two data sets are possible: 'moe4302' or 'hgu133a'. Based on the input, one of two currently available compendiums of publicly available gene expression profiles, from GPL96 for human or from GPL1261 for mouse, will be loaded. The gene expression compendium data is downloaded from NCBI GEO (Barret et al. 2007).
 \\[2ex]
 \noindent
 (4) \texttt{Pval.co}, Significance cutoff for reported active biological contexts.
@@ -79,7 +79,7 @@ Octpattern <- data.frame(
       stringsAsFactors=FALSE)
 @
 
-We are now ready to run the GSCA function. We specify chipdata as "moe430" and Pvalue cutoff as default: 0.05.
+We are now ready to run the GSCA function. We specify chipdata as "moe4302" and Pvalue cutoff as default: 0.05.
 
 <<echo=TRUE>>=
 displayoct <- Octoutput <- GSCA(Octgenedata,Octpattern,"moe4302",Pval.co=0.05,directory=NULL)
