@@ -386,15 +386,19 @@ shinyServer(function(input, output, session) {
                                           ###Calculate Score
                                           singlegeneset <- Maindata$patterndata[genesetid,1]
                                           currentgeneset <- Maindata$genedata[Maindata$genedata[,1] == singlegeneset,]
-                                          score <- rep(0, nrow(Maindata$tab))
+                                          tmpgeneexpr <- matrix(0, nrow(currentgeneset), nrow(Maindata$tab))
                                           for (i in 1:nrow(currentgeneset)) {
                                                 path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
                                                 load(paste0(path,"/",currentgeneset[i,2],".rda"))
                                                 if (input$Summarycompscale)
                                                       e <- scale(e)
-                                                score <- score + currentgeneset[i,3]*e
+                                                tmpgeneexpr[i,] <- currentgeneset[i,3]*e
                                           }
-                                          score <- score/nrow(currentgeneset)
+                                          if (input$Summarygenesetactmethod == "average") {
+                                                score <- colMeans(tmpgeneexpr)                                                
+                                          } else {
+                                                score <- apply(tmpgeneexpr,2,median)
+                                          }
                                           scoremat[genesetid,] <- score
                                           row.names(scoremat)[genesetid] <- singlegeneset
                                           ###Calculate selected samples                   
@@ -511,7 +515,7 @@ shinyServer(function(input, output, session) {
                         checkboxInput("Inputenrichedareaonly","Show Enriched Context only in interested region")
       })
       
-      #Suppress color in heatmap
+      ######## Incubation: Suppress color in heatmap ############
 #       output$heatmapcolorsuppressui <- renderUI({
 #             if (!is.null(Maindata$dim))
 #                   if (Maindata$dim > 2) {

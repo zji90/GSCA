@@ -82,6 +82,7 @@ shinyUI(pageWithSidebar(
                                                     "Quantile" = "Quantile",
                                                     "Exprs" = "Exprs")),
                                    textInput("Inputgenesetpatternco","Cutoff Value","0.1"),
+                                   ####### Incubation: more exhaustive options for specifying pattern #######
                                    #                                    radioButtons("InputPatternmethod","",
                                    #                                                 list("Specify Pattern"="InputspecifyPattern",
                                    #                                                      "Upload Pattern File"="InputuploadPattern"
@@ -128,10 +129,22 @@ shinyUI(pageWithSidebar(
             
             conditionalPanel(condition="input.Mainmethod=='Select'",
                              wellPanel(
-                                   uiOutput("Summarydataselect"),
-                                   uiOutput("Summarycompselectui"),
+                                   wellPanel(
+                                         h4("Select Compendium"),
+                                         radioButtons("Summarycompmethod","",
+                                                      list("Select available GSCA compendium"="available",
+                                                           "Upload your own compendium"="upload")),
+                                         uiOutput("Summarydataselect"),
+                                         uiOutput("Summarycompselectui"),
+                                         uiOutput("Summarycompinfo"),
+                                         
+                                         
+                                         ),
                                    checkboxInput("Summarycompscale","Scale expression values across samples"),
-                                   uiOutput("Summarycompinfo")
+                                   radioButtons("Summarygenesetactmethod","Choose method of defining geneset activity",
+                                                list("Weighted average"="average",
+                                                     "Medium"="medium"))
+                                   
                              )
             ),
             
@@ -145,6 +158,7 @@ shinyUI(pageWithSidebar(
                                          conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",
                                                           uiOutput("InputGSCAsidebar")),
                                          uiOutput("plotenrichedareaui"),
+                                         ######## Incubation: Suppress color in heatmap ############
                                          #uiOutput("heatmapcolorsuppressui"),
                                          uiOutput("heatmapthreerowvui"),
                                          helpText("Context Cutoff and Display options"),
