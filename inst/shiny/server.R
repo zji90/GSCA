@@ -410,11 +410,11 @@ shinyServer(function(input, output, session) {
                                                 }
                                           } else if (Maindata$patterndata[genesetid,3] == "Quantile") {
                                                 if (Maindata$patterndata[genesetid,2] == "High") {
-                                                      cutoff <- quantile(1-as.numeric(Maindata$patterndata[genesetid,4]),mean(score),sd(score))
+                                                      cutoff <- quantile(score,1-as.numeric(Maindata$patterndata[genesetid,4]))
                                                       selectsample <- intersect(selectsample,which(score >= cutoff))
                                                       cutoffval[genesetid] <- cutoff
                                                 } else {
-                                                      cutoff <- quantile(as.numeric(Maindata$patterndata[genesetid,4]),mean(score),sd(score))
+                                                      cutoff <- quantile(score,as.numeric(Maindata$patterndata[genesetid,4]))
                                                       selectsample <- intersect(selectsample,which(score < cutoff))
                                                       cutoffval[genesetid] <- cutoff
                                                 }

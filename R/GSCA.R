@@ -90,10 +90,10 @@ GSCA <- function(genedata,pattern,chipdata,scaledata=F,Pval.co=0.05,directory=NU
                   }
             } else if (singlepattern[,3] == "Quantile") {
                   if (singlepattern[,2] == "High") {
-                        cutoff <- quantile(1-singlepattern[,4],mean(score),sd(score))
+                        cutoff <- quantile(score,1-singlepattern[,4])
                         selectsample <- intersect(selectsample,which(score >= cutoff))
                   } else if (singlepattern[,2] == "Low") {
-                        cutoff <- quantile(singlepattern[,4],mean(score),sd(score))
+                        cutoff <- quantile(score,singlepattern[,4])
                         selectsample <- intersect(selectsample,which(score < cutoff))
                   } else {
                         stop(paste("Second Column of pattern in",singlegeneset,"is not correctly given"))      
