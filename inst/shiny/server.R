@@ -6,7 +6,6 @@
 ##       Maintainer:Zhicheng Ji (zji4@jhu.edu)      ##
 ######################################################
 
-##testing branch
 require(gplots)
 require(shiny)
 require(sp)
