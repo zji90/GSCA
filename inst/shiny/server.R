@@ -226,7 +226,7 @@ shinyServer(function(input, output, session) {
       #Sidebar checkbox group for selecting dataset
       output$Summarydataselect <- renderUI({
             if (!is.null(Rawdata$patterndata)) {
-                  checkboxGroupInput("Selectedgeneset","Select Genesets",Rawdata$patterndata[,1],selected=Rawdata$patterndata[,1])
+                  checkboxGroupInput("Selectedgeneset","",Rawdata$patterndata[,1],selected=Rawdata$patterndata[,1])
             }
       })
       
@@ -264,6 +264,7 @@ shinyServer(function(input, output, session) {
       
       #Update Maindata information
       observe({   
+            if (input$Summarycompmethod=='available') {
             if (!is.null(input$Summarycompselect)) {
                   if(input$Summarycompselect=="moe4302"){
                         data(Affymoe4302Exprtab)
@@ -278,14 +279,25 @@ shinyServer(function(input, output, session) {
                         data(Affyhgu133A2Exprtab)
                         Maindata$tab <- Affyhgu133A2Exprtab
                   }
+            }
+            path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
+            compengene <- sub(".rda","",list.files(path))
+            } else {
+                  input$Summaryuploadtabfile
+                  if (!is.null(input$Summaryuploadtabfile)) {
+                        tmptab <- read.table(input$Summaryuploadtabfile$datapath,stringsAsFactors=F,blank.lines.skip=TRUE)
+                        Maindata$tab <- data.frame(SampleID=tmptab[,1],ExperimentID=tmptab[,2],SampleType=tmptab[,3])
+                  }
+                  if (!is.null(input$Summaryuploadgeneexprfile))
+                        Maindata$uploadgeneexpr <- as.matrix(read.table(input$Summaryuploadgeneexprfile$datapath,stringsAsFactors=F,blank.lines.skip=TRUE,row.names=1))
+                        compengene <- row.names(Maindata$uploadgeneexpr)
+            }
                   if (!is.null(Rawdata$genedata)) {
-                        path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
-                        compengene <- sub(".rda","",list.files(path))
                         Maindata$genedata <- Rawdata$genedata[Rawdata$genedata[,2] %in% compengene & Rawdata$genedata[,1] %in% input$Selectedgeneset,]
                         Maindata$patterndata <- Rawdata$patterndata[Rawdata$patterndata[,1] %in% Maindata$genedata[,1],]
                         Maindata$dim <- nrow(Maindata$patterndata)
                   }       
-            }
+            
       })
       
       #Render summary of selected dataset
@@ -388,8 +400,12 @@ shinyServer(function(input, output, session) {
                                           currentgeneset <- Maindata$genedata[Maindata$genedata[,1] == singlegeneset,]
                                           tmpgeneexpr <- matrix(0, nrow(currentgeneset), nrow(Maindata$tab))
                                           for (i in 1:nrow(currentgeneset)) {
-                                                path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
-                                                load(paste0(path,"/",currentgeneset[i,2],".rda"))
+                                                if (input$Summarycompmethod=='available') {
+                                                      path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
+                                                      load(paste0(path,"/",currentgeneset[i,2],".rda"))
+                                                } else {
+                                                      e <- Maindata$uploadgeneexpr[currentgeneset[i,2],]
+                                                }
                                                 if (input$Summarycompscale)
                                                       e <- scale(e)
                                                 tmpgeneexpr[i,] <- currentgeneset[i,3]*e
@@ -698,8 +714,8 @@ shinyServer(function(input, output, session) {
                         heatmap.2(Maindata$GSCAscore[,Maindata$defaultsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$defaultsample],main="Selected Sample Heatmap",useRaster=T)
                         leg.txt <- substr(Maindata$GSCAcontext,1,25)
                         legend("bottomleft",legend=leg.txt,lwd=1,col=COLORS)
-                  }
-                  else {
+                  } else {
+                        if (length(Maindata$defaultsample) > 1)
                         heatmap.2(Maindata$GSCAscore[,Maindata$defaultsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
                   }
             }
@@ -1209,6 +1225,7 @@ shinyServer(function(input, output, session) {
                                     heatmap.2(Maindata$GSCAscore[,Maindata$selectsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$selectsample],main="Selected Sample Heatmap",useRaster=T)
                                     legend("bottomleft",legend=leg.txt,lwd=1,col=COLORS)
                               } else {
+                                    if (length(Maindata$selectsample) > 1)
                                     heatmap.2(Maindata$GSCAscore[,Maindata$selectsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
                               }
                         })
