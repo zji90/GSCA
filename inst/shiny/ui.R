@@ -129,11 +129,11 @@ shinyUI(pageWithSidebar(
             
             conditionalPanel(condition="input.Mainmethod=='Select'",
                              wellPanel(
-                                   wellPanel(
+                                    wellPanel(
                                          h4("Select Geneset"),
                                          uiOutput("Summarydataselect")
                                          ),
-                                   wellPanel(
+                                    wellPanel(
                                          h4("Select Compendium"),
                                          radioButtons("Summarycompmethod","",
                                                       list("Select available GSCA compendium"="available",
@@ -148,11 +148,10 @@ shinyUI(pageWithSidebar(
                                                           fileInput('Summaryuploadtabfile', 'Choose annotation file')
                                          )
                                     ),
-                                   checkboxInput("Summarycompscale","Scale expression values across samples"),
-                                   radioButtons("Summarygenesetactmethod","Choose method of defining geneset activity",
+                                    checkboxInput("Summarycompscale","Scale expression values across samples"),
+                                    radioButtons("Summarygenesetactmethod","Choose method of defining geneset activity",
                                                 list("Weighted average"="average",
                                                      "Medium"="medium"))
-                                   
                              )
             ),
             
@@ -164,6 +163,12 @@ shinyUI(pageWithSidebar(
                                    ),
                                    wellPanel(
                                          conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",
+                                                          checkboxInput("GSCAinteractivesaveload","save/load interactive POI"),
+                                                          conditionalPanel(condition="input.GSCAinteractivesaveload==1",
+                                                                           p(downloadButton('GSCAinteractivesavebutton','Save current POI')),
+                                                                           fileInput('GSCAinteractiveload', 'Load exact POI file'),
+                                                                           p(actionButton('GSCAinteractiveloadbutton','Load POI'))
+                                                            ),
                                                           uiOutput("InputGSCAsidebar")),
                                          uiOutput("plotenrichedareaui"),
                                          ######## Incubation: Suppress color in heatmap ############
