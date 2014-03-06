@@ -213,6 +213,8 @@ shinyUI(pageWithSidebar(
                              )
             ),
             conditionalPanel(condition="input.Mainmethod=='Select'",
+                             tabsetPanel(
+                             tabPanel("Analysis data summary",
                              dataTableOutput("OutputDataSummary"),
                              uiOutput("Outputmissinggenesetreport"),
                              conditionalPanel(condition="input.Summarycompmethod=='upload'",
@@ -228,6 +230,14 @@ shinyUI(pageWithSidebar(
                                               p('Example for annotation file:'),
                                               p(br('GSM132917 GSE5681 skidlcl_cells:normal'),br('GSM132918 GSE5681 skidlcl_cells:normal'),br('GSM132920 GSE5681 skidlcl_cells:normal'),br('GSM148748 GSE6475 skin:normal'),br('GSM148763 GSE6475 skin:normal'),br('GSM148765 GSE6475 skin:normal'))
                                               )
+                             )
+                             ),
+                             tabPanel("Geneset breakdown",
+                                      uiOutput("genesetbreakdownnameui"),
+                                      uiOutput("genesetbreakdowntreenumui"),
+                                      p(actionButton("genesetbreakdownaddbutton","Add sub genesets")),
+                                      plotOutput("genesetbreakdownclustplot")
+                                      )
                              )
             ),
             conditionalPanel(condition="input.Mainmethod=='GSCA'",

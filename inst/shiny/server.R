@@ -330,6 +330,97 @@ shinyServer(function(input, output, session) {
             do.call("paste",c(as.list(setdiff(input$Selectedgeneset,Maindata$patterndata$Genesetname)),sep=","))
       })
       
+      #Geneset breakdown
+      
+      genebreakdata <- reactiveValues()
+      
+      output$genesetbreakdownnameui <- renderUI({
+            if (!is.null(Rawdata$genedata)) {
+                  namelist <- list()
+                  for (i in unique(Rawdata$genedata$Genesetname)) 
+                        if (sum(Maindata$genedata$Genesetname==i) > 1)
+                              eval(parse(text=paste0("namelist <- c(namelist,`",i,"`=i)")))
+                  radioButtons("genesetbreakdownchoose","Choose one of the geneset with at least two genes.",namelist)
+            }
+      })
+      
+      output$genesetbreakdowntreenumui <- renderUI({
+            if (!is.null(genebreakdata$expr))
+            sliderInput("genesetbreakdowntreenum","Choose number of groups",min=1,max=min(12,nrow(genebreakdata$expr)),value=1,step=1)
+      })
+      
+      observe({
+            if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) > 1) {
+                  genebreakdata$geneset <- tmpgeneset <- Maindata$genedata[Maindata$genedata$Genesetname==input$genesetbreakdownchoose,]
+                  tmpgeneexpr <- matrix(0, nrow(tmpgeneset), nrow(Maindata$tab))
+                  rownames(tmpgeneexpr) <- tmpgeneset[,2]
+                  if (nrow(tmpgeneset) > 1) {
+                        for (i in 1:nrow(tmpgeneset)) {
+                              if (input$Summarycompmethod=='available') {
+                                    path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
+                                    load(paste0(path,"/",tmpgeneset[i,2],".rda"))
+                              } else {
+                                    e <- Maindata$uploadgeneexpr[tmpgeneset[i,2],]
+                              }
+                              if (input$Summarycompscale)
+                                    e <- scale(e)
+                              tmpgeneexpr[i,] <- tmpgeneset[i,3]*e
+                        }
+                        genebreakdata$expr <- tmpgeneexpr
+                        genebreakdata$hc <- hclust(dist(tmpgeneexpr))
+                  }
+            }
+      })
+      
+      observe({
+            if (!is.null(genebreakdata$hc) & !is.null(input$genesetbreakdowntreenum))
+                  genebreakdata$cutree <- cutree(genebreakdata$hc,k=as.numeric(input$genesetbreakdowntreenum))      
+      })
+      
+      output$genesetbreakdownclustplot <- renderPlot({
+            if (!is.null(genebreakdata$hc) && !is.null(input$genesetbreakdowntreenum)) {          
+                  treenum <- as.numeric(input$genesetbreakdowntreenum)
+                  if (treenum == 1) {
+                        labelColors <- "black"
+                  } else if (treenum == 2) {
+                        labelColors <- c("black","red")
+                  } else {
+                        labelColors <- brewer.pal(treenum,"Paired")
+                  }
+            colLab <- function(n) {
+                  if (is.leaf(n)) {
+                        a <- attributes(n)
+                        labCol <- labelColors[genebreakdata$cutree[a$label]]
+                        attr(n, "nodePar") <- c(a$nodePar, lab.col=labCol)
+                  }
+                  n
+            }
+            clusDendro <- dendrapply(as.dendrogram(genebreakdata$hc), colLab)
+            plot(clusDendro)
+            }
+      })
+      
+      observe({
+            if (input$genesetbreakdownaddbutton > 0)
+            isolate({
+                  tmpgeneset <- genebreakdata$geneset
+                  tmppatternone <- Rawdata$patterndata[Rawdata$patterndata[,1] == input$genesetbreakdownchoose,]
+                  tmppattern <- NULL
+                  for (i in 1:input$genesetbreakdowntreenum) {
+                        tmppattern <- rbind(tmppattern,tmppatternone)
+                  }
+                  for (i in 1:input$genesetbreakdowntreenum) {
+                        tmppattern[i,1] <- paste(tmppattern[i,1],i,sep="_")
+                  }
+                  for (i in 1:nrow(tmpgeneset)) {
+                        tmpgeneset[i,1] <-paste(tmpgeneset[i,1],genebreakdata$cutree[as.character(tmpgeneset[i,2])],sep="_")                        
+                  }
+                  Rawdata$genedata <- rbind(Rawdata$genedata,tmpgeneset)
+                  Rawdata$patterndata <- rbind(Rawdata$patterndata,tmppattern)
+                  
+            })
+      })
+      
       ######  Mainmethod : GSCA  ######
       
       #When reentering GSCA page, GSCAmethod should be set to GSCAdefault
