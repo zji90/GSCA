@@ -694,9 +694,9 @@ shinyServer(function(input, output, session) {
                         heatmap.2(Maindata$GSCAscore[,Maindata$defaultsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$defaultsample],main="Selected Sample Heatmap",useRaster=T)
                         leg.txt <- substr(Maindata$GSCAcontext,1,25)
                         legend("bottomleft",legend=leg.txt,lwd=1,col=COLORS)
-                  }
-                  else {
-                        heatmap.2(Maindata$GSCAscore[,Maindata$defaultsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
+                  } else {
+                        if (length(Maindata$defaultsample) > 1)
+                              heatmap.2(Maindata$GSCAscore[,Maindata$defaultsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
                   }
             }
       })
@@ -799,6 +799,7 @@ shinyServer(function(input, output, session) {
       output$GSCAinteractiveplottwo <- renderPlot({  
             if (Maindata$dim == 2) { 
                   inputcoords <- get.coords()
+                  input$GSCAinteractiveloadbutton
                   plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],pch=20, xlab=Maindata$patterndata[1,1],ylab=Maindata$patterndata[2,1],cex.lab=1.5)
                   if (input$reset != resetvalue) {
                         polycord <<- NULL
@@ -1205,7 +1206,8 @@ shinyServer(function(input, output, session) {
                                     heatmap.2(Maindata$GSCAscore[,Maindata$selectsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$selectsample],main="Selected Sample Heatmap",useRaster=T)
                                     legend("bottomleft",legend=leg.txt,lwd=1,col=COLORS)
                               } else {
-                                    heatmap.2(Maindata$GSCAscore[,Maindata$selectsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
+                                    if (length(Maindata$selectsample) > 1)
+                                          heatmap.2(Maindata$GSCAscore[,Maindata$selectsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
                               }
                         })
                   }
@@ -1231,6 +1233,59 @@ shinyServer(function(input, output, session) {
                   mtext3d(row.names(Maindata$GSCAscore)[3],edge="z",size=2)
             }      
       })
+
+##### save and load POI
+
+output$GSCAinteractivesavebutton <- downloadHandler(
+      filename = function() { "POIfile.txt" },
+      content = function(file) {
+            if (Maindata$dim == 1) {
+                  write.table(c(input$GSCAoneslider[1],input$GSCAoneslider[2]),file,row.names=F,col.names=F)
+            } else if (Maindata$dim == 2) {
+                  write.table(polycord,file,row.names=F,col.names=F)
+            } else {
+                  tmp <- NULL
+                  if (input$Threecutoffvalue == T) {
+                        for (i in 1:Maindata$dim) {
+                              eval(parse(text=paste0("tmp <- rbind(tmp,c(input$GSCAthreevalueslider",i,"[1], input$GSCAthreevalueslider",i,"[2]))")))
+                        }
+                  } else {
+                        for (i in 1:GSCAthreeinfo$sampleslidernum) {
+                              if(!is.null(eval(parse(text=paste0("input$GSCAthreesampleslider",i,"[1]"))))) 
+                                    eval(parse(text=paste0("tmp <- rbind(tmp,c(input$GSCAthreesampleslider",i,"[1],input$GSCAthreesampleslider",i,"[2]))")))
+                        }
+                  }
+                  write.table(tmp,file,row.names=F,col.names=F)
+            }
+      }
+)
+
+observe({
+      if (!is.null(input$GSCAinteractiveload)) { 
+            if (input$GSCAinteractiveloadbutton > 0)
+                  isolate({
+                        tmp <- read.table(input$GSCAinteractiveload$datapath)
+                        if (dim(tmp)[1] == 2 & dim(tmp)[2] == 1) {
+                              updateSliderInput(session,"GSCAoneslider",value=c(tmp[1,1],tmp[2,1]))
+                        } else if (dim(tmp)[2] == 3) {
+                              polycord <<- as.matrix(tmp)
+                              polynum <<- max(polycord[,3])
+                              actiontaken <<- 1
+                        } else if (dim(tmp)[2] == 2) {
+                              if (tmp[1,1] == round(tmp[1,1])) {
+                                    GSCAthreeinfo$sampleslidernum <- nrow(tmp)
+                                    for (i in 1:GSCAthreeinfo$sampleslidernum) {
+                                          eval(parse(text=paste0("updateSliderInput(session,'GSCAthreesampleslider",i,"',value=c(tmp[",i,",1],tmp[",i,",2]))")))
+                                    }                                  
+                              } else {
+                                    for (i in 1:Maindata$dim) {
+                                          eval(parse(text=paste0("updateSliderInput(session,'GSCAthreevalueslider",i,"',value=c(tmp[",i,",1],tmp[",i,",2]))")))
+                                    }
+                              }
+                        }
+                  })
+      }
+})
 
       #####   Mainmethod : Download   #####
       
