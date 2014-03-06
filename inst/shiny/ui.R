@@ -143,6 +143,12 @@ shinyUI(pageWithSidebar(
                                    ),
                                    wellPanel(
                                          conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",
+                                                          checkboxInput("GSCAinteractivesaveload","save/load interactive POI"),
+                                                          conditionalPanel(condition="input.GSCAinteractivesaveload==1",
+                                                                           p(downloadButton('GSCAinteractivesavebutton','Save current POI')),
+                                                                           fileInput('GSCAinteractiveload', 'Load exact POI file'),
+                                                                           p(actionButton('GSCAinteractiveloadbutton','Load POI'))
+                                                          ),
                                                           uiOutput("InputGSCAsidebar")),
                                          uiOutput("plotenrichedareaui"),
                                          #uiOutput("heatmapcolorsuppressui"),
