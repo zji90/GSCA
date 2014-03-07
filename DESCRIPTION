@@ -15,6 +15,5 @@ License: GPL(>=2)
 LazyLoad: yes
 Imports: graphics
 Depends: shiny, sp, gplots, ggplot2, reshape2, RColorBrewer
-Suggests: Affyhgu133aExpr, Affymoe4302Expr, Affyhgu133A2Expr,
-        Affyhgu133Plus2Expr
+Suggests: Affyhgu133aExpr, Affymoe4302Expr
 biocViews: GeneExpression, Visualization, GUI
