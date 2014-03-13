@@ -129,29 +129,29 @@ shinyUI(pageWithSidebar(
             
             conditionalPanel(condition="input.Mainmethod=='Select'",
                              wellPanel(
-                                    wellPanel(
+                                   wellPanel(
                                          h4("Select Geneset"),
                                          uiOutput("Summarydataselect")
-                                         ),
-                                    wellPanel(
+                                   ),
+                                   wellPanel(
                                          h4("Select Compendium"),
                                          radioButtons("Summarycompmethod","",
                                                       list("Select available GSCA compendium"="available",
                                                            "Upload your own compendium"="upload")),
                                          conditionalPanel(condition="input.Summarycompmethod=='available'",
-                                                uiOutput("Summarycompselectui"),
-                                                uiOutput("Summarycompinfo")
+                                                          uiOutput("Summarycompselectui"),
+                                                          uiOutput("Summarycompinfo")
                                          ),
                                          conditionalPanel(condition="input.Summarycompmethod=='upload'",
                                                           h5("See instructions on the right!"),
                                                           fileInput('Summaryuploadgeneexprfile', 'Choose gene expression file'),
                                                           fileInput('Summaryuploadtabfile', 'Choose annotation file')
                                          )
-                                    ),
-                                    checkboxInput("Summarycompscale","Scale expression values across samples"),
-                                    radioButtons("Summarygenesetactmethod","Choose method of defining geneset activity",
+                                   ),
+                                   checkboxInput("Summarycompscale","Scale expression values across samples"),
+                                   radioButtons("Summarygenesetactmethod","Choose method of defining geneset activity",
                                                 list("Weighted average"="average",
-                                                     "Medium"="medium"))
+                                                     "Median"="median"))
                              )
             ),
             
@@ -168,11 +168,7 @@ shinyUI(pageWithSidebar(
                                                                            p(downloadButton('GSCAinteractivesavebutton','Save current POI')),
                                                                            fileInput('GSCAinteractiveload', 'Load exact POI file'),
                                                                            p(actionButton('GSCAinteractiveloadbutton','Load POI'))
-<<<<<<< HEAD
                                                           ),
-=======
-                                                            ),
->>>>>>> incubation
                                                           uiOutput("InputGSCAsidebar")),
                                          uiOutput("plotenrichedareaui"),
                                          ######## Incubation: Suppress color in heatmap ############
@@ -218,30 +214,30 @@ shinyUI(pageWithSidebar(
             ),
             conditionalPanel(condition="input.Mainmethod=='Select'",
                              tabsetPanel(
-                             tabPanel("Analysis data summary",
-                             dataTableOutput("OutputDataSummary"),
-                             uiOutput("Outputmissinggenesetreport"),
-                             conditionalPanel(condition="input.Summarycompmethod=='upload'",
-                                              checkboxInput("Summarycompuploadinfo","Hide instruction for upload"),
-                                              conditionalPanel(condition="input.Summarycompuploadinfo==0",
-                                              h4("Important! See instructions before preparing files"),
-                                              p('GSCA requires rigorous file format if you want to upload your own gene expression data and annotation files'),
-                                              p('For gene expression data file: the file should be in txt format and entries should be separated by space. Each row stands for expression for one gene. Row order SHOULD correspond to the column order in the gene expression data file (For example, first row should annotate the first column in gene expression data). The first column should be gene ENTREZ ID and all other columns stands for expression in samples. Data types in all entries should be numeric. DO NOT include header in the file.'),
-                                              p('For annotation file: the file should be in txt format and entries should be separated by space. Each row stands for a sample. First column: sample ID; Second column: experiment ID; Third column: sampleType. NO space is allowed in any of the entries and they SHOULD be replaced by other separators like "_". DO NOT include header in the file.'),
-                                              p('Files unable to meet the requirements could fail to be read in or lead to unpredictable error.'),
-                                              p('Example for gene expression data file:'),
-                                              p(br('10000 -0.315 -0.457 -0.658 -0.685 -0.651 -0.677'),br('10001 0.166 0.009 0.098 -1.108 -1.183 -1.446'),br('10002 -0.303 -0.39 -0.149 -0.686 -1.068 0.066')),
-                                              p('Example for annotation file:'),
-                                              p(br('GSM132917 GSE5681 skidlcl_cells:normal'),br('GSM132918 GSE5681 skidlcl_cells:normal'),br('GSM132920 GSE5681 skidlcl_cells:normal'),br('GSM148748 GSE6475 skin:normal'),br('GSM148763 GSE6475 skin:normal'),br('GSM148765 GSE6475 skin:normal'))
-                                              )
-                             )
-                             ),
-                             tabPanel("Geneset breakdown",
-                                      uiOutput("genesetbreakdownnameui"),
-                                      uiOutput("genesetbreakdowntreenumui"),
-                                      p(actionButton("genesetbreakdownaddbutton","Add sub genesets")),
-                                      plotOutput("genesetbreakdownclustplot")
-                                      )
+                                   tabPanel("Analysis data summary",
+                                            dataTableOutput("OutputDataSummary"),
+                                            uiOutput("Outputmissinggenesetreport"),
+                                            conditionalPanel(condition="input.Summarycompmethod=='upload'",
+                                                             checkboxInput("Summarycompuploadinfo","Hide instruction for upload"),
+                                                             conditionalPanel(condition="input.Summarycompuploadinfo==0",
+                                                                              h4("Important! See instructions before preparing files"),
+                                                                              p('GSCA requires rigorous file format if you want to upload your own gene expression data and annotation files'),
+                                                                              p('For gene expression data file: the file should be in txt format and entries should be separated by space. Each row stands for expression for one gene. Row order SHOULD correspond to the column order in the gene expression data file (For example, first row should annotate the first column in gene expression data). The first column should be gene ENTREZ ID and all other columns stands for expression in samples. Data types in all entries should be numeric. DO NOT include header in the file.'),
+                                                                              p('For annotation file: the file should be in txt format and entries should be separated by space. Each row stands for a sample. First column: sample ID; Second column: experiment ID; Third column: sampleType. NO space is allowed in any of the entries and they SHOULD be replaced by other separators like "_". DO NOT include header in the file.'),
+                                                                              p('Files unable to meet the requirements could fail to be read in or lead to unpredictable error.'),
+                                                                              p('Example for gene expression data file:'),
+                                                                              p(br('10000 -0.315 -0.457 -0.658 -0.685 -0.651 -0.677'),br('10001 0.166 0.009 0.098 -1.108 -1.183 -1.446'),br('10002 -0.303 -0.39 -0.149 -0.686 -1.068 0.066')),
+                                                                              p('Example for annotation file:'),
+                                                                              p(br('GSM132917 GSE5681 skidlcl_cells:normal'),br('GSM132918 GSE5681 skidlcl_cells:normal'),br('GSM132920 GSE5681 skidlcl_cells:normal'),br('GSM148748 GSE6475 skin:normal'),br('GSM148763 GSE6475 skin:normal'),br('GSM148765 GSE6475 skin:normal'))
+                                                             )
+                                            )
+                                   ),
+                                   tabPanel("Geneset breakdown",
+                                            uiOutput("genesetbreakdownnameui"),
+                                            uiOutput("genesetbreakdowntreenumui"),
+                                            p(actionButton("genesetbreakdownaddbutton","Add sub genesets")),
+                                            plotOutput("genesetbreakdownclustplot")
+                                   )
                              )
             ),
             conditionalPanel(condition="input.Mainmethod=='GSCA'",
