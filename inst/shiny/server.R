@@ -22,7 +22,8 @@ actiontaken <- 0
 finishpolygonaction <- 0
 polynum <- 1
 
-#three genedata case sample selection initiate
+#one and three genedata case sample selection initiate
+onesampleslidervalue <- matrix(0,nrow=5,ncol=3)
 threesampleslidervalue <- matrix(0,nrow=5,ncol=3)
 
 ###default styles and colors
@@ -78,11 +79,11 @@ shinyServer(function(input, output, session) {
       #Check and automatically modify genesetname if current genesetname is already used
       observe({
             currentgenesetname <- input$InputGenesetname
-            if (!is.null(Rawdata$patterndata))
-                  if (input$InputGenesetname %in% Rawdata$patterndata[,1]) {
+            if (!is.null(Rawdata$genedata))
+                  if (input$InputGenesetname %in% Rawdata$genedata[,1]) {
                         i <- 2
                         modifygenesetname <- paste(currentgenesetname,i,sep="_")
-                        while (modifygenesetname %in% Rawdata$patterndata[,1]) {
+                        while (modifygenesetname %in% Rawdata$genedata[,1]) {
                               i <- i + 1
                               modifygenesetname <- paste(currentgenesetname,i,sep="_")
                         }
@@ -132,11 +133,6 @@ shinyServer(function(input, output, session) {
             if(input$Inputgenesetadd != 0) {
                   isolate({
                         Rawdata$genedata <- rbind(Rawdata$genedata,Currentdata$genedata)
-                        if (input$InputGenesetmethod == 'InputuploadGeneset' && ncol(Currentdata$rawGenesetFile) > 2 && !is.null(input$InputGenesetcolnumthree) && input$InputGenesetcolnumthree) {
-                              Rawdata$patterndata <- rbind(Rawdata$patterndata,data.frame(Genesetname=unique(Currentdata$genedata$Genesetname),Activity=input$Inputgenesetpatternactivity,cotype=input$Inputgenesetpatterncotype,cutoff=input$Inputgenesetpatternco,stringsAsFactors=F))
-                        } else {
-                              Rawdata$patterndata <- rbind(Rawdata$patterndata,data.frame(Genesetname=Currentdata$genesetname,Activity=input$Inputgenesetpatternactivity,cotype=input$Inputgenesetpatterncotype,cutoff=input$Inputgenesetpatternco,stringsAsFactors=F))
-                        }
                   })
             }
       })
@@ -160,8 +156,6 @@ shinyServer(function(input, output, session) {
                   sumtable      
             }
       })    
-      
-      output$OutputAllPattern <- renderDataTable(Rawdata$patterndata)
       
       output$Indigenesetnameui <- renderUI({
             if (!is.null(Rawdata$genedata)) {
@@ -198,7 +192,6 @@ shinyServer(function(input, output, session) {
             if(input$Inputgenesetdelete != 0) {
                   isolate({
                         Rawdata$genedata <- Rawdata$genedata[!Rawdata$genedata$Genesetname %in% input$Inputdeletegenesetselect,]
-                        Rawdata$patterndata <- Rawdata$patterndata[!Rawdata$patterndata$Genesetname %in% input$Inputdeletegenesetselect,]
                   })
             }
       })      
@@ -207,7 +200,6 @@ shinyServer(function(input, output, session) {
             input$Inputgenesetreset
             isolate({
                   Rawdata$genedata <- NULL
-                  Rawdata$patterndata <- NULL
             })
       })
       
@@ -225,8 +217,8 @@ shinyServer(function(input, output, session) {
       
       #Sidebar checkbox group for selecting dataset
       output$Summarydataselect <- renderUI({
-            if (!is.null(Rawdata$patterndata)) {
-                  checkboxGroupInput("Selectedgeneset","",Rawdata$patterndata[,1],selected=Rawdata$patterndata[,1])
+            if (!is.null(Rawdata$genedata)) {
+                  checkboxGroupInput("Selectedgeneset","",unique(Rawdata$genedata[,1]),selected=unique(Rawdata$genedata[,1]))
             }
       })
       
@@ -294,23 +286,21 @@ shinyServer(function(input, output, session) {
             }
             if (!is.null(Rawdata$genedata)) {
                   Maindata$genedata <- Rawdata$genedata[Rawdata$genedata[,2] %in% compengene & Rawdata$genedata[,1] %in% input$Selectedgeneset,]
-                  Maindata$patterndata <- Rawdata$patterndata[Rawdata$patterndata[,1] %in% Maindata$genedata[,1],]
-                  Maindata$dim <- nrow(Maindata$patterndata)
-            }       
-            
+                  Maindata$dim <- length(unique((Maindata$genedata[,1])))
+                  Maindata$genesetname <- unique(Maindata$genedata[,1])
+            }            
       })
       
       #Render summary of selected dataset
       output$OutputDataSummary <- renderDataTable({
-            if (!is.null(Maindata$patterndata))
-                  if(nrow(Maindata$patterndata) != 0) {
-                        sumtable <- data.frame(Genesetname=Maindata$patterndata[,1],Originalgene=0,Compendiumgene=0)
+            if (!is.null(Maindata$genedata))
+                  if(nrow(Maindata$genedata) != 0) {
+                        sumtable <- data.frame(Genesetname=Maindata$genesetname,Originalgene=0,Compendiumgene=0)
                         for (i in 1:nrow(sumtable)) {
                               sumtable[i,2] <- sum(Rawdata$genedata[,1] == sumtable[i,1])
                               sumtable[i,3] <- sum(Maindata$genedata[,1] == sumtable[i,1])
                         }
-                        sumtable <- merge(sumtable,Maindata$patterndata)
-                        names(sumtable) <- c("Genesetname","Original Number of Genes","Number of Genes in Compendium","Cutoff Activity","Cutoff Type","Cutoff Value")
+                        names(sumtable) <- c("Genesetname","Original Number of Genes","Number of Genes in Compendium")
                         sumtable
                   }
       })    
@@ -327,7 +317,7 @@ shinyServer(function(input, output, session) {
       })
       
       output$Outputmissinggenesetreporttext <- renderText({
-            do.call("paste",c(as.list(setdiff(input$Selectedgeneset,Maindata$patterndata$Genesetname)),sep=","))
+            do.call("paste",c(as.list(setdiff(input$Selectedgeneset,Maindata$genesetname)),sep=","))
       })
       
       #Geneset breakdown
@@ -335,12 +325,13 @@ shinyServer(function(input, output, session) {
       genebreakdata <- reactiveValues()
       
       output$genesetbreakdownnameui <- renderUI({
-            if (!is.null(Rawdata$genedata)) {
+            if (!is.null(Maindata$genedata)) {
                   namelist <- list()
-                  for (i in unique(Rawdata$genedata$Genesetname)) 
+                  for (i in Maindata$genesetname) 
                         if (sum(Maindata$genedata$Genesetname==i) > 1)
                               eval(parse(text=paste0("namelist <- c(namelist,`",i,"`=i)")))
-                  radioButtons("genesetbreakdownchoose","Choose one of the geneset with at least two genes.",namelist)
+                  if (length(namelist) > 0)
+                        radioButtons("genesetbreakdownchoose","Choose one of the geneset with at least two genes.",namelist)
             }
       })
       
@@ -404,20 +395,10 @@ shinyServer(function(input, output, session) {
             if (input$genesetbreakdownaddbutton > 0)
                   isolate({
                         tmpgeneset <- genebreakdata$geneset
-                        tmppatternone <- Rawdata$patterndata[Rawdata$patterndata[,1] == input$genesetbreakdownchoose,]
-                        tmppattern <- NULL
-                        for (i in 1:input$genesetbreakdowntreenum) {
-                              tmppattern <- rbind(tmppattern,tmppatternone)
-                        }
-                        for (i in 1:input$genesetbreakdowntreenum) {
-                              tmppattern[i,1] <- paste(tmppattern[i,1],i,sep="_")
-                        }
                         for (i in 1:nrow(tmpgeneset)) {
                               tmpgeneset[i,1] <-paste(tmpgeneset[i,1],genebreakdata$cutree[as.character(tmpgeneset[i,2])],sep="_")                        
                         }
                         Rawdata$genedata <- rbind(Rawdata$genedata,tmpgeneset)
-                        Rawdata$patterndata <- rbind(Rawdata$patterndata,tmppattern)
-                        
                   })
       })
       
@@ -426,7 +407,7 @@ shinyServer(function(input, output, session) {
       #When reentering GSCA page, GSCAmethod should be set to GSCAdefault
       observe({
             if (input$Mainmethod == "Input" | input$Mainmethod == "Select" | input$Mainmethod == "Download")
-                  updateRadioButtons(session,"GSCAmethod",choices=list("Precise pattern selection"="GSCAdefault","Interactive pattern selection"="GSCAinteractive"),selected="Precise pattern selection")
+                  updateRadioButtons(session,"GSCAmethod",choices=list("Numeric POI"="GSCAdefault","Interactive POI"="GSCAinteractive"),selected="Numeric POI")
       })
       
       #Function to calculate enriched samples
@@ -474,181 +455,181 @@ shinyServer(function(input, output, session) {
             return(FIN)
       }      
       
-      #Calculating GSCA Score, default selected samples, default Ranking, also hclust dendrogram if there are geq three genesets
+      #Calculating GSCA Score and hclust dendrogram if there are more than three genesets
       observe({
-            if (input$Mainmethod == 'GSCA' || input$Mainmethod == 'Download' || input$Mainmethod == 'about') {
-                  input$Summarycompscale
+            if (input$Mainmethod=='GSCA') {
                   isolate({
-                        if (!is.null(Maindata$patterndata))
-                              if(nrow(Maindata$patterndata) != 0) {
-                                    scoremat <- matrix(0,nrow=Maindata$dim,ncol=nrow(Maindata$tab))
-                                    row.names(scoremat) <- rep("tmp",Maindata$dim)
-                                    selectsample <- 1:nrow(Maindata$tab)
-                                    cutoffval <- rep(0,Maindata$dim)
-                                    for (genesetid in 1:Maindata$dim) {
-                                          ###Calculate Score
-                                          singlegeneset <- Maindata$patterndata[genesetid,1]
-                                          currentgeneset <- Maindata$genedata[Maindata$genedata[,1] == singlegeneset,]
-                                          tmpgeneexpr <- matrix(0, nrow(currentgeneset), nrow(Maindata$tab))
-                                          for (i in 1:nrow(currentgeneset)) {
-                                                if (input$Summarycompmethod=='available') {
-                                                      path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
-                                                      load(paste0(path,"/",currentgeneset[i,2],".rda"))
-                                                } else {
-                                                      e <- Maindata$uploadgeneexpr[currentgeneset[i,2],]
-                                                }
-                                                if (input$Summarycompscale)
-                                                      e <- scale(e)
-                                                tmpgeneexpr[i,] <- currentgeneset[i,3]*e
-                                          }
-                                          if (input$Summarygenesetactmethod == "average") {
-                                                score <- colMeans(tmpgeneexpr)                                                
+                        if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) != 0) {
+                              scoremat <- matrix(0,nrow=Maindata$dim,ncol=nrow(Maindata$tab))
+                              row.names(scoremat) <- rep("tmp",Maindata$dim)
+                              for (genesetid in 1:Maindata$dim) {
+                                    ###Calculate Score
+                                    singlegeneset <- Maindata$genesetname[genesetid]
+                                    currentgeneset <- Maindata$genedata[Maindata$genedata[,1] == singlegeneset,]
+                                    tmpgeneexpr <- matrix(0, nrow(currentgeneset), nrow(Maindata$tab))
+                                    for (i in 1:nrow(currentgeneset)) {
+                                          if (input$Summarycompmethod=='available') {
+                                                path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
+                                                load(paste0(path,"/",currentgeneset[i,2],".rda"))
                                           } else {
-                                                score <- apply(tmpgeneexpr,2,median)
+                                                e <- Maindata$uploadgeneexpr[currentgeneset[i,2],]
                                           }
-                                          scoremat[genesetid,] <- score
-                                          row.names(scoremat)[genesetid] <- singlegeneset
-                                          ###Calculate selected samples                   
-                                          if (Maindata$patterndata[genesetid,3] == "Norm") {
-                                                if (Maindata$patterndata[genesetid,2] == "High") {       
-                                                      cutoff <- qnorm(1-as.numeric(Maindata$patterndata[genesetid,4]),mean(score),sd(score))
-                                                      selectsample <- intersect(selectsample,which(score >= cutoff))
-                                                      cutoffval[genesetid] <- cutoff
-                                                } else {
-                                                      cutoff <- qnorm(as.numeric(Maindata$patterndata[genesetid,4]),mean(score),sd(score))
-                                                      selectsample <- intersect(selectsample,which(score < cutoff))
-                                                      cutoffval[genesetid] <- cutoff
-                                                }
-                                          } else if (Maindata$patterndata[genesetid,3] == "Quantile") {
-                                                if (Maindata$patterndata[genesetid,2] == "High") {
-                                                      cutoff <- quantile(score,1-as.numeric(Maindata$patterndata[genesetid,4]))
-                                                      selectsample <- intersect(selectsample,which(score >= cutoff))
-                                                      cutoffval[genesetid] <- cutoff
-                                                } else {
-                                                      cutoff <- quantile(score,as.numeric(Maindata$patterndata[genesetid,4]))
-                                                      selectsample <- intersect(selectsample,which(score < cutoff))
-                                                      cutoffval[genesetid] <- cutoff
-                                                }
-                                          } else if (Maindata$patterndata[genesetid,3] == "Exprs") {
-                                                if (Maindata$patterndata[genesetid,2] == "High") {
-                                                      cutoff <- as.numeric(Maindata$patterndata[genesetid,4])
-                                                      selectsample <- intersect(selectsample,which(score >= cutoff))
-                                                      cutoffval[genesetid] <- cutoff
-                                                } else {
-                                                      cutoff <- as.numeric(Maindata$patterndata[genesetid,4])
-                                                      selectsample <- intersect(selectsample,which(score < cutoff))
-                                                      cutoffval[genesetid] <- cutoff
-                                                }
-                                          }
+                                          if (input$Summarycompscale)
+                                                e <- scale(e)
+                                          tmpgeneexpr[i,] <- currentgeneset[i,3]*e
                                     }
-                                    
-                                    Maindata$GSCAscore <- scoremat
-                                    Maindata$defaultsample <- selectsample
-                                    Maindata$cutoffval <- cutoffval
-                                    if (Maindata$dim >= 3) {
-                                          Maindata$GSCAclust <- hclust(dist(t(scoremat)))
-                                          Rowv <- rowMeans(Maindata$GSCAscore)
-                                          hcr <- hclust(dist(Maindata$GSCAscore))
-                                          ddr <- as.dendrogram(hcr)
-                                          Maindata$GSCArowclust <- reorder(ddr, Rowv)
+                                    if (input$Summarygenesetactmethod == "average") {
+                                          score <- colMeans(tmpgeneexpr)         
+                                    } else {
+                                          score <- apply(tmpgeneexpr,2,median)
                                     }
-                                    if (threesampleslidervalue[1,3] != ncol(Maindata$GSCAscore)) {
-                                          threesampleslidervalue[,3] <<- rep(ncol(Maindata$GSCAscore),5)
-                                          threesampleslidervalue[,1] <<- rep(0,5)
-                                          threesampleslidervalue[,2] <<- rep(ncol(Maindata$GSCAscore),5)
-                                    }
-                                    if (Maindata$dim == 2) {
-                                          Maindata$twocorr <- cor(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,])
-                                          Maindata$twocorrp <- cor.test(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,])$p.value
-                                          twolm <- summary(lm(Maindata$GSCAscore[2,]~Maindata$GSCAscore[1,]))
-                                          Maindata$twoslope <- twolm$coefficients[2,1]
-                                          Maindata$twoslopep <- twolm$coefficients[2,4]
-                                    }
+                                    scoremat[genesetid,] <- score
+                                    row.names(scoremat)[genesetid] <- singlegeneset
                               }
+                              Maindata$GSCAscore <- scoremat
+                              if (Maindata$dim >= 3) {
+                                    Maindata$GSCAclust <- hclust(dist(t(scoremat)))
+                                    Rowv <- rowMeans(Maindata$GSCAscore)
+                                    hcr <- hclust(dist(Maindata$GSCAscore))
+                                    ddr <- as.dendrogram(hcr)
+                                    Maindata$GSCArowclust <- reorder(ddr, Rowv)
+                              }
+                              if (onesampleslidervalue[1,3] != ncol(Maindata$GSCAscore)) {
+                                    onesampleslidervalue[,3] <<- rep(ncol(Maindata$GSCAscore),5)
+                                    onesampleslidervalue[,1] <<- rep(0,5)
+                                    onesampleslidervalue[,2] <<- rep(ncol(Maindata$GSCAscore),5)
+                              }
+                              if (threesampleslidervalue[1,3] != ncol(Maindata$GSCAscore)) {
+                                    threesampleslidervalue[,3] <<- rep(ncol(Maindata$GSCAscore),5)
+                                    threesampleslidervalue[,1] <<- rep(0,5)
+                                    threesampleslidervalue[,2] <<- rep(ncol(Maindata$GSCAscore),5)
+                              }
+                              if (Maindata$dim == 2) {
+                                    Maindata$twocorr <- cor(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,])
+                                    Maindata$twocorrp <- cor.test(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,])$p.value
+                                    twolm <- summary(lm(Maindata$GSCAscore[2,]~Maindata$GSCAscore[1,]))
+                                    Maindata$twoslope <- twolm$coefficients[2,1]
+                                    Maindata$twoslopep <- twolm$coefficients[2,4]
+                              }
+                        }
                   })
+            }
+      })
+      
+      #Numeric POI
+      output$numericpoisliderui <- renderUI({
+            if (!is.null(Maindata$dim))
+                  lapply(1:Maindata$dim, function(i) {
+                        tmpmin <- mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,])
+                        sliderInput(inputId = paste0("GSCAnumericpoislider",i), label = Maindata$genesetname[i], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(tmpmin, max(Maindata$GSCAscore[i,])))
+                  })
+      })
+      
+      observe({
+            if (!is.null(Maindata$dim)) {
+                  selectsample <- 1:nrow(Maindata$tab)
+                  cutoffval <- matrix(0,Maindata$dim,2)
+                  for (i in 1:Maindata$dim) {
+                        if(!is.null(eval(parse(text=paste0("input$GSCAnumericpoislider",i,"[1]"))))) {
+                              eval(parse(text=paste0("cutoffval[",i,",1] <- input$GSCAnumericpoislider",i,"[1]")))
+                              eval(parse(text=paste0("cutoffval[",i,",2] <- input$GSCAnumericpoislider",i,"[2]")))
+                              selectsample <- intersect(selectsample,which(Maindata$GSCAscore[i,] >= cutoffval[i,1] & Maindata$GSCAscore[i,] <= cutoffval[i,2]))
+                        }
+                  }            
+                  Maindata$defaultsample <- selectsample
+                  Maindata$cutoffval <- cutoffval
+            }
+      })
+      
+      output$numericpoimoreopgenesetnameui <- renderUI({
+            if (!is.null(Maindata$genesetname))
+                  tagList(
+                        selectInput("numericpoimoreopselectgene","Select geneset",Maindata$genesetname)
+                  )
+      })
+      
+      #Numeric POI more options
+      observe({
+            if (input$numericpoimoreopbutton > 0)
+                  isolate({
+                        tmpscore <- Maindata$GSCAscore[input$numericpoimoreopselectgene,]
+                        id <- which(Maindata$genesetname == input$numericpoimoreopselectgene)
+                        tmpinput <- min(as.numeric(input$numericpoimoreopvalue),1)
+                        tmpinput <- max(0,tmpinput)
+                        if (input$numericpoimoreopcutofftype == "sd") {
+                              value <- mean(tmpscore) + as.numeric(input$numericpoimoreopvalue) * sd(tmpscore)
+                        } else if (input$numericpoimoreopcutofftype == "Norm") {
+                              if (tmpinput == 0) {
+                                    value <- min(tmpscore)
+                              } else if (tmpinput == 1) {
+                                    value <- max(tmpscore)
+                              } else {
+                                    value <- qnorm(tmpinput,mean(tmpscore),sd(tmpscore))      
+                              }
+                        } else if (input$numericpoimoreopcutofftype == "Quantile") {
+                              value <- as.numeric(quantile(tmpscore,tmpinput))
+                        }
+                        if (input$numericpoimoreopbound == 'Upper') {
+                              eval(parse(text=paste0('updateSliderInput(session,"GSCAnumericpoislider', id ,'",label = Maindata$genesetname[',id,'],value=c(input$GSCAnumericpoislider', id, '[1],value))')))                                    
+                        } else {
+                              eval(parse(text=paste0('updateSliderInput(session,"GSCAnumericpoislider', id ,'",label = Maindata$genesetname[',id,'],value=c(value,input$GSCAnumericpoislider', id, '[2]))')))                                    
+                        }
+                        
+                  })
+      })
+      
+      #Establish Maindata$selectsample
+      observe({
+            if (input$Mainmethod == 'GSCA' & input$GSCAmethod == 'GSCAinteractive' & !is.null(Maindata$dim)) {
+                  if (Maindata$dim == 1) {
+                        if(!is.null(input$GSCAinteractiveoneupdate)) {
+                              isolate({
+                                    selectsample <- NULL
+                                    for (i in 1:GSCAoneinfo$sampleslidernum) {
+                                          if(!is.null(eval(parse(text=paste0("input$GSCAonesampleslider",i,"[1]"))))) 
+                                                eval(parse(text=paste0("selectsample <- union(selectsample,input$GSCAonesampleslider",i,"[1]:input$GSCAonesampleslider",i,"[2])")))
+                                    }
+                                    Maindata$selectsample <- order(Maindata$GSCAscore)[selectsample]
+                              })
+                        }
+                  } else if (Maindata$dim == 2) {
+                        Maindata$selectsample <- inpoly$tf
+                  } else {
+                        if(!is.null(input$GSCAinteractivethreeupdate)) {
+                              isolate({
+                                    selectsample <- NULL
+                                    for (i in 1:GSCAthreeinfo$sampleslidernum) {
+                                          if(!is.null(eval(parse(text=paste0("input$GSCAthreesampleslider",i,"[1]"))))) 
+                                                eval(parse(text=paste0("selectsample <- union(selectsample,Maindata$GSCAclust$order[input$GSCAthreesampleslider",i,"[1]:input$GSCAthreesampleslider",i,"[2]])")))
+                                    }
+                                    Maindata$selectsample <- selectsample
+                              })
+                        }
+                  }
+                  Maindata$interactsample <- Maindata$selectsample
+            } else {
+                  Maindata$selectsample <- Maindata$defaultsample
             }
       })
       
       #GSCA Ranking
       observe({
-            Maindata$AllRanking <- enrichfunc(Maindata$GSCAscore,Maindata$selectsample,Maindata$tab)
-            Maindata$Ranking <- Maindata$AllRanking[as.numeric(Maindata$AllRanking[,"Adj.Pvalue"]) <= as.numeric(input$Inputpvalco) & as.numeric(Maindata$AllRanking[,"FoldChange"]) >= as.numeric(input$Inputfoldchangeco),]
+            if (length(Maindata$selectsample)!=0) {
+                  AllRanking <- enrichfunc(Maindata$GSCAscore,Maindata$selectsample,Maindata$tab)
+                  SelectRanking <- AllRanking[as.numeric(AllRanking[,"Adj.Pvalue"]) <= as.numeric(input$Inputpvalco) & as.numeric(AllRanking[,"FoldChange"]) >= as.numeric(input$Inputfoldchangeco),]
+                  if (is.null(SelectRanking) || nrow(SelectRanking) == 0) {
+                        Maindata$Ranking <- NULL
+                  } else {
+                        Maindata$Ranking <- SelectRanking
+                  }
+            } else {
+                  Maindata$Ranking <- NULL
+            }
             if (input$Mainmethod == 'GSCA' & input$GSCAmethod == 'GSCAdefault') {
                   Maindata$defaultranking <- Maindata$Ranking
             } else if (input$Mainmethod == 'GSCA' & input$GSCAmethod == 'GSCAinteractive'){
                   Maindata$interactranking <- Maindata$Ranking
             }    
-      })
-      
-      #GSCA sidebar
-      output$InputNslider <- renderUI({
-            maxval <- min(30,nrow(Maindata$Ranking))
-            defaultval <- min(5,nrow(Maindata$Ranking))
-            if (maxval > 0)
-                  sliderInput("InputN","Number of top ranked context to display",min=0,max=maxval,value=defaultval,step=1)
-      })
-      
-      output$InputGSCAsidebar <- renderUI({
-            if (!is.null(Maindata$patterndata)) 
-                  if(nrow(Maindata$patterndata) != 0) {
-                        if (Maindata$dim == 1) {
-                              sliderInput(inputId = "GSCAoneslider", label = Maindata$patterndata[,1], min = min(Maindata$GSCAscore), max = max(Maindata$GSCAscore), value = c(min(Maindata$GSCAscore), max(Maindata$GSCAscore)))
-                        } else if (Maindata$dim == 2) {
-                              tagList(
-                                    helpText("Build polygon by clicking on the scatterplot"),
-                                    p(actionButton('finishpolygon', 'Finish Drawing Polygon')),
-                                    p(actionButton('addpolygon', 'Add New Polygon')),
-                                    p(actionButton('undo', 'Undo last Operation')),
-                                    p(actionButton('reset', 'Reset'))
-                              )
-                        } else {             
-                              tagList(
-                                    p(actionButton("GSCAinteractivethreeupdate","Update Sample Selection")),
-                                    checkboxInput("Threecutoffvalue","Select sample by exact value"),
-                                    conditionalPanel(condition="input.Threecutoffvalue == 1",
-                                                     lapply(1:Maindata$dim, function(i) {
-                                                           sliderInput(inputId = paste0("GSCAthreevalueslider",i), label = Maindata$patterndata[i,1], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(min(Maindata$GSCAscore[i,]), max(Maindata$GSCAscore[i,])))
-                                                     })
-                                    )
-                              )
-                        }
-                  }
-      })
-      
-      #Checkbox whether to display enriched context in all area
-      output$plotenrichedareaui <- renderUI({
-            if (!is.null(Maindata$dim))
-                  if (Maindata$dim == 2)
-                        checkboxInput("Inputenrichedareaonly","Show Enriched Context only in interested region")
-      })
-      
-      ######## Incubation: Suppress color in heatmap ############
-      #       output$heatmapcolorsuppressui <- renderUI({
-      #             if (!is.null(Maindata$dim))
-      #                   if (Maindata$dim > 2) {
-      #                         tagList(
-      #                               checkboxInput("heatmapcolorsuppresscheck","Coerce expression values to a certain range"),
-      #                               conditionalPanel("input.heatmapcolorsuppresscheck == 1",
-      #                                                helpText("For better display, expression values greater(smaller) than the upper(lower) bound will be coerced to the upper(lower) bound"),
-      #                                                sliderInput("heatmapcolorsuppressslider","choose the bound",min=min(Maindata$GSCAscore),max=max(Maindata$GSCAscore),value=c(min(Maindata$GSCAscore),max(Maindata$GSCAscore)))
-      #                               )
-      #                         )
-      #                   }
-      #       })
-      #       
-      #       observe({
-      #             Maindata$GSCAthreescore <- Maindata$GSCAscore
-      #             if (input$heatmapcolorsuppresscheck) {
-      #                   Maindata$GSCAthreescore[Maindata$GSCAthreescore<input$heatmapcolorsuppressslider[1]]<-input$heatmapcolorsuppressslider[1]
-      #                   Maindata$GSCAthreescore[Maindata$GSCAthreescore>input$heatmapcolorsuppressslider[2]]<-input$heatmapcolorsuppressslider[2]
-      #             }
-      #       })
-      
-      #Checkbox whether to cluster on rows for heatmaps
-      output$heatmapthreerowvui <- renderUI({
-            if (!is.null(Maindata$dim))
-                  if (Maindata$dim > 2)
-                        checkboxInput("heatmapthreerowv","Cluster on rows")
       })
       
       #Specify Context
@@ -661,14 +642,16 @@ shinyServer(function(input, output, session) {
       observe({
             if(!is.null(Maindata$Ranking)) {
                   if (input$Inputcontexttype=='Toprank') {
-                        if (nrow(Maindata$Ranking) == 0) {
-                              Maindata$GSCAcontext <- NULL
-                        } else {
+                        if (!is.null(input$InputN)) {
                               Maindata$GSCAcontext <- Maindata$Ranking[1:as.numeric(input$InputN),"SampleType"]
+                        } else {
+                              Maindata$GSCAcontext <- NULL
                         }
                   } else {
                         Maindata$GSCAcontext <- input$GSCAspecifycontext 
                   }
+            } else {
+                  Maindata$GSCAcontext <- NULL
             }
             
             if (input$Mainmethod == 'GSCA' & input$GSCAmethod == 'GSCAdefault') {
@@ -678,72 +661,87 @@ shinyServer(function(input, output, session) {
             }
       })
       
-      #Establish Maindata$selectsample
-      observe({
-            if (input$Mainmethod == 'GSCA' & input$GSCAmethod == 'GSCAinteractive' & !is.null(Maindata$dim)) {
+      #GSCA sidebar
+      output$InputNslider <- renderUI({
+            if (!is.null(Maindata$Ranking)) {
+                  maxval <- min(30,nrow(Maindata$Ranking))
+                  defaultval <- min(5,nrow(Maindata$Ranking))
+                  if (maxval > 0)
+                        sliderInput("InputN","Number of top ranked context to display",min=0,max=maxval,value=defaultval,step=1)
+            }
+      })
+      
+      output$InputGSCAsidebar <- renderUI({
+            if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) != 0) {
                   if (Maindata$dim == 1) {
-                        Maindata$selectsample <- which(Maindata$GSCAscore > input$GSCAoneslider[1] & Maindata$GSCAscore < input$GSCAoneslider[2])
+                        p(actionButton("GSCAinteractiveoneupdate","Update Sample Selection"))
                   } else if (Maindata$dim == 2) {
-                        Maindata$selectsample <- inpoly$tf
-                  } else {
-                        if (!is.null(input$GSCAinteractivethreeupdate)) 
-                              if (input$GSCAinteractivethreeupdate>0) {
-                                    isolate({
-                                          Maindata$selectsample <- GSCAthreeinfo$selectsample
-                                    })
-                              }
+                        tagList(
+                              helpText("Build polygon by clicking on the scatterplot"),
+                              p(actionButton('finishpolygon', 'Finish Drawing Polygon')),
+                              p(actionButton('addpolygon', 'Add New Polygon')),
+                              p(actionButton('undo', 'Undo last Operation')),
+                              p(actionButton('reset', 'Reset'))
+                        )
+                  } else if (Maindata$dim == 3) {             
+                        p(actionButton("GSCAinteractivethreeupdate","Update Sample Selection"))
                   }
-                  Maindata$interactsample <- Maindata$selectsample
-            } else {
-                  Maindata$selectsample <- Maindata$defaultsample
             }
       })
       
       #GSCA default plot
       output$GSCAdefaultplot <- renderUI({
-            if (!is.null(Maindata$patterndata)) 
-                  if(nrow(Maindata$patterndata) != 0) {
-                        if (Maindata$dim == 1) {
-                              tagList(
-                                    helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
-                                    plotOutput("GSCAdefaultplotone",height=300*(length(Maindata$GSCAcontext)+1))
-                              )
-                        } else if (Maindata$dim == 2) {
-                              div(align="center",
-                                  helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
-                                  plotOutput("GSCAdefaultplottwo",width=900,height=900),
-                                  helpText(paste0("Correlation: ",Maindata$twocorr)),
-                                  helpText(paste0("Pearson Correlation Test p-value: ",Maindata$twocorrp)),
-                                  helpText(paste0("Regression Slope: ",Maindata$twoslope)),
-                                  helpText(paste0("Regression Slope t-test p-value: ",Maindata$twoslopep))
-                              )
-                        } else {
-                              tagList(
-                                    plotOutput("GSCAdefaultplotthree"),
-                                    helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
-                                    plotOutput("GSCAdefaultplotthreeplus")
-                              )
-                        }
-                  }      
+            if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) != 0) {
+                  if (Maindata$dim == 1) {
+                        tagList(
+                              helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
+                              plotOutput("GSCAdefaultplotone",height=300*(length(Maindata$GSCAcontext)+1))
+                        )
+                  } else if (Maindata$dim == 2) {
+                        div(align="center",
+                            helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
+                            plotOutput("GSCAdefaultplottwo",width=900,height=900),
+                            helpText(paste0("Correlation: ",Maindata$twocorr)),
+                            helpText(paste0("Pearson Correlation Test p-value: ",Maindata$twocorrp)),
+                            helpText(paste0("Regression Slope: ",Maindata$twoslope)),
+                            helpText(paste0("Regression Slope t-test p-value: ",Maindata$twoslopep))
+                        )
+                  } else {
+                        tagList(
+                              plotOutput("GSCAdefaultplotthree"),
+                              helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
+                              plotOutput("GSCAdefaultplotthreeplus")
+                        )
+                  }
+            }      
       })
       
       output$GSCAdefaultplotone <- renderPlot({
             if (Maindata$dim == 1) {
                   par(mfrow=c(length(Maindata$GSCAcontext)+1,1),oma=c(0,0,2,0))
                   hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All sample in the compendium",cex.main=2)
-                  abline(v=Maindata$cutoffval[1], lty=2)
+                  abline(v=Maindata$cutoffval[1,1], lty=2)
+                  abline(v=Maindata$cutoffval[1,2], lty=2)
                   if (!is.null(Maindata$GSCAcontext))
                         for(INDEX in Maindata$GSCAcontext) {
                               hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlim=range(Maindata$GSCAscore),main=substr(INDEX,1,25),xlab="Sample Score",cex.main=2)
-                              abline(v=Maindata$cutoffval[1], lty=2)
+                              abline(v=Maindata$cutoffval[1,1], lty=2)
+                              abline(v=Maindata$cutoffval[1,2], lty=2)
                         }
                   GSCAstatus$status <- 0
             }
       })
       
+      #Checkbox whether to display enriched context in all area
+      output$plotenrichedareaui <- renderUI({
+            if (!is.null(Maindata$dim))
+                  if (Maindata$dim == 2)
+                        checkboxInput("Inputenrichedareaonly","Show Enriched Context only in interested region")
+      })
+      
       output$GSCAdefaultplottwo <- renderPlot({  
             if (Maindata$dim == 2) {
-                  plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],col="#00000022",pch=20,xlab=Maindata$patterndata[1,1],cex=0.7,ylab=Maindata$patterndata[2,1],cex.lab=1.5,ylim=c(min(Maindata$GSCAscore[2,]),1.15*max(Maindata$GSCAscore[2,])))
+                  plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],col="#00000022",pch=20,xlab=Maindata$genedata[1,1],cex=0.7,ylab=Maindata$genedata[2,1],cex.lab=1.5,ylim=c(min(Maindata$GSCAscore[2,]),1.15*max(Maindata$GSCAscore[2,])))
                   toprankingsample <- NULL
                   if (!is.null(Maindata$GSCAcontext)) {
                         for(INDEX in Maindata$GSCAcontext) {
@@ -751,7 +749,10 @@ shinyServer(function(input, output, session) {
                         }
                   }
                   points(Maindata$GSCAscore[1,setdiff(Maindata$selectsample,toprankingsample)],Maindata$GSCAscore[2,setdiff(Maindata$selectsample,toprankingsample)],cex=0.7,pch=20)
-                  abline(v=Maindata$cutoffval[1], h=Maindata$cutoffval[2], lty=2,lwd=2)
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,1]), lty=2,lwd=2,col="blue")
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,2],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,1]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
+                  lines(c(Maindata$cutoffval[1,2],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
                   if (!is.null(Maindata$GSCAcontext)) {
                         i <- 1
                         for(INDEX in Maindata$GSCAcontext) {
@@ -776,23 +777,24 @@ shinyServer(function(input, output, session) {
       })
       
       output$GSCAdefaultplotthree <- renderPlot({
-            if (Maindata$dim >= 3) {
-                  par(oma=c(0.5,0,0.5,max(nchar(Maindata$patterndata[,1]))/1.5))
+            if (Maindata$dim >= 3 && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
+                  par(oma=c(0.5,0,0.5,max(nchar(Maindata$genesetname))/1.5))
                   colcolorall <- rep("cyan",ncol(Maindata$GSCAscore))
                   colcolorall[Maindata$defaultsample] <- "blue"
                   tmprowv <- F
                   if (input$heatmapthreerowv)
                         tmprowv <- Maindata$GSCArowclust
-                  heatmap.2(Maindata$GSCAscore,col=bluered,Colv=as.dendrogram(Maindata$GSCAclust),dendrogram="none",trace="none",Rowv=tmprowv,labCol=NA,ColSideColors=colcolorall,main="All Sample Heatmap",useRaster=T)
+                  if (!all(Maindata$threesupscore==Maindata$threesupscore[1,1]))
+                        heatmap.2(Maindata$threesupscore,col=bluered,Colv=as.dendrogram(Maindata$GSCAclust),dendrogram="none",trace="none",Rowv=tmprowv,labCol=NA,ColSideColors=colcolorall,main="All Sample Heatmap",useRaster=T)
                   legend("bottomleft",legend=c("Selected Sample","Unselected Sample"),lwd=1,col=c("blue","cyan"))
                   GSCAstatus$status <- 0
             }
       })
       
       output$GSCAdefaultplotthreeplus <- renderPlot({
-            if (Maindata$dim >= 3 && length(Maindata$defaultsample) > 0) {
+            if (Maindata$dim >= 3 && length(Maindata$defaultsample) > 0 && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
                   colcolorselect <- rep("white",ncol(Maindata$GSCAscore))
-                  par(oma=c(0.5,0,0.5,max(nchar(Maindata$patterndata[,1]))/1.5))
+                  par(oma=c(0.5,0,0.5,max(nchar(Maindata$genesetname))/1.5))
                   tmprowv <- F
                   if (input$heatmapthreerowv)
                         tmprowv <- Maindata$GSCArowclust
@@ -802,91 +804,133 @@ shinyServer(function(input, output, session) {
                               colcolorselect[Maindata$tab$SampleType %in% INDEX] <- COLORS[i]
                               i <- i+1
                         }
-                        heatmap.2(Maindata$GSCAscore[,Maindata$defaultsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$defaultsample],main="Selected Sample Heatmap",useRaster=T)
+                        heatmap.2(Maindata$threesupscore[,Maindata$defaultsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$defaultsample],main="Selected Sample Heatmap",useRaster=T)
                         leg.txt <- substr(Maindata$GSCAcontext,1,25)
                         legend("bottomleft",legend=leg.txt,lwd=1,col=COLORS)
                   } else {
                         if (length(Maindata$defaultsample) > 1)
-                              heatmap.2(Maindata$GSCAscore[,Maindata$defaultsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
+                              heatmap.2(Maindata$threesupscore[,Maindata$defaultsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
                   }
             }
       })
       
       #GSCA interactive plot
       output$GSCAinteractiveplot <- renderUI({
-            if (!is.null(Maindata$patterndata)) 
-                  if(nrow(Maindata$patterndata) != 0) {
-                        if (Maindata$dim == 1) {
-                              tagList(
-                                    helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
-                                    plotOutput("GSCAinteractiveplotone",height=300*(as.numeric(input$InputN)+1))
+            if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) != 0) {
+                  if (Maindata$dim == 1) {
+                        tagList(
+                              helpText("Select sample range using sliders. The range would be the union set of multiple sliders. Click 'Update Sample Selection' button on the left sidepanel after selection finishes."),
+                              actionButton("GSCAonesampleaddslider","Add Slider"),
+                              actionButton("GSCAonesampledeleteslider","Delete Slider"),
+                              lapply(1:ifelse(is.null(GSCAoneinfo$sampleslidernum),1,GSCAoneinfo$sampleslidernum) , function(i) {
+                                    sliderInput(inputId = paste0("GSCAonesampleslider",i),"",min=0,max=ncol(Maindata$GSCAscore),value=c(onesampleslidervalue[i,1],onesampleslidervalue[i,2]),step=1)
+                              }),
+                              plotOutput("GSCAinteractiveplotoneone",height=300),
+                              plotOutput("GSCAinteractiveplotonetwo",height=300*length(Maindata$GSCAcontext)),
+                              helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found",""))
+                        )
+                  } else if (Maindata$dim == 2) {
+                        div(align="center",
+                            plotOutput("GSCAinteractiveplottwo",clickId="coords",width=900,height=900),
+                            plotOutput("GSCAinteractiveplottwoplus",width=900,height=900),
+                            helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found",""))
+                        )      
+                  } else {
+                        tagList(          
+                              helpText("Select sample range using sliders. The range would be the union set of multiple sliders. Click 'Update Sample Selection' button on the left sidepanel after selection finishes."),
+                              actionButton("GSCAthreesampleaddslider","Add Slider"),
+                              actionButton("GSCAthreesampledeleteslider","Delete Slider"),
+                              tags$div(class="row-fluid",
+                                       tags$div(class="span11",lapply(1:ifelse(is.null(GSCAthreeinfo$sampleslidernum),1,GSCAthreeinfo$sampleslidernum) , function(i) {
+                                             sliderInput(inputId = paste0("GSCAthreesampleslider",i),"",min=0,max=ncol(Maindata$GSCAscore),value=c(threesampleslidervalue[i,1],threesampleslidervalue[i,2]),step=1)
+                                       }))
+                              ),
+                              tags$div(class="row-fluid",
+                                       tags$div(class="span11",p(plotOutput("GSCAinteractiveplotthreecolbar",height=20)))
+                              ),
+                              tags$div(class="row-fluid",
+                                       tags$div(class="span11",plotOutput("GSCAinteractiveplotthreeheatmap")),
+                                       tags$div(class="span1",plotOutput("GSCARinteractiveplotthreeheatmaprowlab"))
+                              ),
+                              tags$div(class="row-fluid",
+                                       tags$div(class="span11",p(plotOutput("GSCAinteractiveplotthreecolbarunder",height=20)))
                               )
-                        } else if (Maindata$dim == 2) {
-                              div(align="center",
-                                  plotOutput("GSCAinteractiveplottwo",clickId="coords",width=900,height=900),
-                                  plotOutput("GSCAinteractiveplottwoplus",width=900,height=900),
-                                  helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found",""))
-                              )      
-                        } else {
-                              tagList(          
-                                    conditionalPanel(condition="input.Threecutoffvalue == 0",
-                                                     helpText("Select sample range using sliders. The range would be the union set of multiple sliders. Click 'Update Sample Selection' button on the left sidepanel after selection finishes."),
-                                                     actionButton("GSCAthreesampleaddslider","Add Slider"),
-                                                     actionButton("GSCAthreesampledeleteslider","Delete Slider"),
-                                                     tags$div(class="row-fluid",
-                                                              tags$div(class="span11",lapply(1:ifelse(is.null(GSCAthreeinfo$sampleslidernum),1,GSCAthreeinfo$sampleslidernum) , function(i) {
-                                                                    sliderInput(inputId = paste0("GSCAthreesampleslider",i),"",min=0,max=ncol(Maindata$GSCAscore),value=c(threesampleslidervalue[i,1],threesampleslidervalue[i,2]),step=1)
-                                                              })
-                                                              )
-                                                     )
-                                    ),
-                                    tags$div(class="row-fluid",
-                                             tags$div(class="span11",p(plotOutput("GSCAinteractiveplotthreecolbar",height=20)))
-                                    ),
-                                    tags$div(class="row-fluid",
-                                             tags$div(class="span11",plotOutput("GSCAinteractiveplotthreeheatmap")),
-                                             tags$div(class="span1",plotOutput("GSCARinteractiveplotthreeheatmaprowlab"))
-                                    ),
-                                    tags$div(class="row-fluid",
-                                             tags$div(class="span11",p(plotOutput("GSCAinteractiveplotthreecolbarunder",height=20)))
-                                    )
-                              )
-                        }     
-                  }      
+                        )
+                  }     
+            }      
       })
       
-      output$GSCAinteractiveplotthreezoominallpartsui <- renderUI({
-            if (!is.null(Maindata$patterndata)) 
-                  if(nrow(Maindata$patterndata) != 0) {
-                        if (Maindata$dim >= 3 && input$GSCAmethod=='GSCAinteractive') {
-                              tagList(
-                                    conditionalPanel(condition="input.Threecutoffvalue == 0",
-                                                     checkboxInput("GSCAinteractiveplotthreeheatmapzoomincheck","Heatmap zoom in")),
-                                    conditionalPanel("input.GSCAinteractiveplotthreeheatmapzoomincheck==1 && input.Threecutoffvalue == 0",
-                                                     helpText("Zoom in part of the heatmap with selected samples"),
-                                                     checkboxInput("GSCAinteractiveplotthreeheatmapzoominrealtime","Real time zoom in"),
-                                                     conditionalPanel("input.GSCAinteractiveplotthreeheatmapzoominrealtime==0",
-                                                                      p(actionButton("GSCAinteractiveplotthreeheatmapzoominupdate","Update sample selection"))),
-                                                     uiOutput("GSCAinteractiveplotthreeheatmapzoominplotui")
-                                    ),
-                                    helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
-                                    plotOutput("GSCAinteractiveplotthreeplus")
-                              )
-                        }
-                  }
+      output$GSCAinteractiveplotthreeplotplusui <- renderUI({
+            if (!is.null(Maindata$dim) && Maindata$dim > 2 && input$GSCAmethod=='GSCAinteractive')
+                  tagList(
+                        helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
+                        plotOutput("GSCAinteractiveplotthreeplus"))
       })
       
       #One geneset case
-      output$GSCAinteractiveplotone <- renderPlot({
+      
+      GSCAoneinfo <- reactiveValues()
+      
+      #initiate number of sample slider, record current slider value
+      observe({
+            if (is.null(GSCAoneinfo$sampleslidernum))
+                  GSCAoneinfo$sampleslidernum <- 1
+            for (i in 1:GSCAoneinfo$sampleslidernum) 
+                  if(!is.null(eval(parse(text=paste0("input$GSCAonesampleslider",i,"[1]"))))) {
+                        onesampleslidervalue[i,1] <<- eval(parse(text=paste0("input$GSCAonesampleslider",i,"[1]"))) 
+                        onesampleslidervalue[i,2] <<- eval(parse(text=paste0("input$GSCAonesampleslider",i,"[2]")))
+                  }
+      })
+      
+      #set up action for add slider button in one genedata case
+      observe({
+            if (!is.null(input$GSCAonesampleaddslider) && input$GSCAonesampleaddslider>0)
+                  isolate({
+                        if (GSCAoneinfo$sampleslidernum < 5) {
+                              GSCAoneinfo$sampleslidernum <- GSCAoneinfo$sampleslidernum + 1
+                        }
+                  })
+      })
+      
+      #set up action for delete slider button in one genedata case
+      observe({
+            if (!is.null(input$GSCAonesampledeleteslider) && input$GSCAonesampledeleteslider>0)
+                  isolate({
+                        if (GSCAoneinfo$sampleslidernum != 1) {
+                              GSCAoneinfo$sampleslidernum <- GSCAoneinfo$sampleslidernum - 1
+                        }
+                  })
+      })
+      
+      output$GSCAinteractiveplotoneone <- renderPlot({
             if (Maindata$dim == 1) {
-                  par(mfrow=c(as.numeric(input$InputN)+1,1),oma=c(0,0,2,0))
-                  hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All sample in the compendium",cex.main=2)
-                  abline(v=c(input$GSCAoneslider[1],input$GSCAoneslider[2]), lty=2)
-                  if (!is.null(Maindata$GSCAcontext)) {
-                        for(INDEX in Maindata$GSCAcontext) {
-                              hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlim=range(Maindata$GSCAscore),main=substr(INDEX,1,25),xlab="Sample Score",cex.main=2)
-                              abline(v=c(input$GSCAoneslider[1],input$GSCAoneslider[2]), lty=2)
-                        }     
+                  selectsample <- NULL
+                  for (i in 1:GSCAoneinfo$sampleslidernum) {
+                        if(!is.null(eval(parse(text=paste0("input$GSCAonesampleslider",i,"[1]"))))) 
+                              eval(parse(text=paste0("selectsample <- union(selectsample,input$GSCAonesampleslider",i,"[1]:input$GSCAonesampleslider",i,"[2])")))
+                  }
+                  selectsample <- order(Maindata$GSCAscore)[selectsample]
+                  par(oma=c(0,0,0,0),mar=c(5.1,0,0,0))
+                  colcolorall <- rep("black",ncol(Maindata$GSCAscore))
+                  colcolorall[selectsample] <- "cyan"
+                  plot(1:ncol(Maindata$GSCAscore),sort(Maindata$GSCAscore),xaxs="i",yaxs="i",cex.main=2,xlab="",ylab="",col=colcolorall[order(Maindata$GSCAscore)])
+                  legend("topleft",legend=c("Selected samples","Not selected samples"),pch=c(20,20),pt.bg=c("cyan","black"),col=c("cyan","black"),cex=0.8)    
+            }
+      })
+      
+      output$GSCAinteractiveplotonetwo <- renderPlot({
+            if (Maindata$dim == 1) {
+                  if(!is.null(input$GSCAinteractiveoneupdate) && input$GSCAinteractiveoneupdate>0) {
+                        Maindata$Ranking
+                        Maindata$GSCAcontext
+                        isolate({
+                              par(mfrow=c(length(Maindata$GSCAcontext),1),oma=c(0,0,2,0))
+                              if (!is.null(Maindata$GSCAcontext)) {
+                                    for(INDEX in Maindata$GSCAcontext) {
+                                          hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlim=range(Maindata$GSCAscore),main=substr(INDEX,1,25),xlab="Sample Score",cex.main=2)
+                                    }     
+                              }
+                        })
                   }
             }
       })
@@ -911,7 +955,7 @@ shinyServer(function(input, output, session) {
             if (Maindata$dim == 2) { 
                   inputcoords <- get.coords()
                   input$GSCAinteractiveloadbutton
-                  plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],pch=20, xlab=Maindata$patterndata[1,1],ylab=Maindata$patterndata[2,1],cex.lab=1.5)
+                  plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],pch=20, xlab=Maindata$genesetname[1],ylab=Maindata$genesetname[2],cex.lab=1.5)
                   if (input$reset != resetvalue) {
                         polycord <<- NULL
                         polynum <<- 1
@@ -980,7 +1024,7 @@ shinyServer(function(input, output, session) {
       output$GSCAinteractiveplottwoplus <- renderPlot({  
             if (Maindata$dim == 2) { 
                   if (sum(inpoly$tf) != 0) {
-                        plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],ylim=c(min(Maindata$GSCAscore[2,]),1.15*max(Maindata$GSCAscore[2,])),xlab=Maindata$patterndata[1,1],ylab=Maindata$patterndata[2,1],pch=20,cex=0.7,col="#00000022",cex.lab=1.5)            
+                        plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],ylim=c(min(Maindata$GSCAscore[2,]),1.15*max(Maindata$GSCAscore[2,])),xlab=Maindata$genesetname[1],ylab=Maindata$genesetname[2],pch=20,cex=0.7,col="#00000022",cex.lab=1.5)            
                         for (j in 1:polynum) {
                               tmpcord <- polycord[polycord[,3]==j,]
                               if (is.matrix(tmpcord) && nrow(tmpcord) > 2) {
@@ -1021,6 +1065,34 @@ shinyServer(function(input, output, session) {
       
       GSCAthreeinfo <- reactiveValues()
       
+      # Suppress color in heatmap
+      output$heatmapcolorsuppressui <- renderUI({
+            if (!is.null(Maindata$dim))
+                  if (Maindata$dim > 2) {
+                        tagList(
+                              checkboxInput("heatmapcolorsuppresscheck","Suppress heatmap color range"),
+                              conditionalPanel("input.heatmapcolorsuppresscheck == 1",
+                                               helpText("Note: this function only impacts heatmap display. GSCA results will not change."),
+                                               sliderInput("heatmapcolorsuppressslider","choose value boundaries",min=min(Maindata$GSCAscore),max=max(Maindata$GSCAscore),value=c(min(Maindata$GSCAscore),max(Maindata$GSCAscore)))
+                              )
+                        )
+                  }
+      })
+      
+      observe({
+            supscore <- Maindata$GSCAscore
+            supscore[supscore<input$heatmapcolorsuppressslider[1]]<-input$heatmapcolorsuppressslider[1]
+            supscore[supscore>input$heatmapcolorsuppressslider[2]]<-input$heatmapcolorsuppressslider[2]
+            Maindata$threesupscore <- supscore
+      })
+      
+      #Checkbox whether to cluster on rows for heatmaps
+      output$heatmapthreerowvui <- renderUI({
+            if (!is.null(Maindata$dim))
+                  if (Maindata$dim > 2)
+                        checkboxInput("heatmapthreerowv","Cluster on rows")
+      })
+      
       #initiate number of sample slider, record current slider value
       observe({
             if (is.null(GSCAthreeinfo$sampleslidernum))
@@ -1052,25 +1124,6 @@ shinyServer(function(input, output, session) {
                   })
       })
       
-      observe({
-            if (!is.null(input$Threecutoffvalue)) {
-                  if (input$Threecutoffvalue == F) {
-                        selectsample <- NULL
-                        for (i in 1:GSCAthreeinfo$sampleslidernum) {
-                              if(!is.null(eval(parse(text=paste0("input$GSCAthreesampleslider",i,"[1]"))))) 
-                                    eval(parse(text=paste0("selectsample <- union(selectsample,Maindata$GSCAclust$order[input$GSCAthreesampleslider",i,"[1]:input$GSCAthreesampleslider",i,"[2]])")))
-                        }
-                        GSCAthreeinfo$selectsample <- selectsample
-                  } else {
-                        selectsample <- 1:ncol(Maindata$GSCAscore)
-                        for (i in 1:Maindata$dim) {
-                              eval(parse(text=paste0("selectsample <- intersect(selectsample,which(input$GSCAthreevalueslider",i,"[1]<Maindata$GSCAscore[",i,",] & input$GSCAthreevalueslider",i,"[2]>Maindata$GSCAscore[",i,",]))")))
-                        }
-                        GSCAthreeinfo$selectsample <- selectsample
-                  }
-            }
-      })
-      
       output$GSCARinteractiveplotthreeheatmaprowlab <- renderPlot({
             par(mar = c(0,0,0,0))
             plot(c(1, 1), c(Maindata$dim, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
@@ -1092,17 +1145,27 @@ shinyServer(function(input, output, session) {
       
       output$GSCAinteractiveplotthreecolbar <- renderPlot({
             if (Maindata$dim >= 3) { 
+                  selectsample <- NULL
+                  for (i in 1:GSCAthreeinfo$sampleslidernum) {
+                        if(!is.null(eval(parse(text=paste0("input$GSCAthreesampleslider",i,"[1]"))))) 
+                              eval(parse(text=paste0("selectsample <- union(selectsample,Maindata$GSCAclust$order[input$GSCAthreesampleslider",i,"[1]:input$GSCAthreesampleslider",i,"[2]])")))
+                  }
                   colcolorall <- rep("cyan",ncol(Maindata$GSCAscore))
-                  colcolorall[GSCAthreeinfo$selectsample] <- "blue"
+                  colcolorall[selectsample] <- "blue"
                   par(mar=c(0,0,0,0))
                   image(cbind(1:ncol(Maindata$GSCAscore)),col=colcolorall[Maindata$GSCAclust$order],axes=F,useRaster=T)
             }
       })
       
       output$GSCAinteractiveplotthreecolbarunder <- renderPlot({
-            if (Maindata$dim >= 3) { 
+            if (Maindata$dim >= 3) {
+                  selectsample <- NULL
+                  for (i in 1:GSCAthreeinfo$sampleslidernum) {
+                        if(!is.null(eval(parse(text=paste0("input$GSCAthreesampleslider",i,"[1]"))))) 
+                              eval(parse(text=paste0("selectsample <- union(selectsample,Maindata$GSCAclust$order[input$GSCAthreesampleslider",i,"[1]:input$GSCAthreesampleslider",i,"[2]])")))
+                  }
                   colcolorall <- rep("cyan",ncol(Maindata$GSCAscore))
-                  colcolorall[GSCAthreeinfo$selectsample] <- "blue"
+                  colcolorall[selectsample] <- "blue"
                   par(mar=c(0,0,0,0))
                   image(cbind(1:ncol(Maindata$GSCAscore)),col=colcolorall[Maindata$GSCAclust$order],axes=F,useRaster=T)
             }
@@ -1113,9 +1176,27 @@ shinyServer(function(input, output, session) {
                   par(mar=c(0,0,0,0))
                   if (input$heatmapthreerowv) {
                         rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                        image(1:ncol(Maindata$GSCAscore),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order]),col=bluered(100),axes=F,useRaster=T)
+                        image(1:ncol(Maindata$GSCAscore),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order]),col=bluered(100),axes=F,useRaster=T)
                   } else {
-                        image(1:ncol(Maindata$GSCAscore),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order]),col=bluered(100),axes=F,useRaster=T)
+                        image(1:ncol(Maindata$GSCAscore),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order]),col=bluered(100),axes=F,useRaster=T)
+                  }
+            }
+      })
+      
+      
+      output$GSCAinteractiveplotthreezoominallpartsui <- renderUI({
+            if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) != 0) {
+                  if (Maindata$dim >= 3 && input$GSCAmethod=='GSCAinteractive') {
+                        tagList(
+                              checkboxInput("GSCAinteractiveplotthreeheatmapzoomincheck","Heatmap zoom in"),
+                              conditionalPanel("input.GSCAinteractiveplotthreeheatmapzoomincheck==1",
+                                               helpText("Zoom in part of the heatmap with selected samples"),
+                                               checkboxInput("GSCAinteractiveplotthreeheatmapzoominrealtime","Real time zoom in"),
+                                               conditionalPanel("input.GSCAinteractiveplotthreeheatmapzoominrealtime==0",
+                                                                p(actionButton("GSCAinteractiveplotthreeheatmapzoominupdate","Update sample selection"))),
+                                               uiOutput("GSCAinteractiveplotthreeheatmapzoominplotui")
+                              )
+                        )
                   }
             }
       })
@@ -1162,22 +1243,22 @@ shinyServer(function(input, output, session) {
       
       #zoom in heatmaps
       output$GSCAinteractiveplotthreeheatmapzoominplot1 <- renderPlot({
-            if (input$GSCAinteractiveplotthreeheatmapzoomincheck) {
+            if (input$GSCAinteractiveplotthreeheatmapzoomincheck && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
                   par(mar=c(0,0,0,0))
                   if (input$GSCAinteractiveplotthreeheatmapzoominrealtime) {
                         if (input$heatmapthreerowv) {
                               rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                              image(1:(input$GSCAthreesampleslider1[2]-input$GSCAthreesampleslider1[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider1[1]:input$GSCAthreesampleslider1[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider1[2]-input$GSCAthreesampleslider1[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider1[1]:input$GSCAthreesampleslider1[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         } else {
-                              image(1:(input$GSCAthreesampleslider1[2]-input$GSCAthreesampleslider1[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider1[1]:input$GSCAthreesampleslider1[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider1[2]-input$GSCAthreesampleslider1[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider1[1]:input$GSCAthreesampleslider1[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         }
                   } else {
                         if (input$GSCAinteractiveplotthreeheatmapzoominupdate > 0) {
                               if (input$heatmapthreerowv) {
                                     rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                                    isolate(image(1:(input$GSCAthreesampleslider1[2]-input$GSCAthreesampleslider1[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider1[1]:input$GSCAthreesampleslider1[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider1[2]-input$GSCAthreesampleslider1[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider1[1]:input$GSCAthreesampleslider1[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               } else {
-                                    isolate(image(1:(input$GSCAthreesampleslider1[2]-input$GSCAthreesampleslider1[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider1[1]:input$GSCAthreesampleslider1[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider1[2]-input$GSCAthreesampleslider1[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider1[1]:input$GSCAthreesampleslider1[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               }
                         }
                   }
@@ -1185,22 +1266,22 @@ shinyServer(function(input, output, session) {
       })
       
       output$GSCAinteractiveplotthreeheatmapzoominplot2 <- renderPlot({
-            if (input$GSCAinteractiveplotthreeheatmapzoomincheck & GSCAthreeinfo$sampleslidernum >= 2) {
+            if (input$GSCAinteractiveplotthreeheatmapzoomincheck & GSCAthreeinfo$sampleslidernum >= 2 && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
                   par(mar=c(0,0,0,0))
                   if (input$GSCAinteractiveplotthreeheatmapzoominrealtime) {
                         if (input$heatmapthreerowv) {
                               rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                              image(1:(input$GSCAthreesampleslider2[2]-input$GSCAthreesampleslider2[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider2[1]:input$GSCAthreesampleslider2[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider2[2]-input$GSCAthreesampleslider2[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider2[1]:input$GSCAthreesampleslider2[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         } else {
-                              image(1:(input$GSCAthreesampleslider2[2]-input$GSCAthreesampleslider2[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider2[1]:input$GSCAthreesampleslider2[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider2[2]-input$GSCAthreesampleslider2[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider2[1]:input$GSCAthreesampleslider2[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         }
                   } else {
                         if (input$GSCAinteractiveplotthreeheatmapzoominupdate > 0) {
                               if (input$heatmapthreerowv) {
                                     rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                                    isolate(image(1:(input$GSCAthreesampleslider2[2]-input$GSCAthreesampleslider2[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider2[1]:input$GSCAthreesampleslider2[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider2[2]-input$GSCAthreesampleslider2[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider2[1]:input$GSCAthreesampleslider2[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               } else {
-                                    isolate(image(1:(input$GSCAthreesampleslider2[2]-input$GSCAthreesampleslider2[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider2[1]:input$GSCAthreesampleslider2[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider2[2]-input$GSCAthreesampleslider2[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider2[1]:input$GSCAthreesampleslider2[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               }
                         }
                   }
@@ -1208,22 +1289,22 @@ shinyServer(function(input, output, session) {
       })
       
       output$GSCAinteractiveplotthreeheatmapzoominplot3 <- renderPlot({
-            if (input$GSCAinteractiveplotthreeheatmapzoomincheck & GSCAthreeinfo$sampleslidernum >= 3) {
+            if (input$GSCAinteractiveplotthreeheatmapzoomincheck & GSCAthreeinfo$sampleslidernum >= 3 && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
                   par(mar=c(0,0,0,0))
                   if (input$GSCAinteractiveplotthreeheatmapzoominrealtime) {
                         if (input$heatmapthreerowv) {
                               rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                              image(1:(input$GSCAthreesampleslider3[2]-input$GSCAthreesampleslider3[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider3[1]:input$GSCAthreesampleslider3[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider3[2]-input$GSCAthreesampleslider3[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider3[1]:input$GSCAthreesampleslider3[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         } else {
-                              image(1:(input$GSCAthreesampleslider3[2]-input$GSCAthreesampleslider3[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider3[1]:input$GSCAthreesampleslider3[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider3[2]-input$GSCAthreesampleslider3[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider3[1]:input$GSCAthreesampleslider3[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         }
                   } else {
                         if (input$GSCAinteractiveplotthreeheatmapzoominupdate > 0) {
                               if (input$heatmapthreerowv) {
                                     rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                                    isolate(image(1:(input$GSCAthreesampleslider3[2]-input$GSCAthreesampleslider3[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider3[1]:input$GSCAthreesampleslider3[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider3[2]-input$GSCAthreesampleslider3[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider3[1]:input$GSCAthreesampleslider3[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               } else {
-                                    isolate(image(1:(input$GSCAthreesampleslider3[2]-input$GSCAthreesampleslider3[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider3[1]:input$GSCAthreesampleslider3[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider3[2]-input$GSCAthreesampleslider3[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider3[1]:input$GSCAthreesampleslider3[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               }
                         }
                   }
@@ -1231,22 +1312,22 @@ shinyServer(function(input, output, session) {
       })
       
       output$GSCAinteractiveplotthreeheatmapzoominplot4 <- renderPlot({
-            if (input$GSCAinteractiveplotthreeheatmapzoomincheck & GSCAthreeinfo$sampleslidernum >= 4) {
+            if (input$GSCAinteractiveplotthreeheatmapzoomincheck & GSCAthreeinfo$sampleslidernum >= 4 && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
                   par(mar=c(0,0,0,0))
                   if (input$GSCAinteractiveplotthreeheatmapzoominrealtime) {
                         if (input$heatmapthreerowv) {
                               rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                              image(1:(input$GSCAthreesampleslider4[2]-input$GSCAthreesampleslider4[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider4[1]:input$GSCAthreesampleslider4[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider4[2]-input$GSCAthreesampleslider4[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider4[1]:input$GSCAthreesampleslider4[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         } else {
-                              image(1:(input$GSCAthreesampleslider4[2]-input$GSCAthreesampleslider4[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider4[1]:input$GSCAthreesampleslider4[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider4[2]-input$GSCAthreesampleslider4[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider4[1]:input$GSCAthreesampleslider4[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         }
                   } else {
                         if (input$GSCAinteractiveplotthreeheatmapzoominupdate > 0) {
                               if (input$heatmapthreerowv) {
                                     rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                                    isolate(image(1:(input$GSCAthreesampleslider4[2]-input$GSCAthreesampleslider4[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider4[1]:input$GSCAthreesampleslider4[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider4[2]-input$GSCAthreesampleslider4[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider4[1]:input$GSCAthreesampleslider4[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               } else {
-                                    isolate(image(1:(input$GSCAthreesampleslider4[2]-input$GSCAthreesampleslider4[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider4[1]:input$GSCAthreesampleslider4[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider4[2]-input$GSCAthreesampleslider4[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider4[1]:input$GSCAthreesampleslider4[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               }
                         }
                   }
@@ -1254,22 +1335,22 @@ shinyServer(function(input, output, session) {
       })
       
       output$GSCAinteractiveplotthreeheatmapzoominplot5 <- renderPlot({
-            if (input$GSCAinteractiveplotthreeheatmapzoomincheck & GSCAthreeinfo$sampleslidernum >= 5) {
+            if (input$GSCAinteractiveplotthreeheatmapzoomincheck & GSCAthreeinfo$sampleslidernum >= 5 && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
                   par(mar=c(0,0,0,0))
                   if (input$GSCAinteractiveplotthreeheatmapzoominrealtime) {
                         if (input$heatmapthreerowv) {
                               rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                              image(1:(input$GSCAthreesampleslider5[2]-input$GSCAthreesampleslider5[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider5[1]:input$GSCAthreesampleslider5[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider5[2]-input$GSCAthreesampleslider5[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider5[1]:input$GSCAthreesampleslider5[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         } else {
-                              image(1:(input$GSCAthreesampleslider5[2]-input$GSCAthreesampleslider5[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider5[1]:input$GSCAthreesampleslider5[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T)
+                              image(1:(input$GSCAthreesampleslider5[2]-input$GSCAthreesampleslider5[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider5[1]:input$GSCAthreesampleslider5[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T)
                         }
                   } else {
                         if (input$GSCAinteractiveplotthreeheatmapzoominupdate > 0) {
                               if (input$heatmapthreerowv) {
                                     rowInd <- order.dendrogram(Maindata$GSCArowclust)
-                                    isolate(image(1:(input$GSCAthreesampleslider5[2]-input$GSCAthreesampleslider5[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider5[1]:input$GSCAthreesampleslider5[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider5[2]-input$GSCAthreesampleslider5[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order[input$GSCAthreesampleslider5[1]:input$GSCAthreesampleslider5[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               } else {
-                                    isolate(image(1:(input$GSCAthreesampleslider5[2]-input$GSCAthreesampleslider5[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$GSCAscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider5[1]:input$GSCAthreesampleslider5[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=101),useRaster=T))
+                                    isolate(image(1:(input$GSCAthreesampleslider5[2]-input$GSCAthreesampleslider5[1]+1),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order[input$GSCAthreesampleslider5[1]:input$GSCAthreesampleslider5[2]]]),col=bluered(100),axes=F,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101),useRaster=T))
                               }
                         }
                   }
@@ -1296,13 +1377,13 @@ shinyServer(function(input, output, session) {
       })
       
       output$GSCAinteractiveplotthreeplus <- renderPlot({
-            if (Maindata$dim >= 3 && length(Maindata$selectsample) > 0) {
-                  if(!is.null(input$GSCAinteractivethreeupdate) && input$GSCAinteractivethreeupdate>0) {
+            if (Maindata$dim >= 3 && length(Maindata$selectsample) > 0 && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
+                  if(!is.null(input$GSCAinteractivethreeupdate) && input$GSCAinteractivethreeupdate > 0) {
                         Maindata$Ranking
                         Maindata$GSCAcontext
                         input$heatmapthreerowv
                         isolate({
-                              par(oma=c(0.5,0,0.5,max(nchar(Maindata$patterndata[,1]))/1.5))
+                              par(oma=c(0.5,0,0.5,max(nchar(Maindata$genesetname))/1.5))
                               colcolorselect <- rep("white",ncol(Maindata$GSCAscore))
                               tmprowv <- F
                               if (input$heatmapthreerowv)
@@ -1314,11 +1395,11 @@ shinyServer(function(input, output, session) {
                                           i <- i+1
                                     }
                                     leg.txt <- substr(Maindata$GSCAcontext,1,25)
-                                    heatmap.2(Maindata$GSCAscore[,Maindata$selectsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$selectsample],main="Selected Sample Heatmap",useRaster=T)
+                                    heatmap.2(Maindata$threesupscore[,Maindata$selectsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$selectsample],main="Selected Sample Heatmap",useRaster=T)
                                     legend("bottomleft",legend=leg.txt,lwd=1,col=COLORS)
                               } else {
                                     if (length(Maindata$selectsample) > 1)
-                                          heatmap.2(Maindata$GSCAscore[,Maindata$selectsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
+                                          heatmap.2(Maindata$threesupscore[,Maindata$selectsample],col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T)
                               }
                         })
                   }
@@ -1350,24 +1431,28 @@ shinyServer(function(input, output, session) {
       output$GSCAinteractivesavebutton <- downloadHandler(
             filename = function() { "POIfile.txt" },
             content = function(file) {
-                  if (Maindata$dim == 1) {
-                        write.table(c(input$GSCAoneslider[1],input$GSCAoneslider[2]),file,row.names=F,col.names=F)
-                  } else if (Maindata$dim == 2) {
-                        write.table(polycord,file,row.names=F,col.names=F)
-                  } else {
-                        tmp <- NULL
-                        if (input$Threecutoffvalue == T) {
-                              for (i in 1:Maindata$dim) {
-                                    eval(parse(text=paste0("tmp <- rbind(tmp,c(input$GSCAthreevalueslider",i,"[1], input$GSCAthreevalueslider",i,"[2]))")))
+                  if (input$GSCAmethod=='GSCAdefault') {
+                        write.table(Maindata$cutoffval,file,row.names=F,col.names=F)
+                  } else {                  
+                        if (Maindata$dim == 1) {
+                              tmp <- NULL
+                              for (i in 1:GSCAoneinfo$sampleslidernum) {
+                                    if(!is.null(eval(parse(text=paste0("input$GSCAonesampleslider",i,"[1]"))))) 
+                                          eval(parse(text=paste0("tmp <- rbind(tmp,c(input$GSCAonesampleslider",i,"[1],input$GSCAonesampleslider",i,"[2]))")))
                               }
+                              write.table(tmp,file,row.names=F,col.names=F)
+                        } else if (Maindata$dim == 2) {
+                              write.table(polycord,file,row.names=F,col.names=F)
                         } else {
+                              tmp <- NULL
                               for (i in 1:GSCAthreeinfo$sampleslidernum) {
                                     if(!is.null(eval(parse(text=paste0("input$GSCAthreesampleslider",i,"[1]"))))) 
                                           eval(parse(text=paste0("tmp <- rbind(tmp,c(input$GSCAthreesampleslider",i,"[1],input$GSCAthreesampleslider",i,"[2]))")))
                               }
+                              write.table(tmp,file,row.names=F,col.names=F)
                         }
-                        write.table(tmp,file,row.names=F,col.names=F)
                   }
+                  
             }
       )
       
@@ -1376,22 +1461,25 @@ shinyServer(function(input, output, session) {
                   if (input$GSCAinteractiveloadbutton > 0)
                         isolate({
                               tmp <- read.table(input$GSCAinteractiveload$datapath)
-                              if (dim(tmp)[1] == 2 & dim(tmp)[2] == 1) {
-                                    updateSliderInput(session,"GSCAoneslider",value=c(tmp[1,1],tmp[2,1]))
-                              } else if (dim(tmp)[2] == 3) {
-                                    polycord <<- as.matrix(tmp)
-                                    polynum <<- max(polycord[,3])
-                                    actiontaken <<- 1
-                              } else if (dim(tmp)[2] == 2) {
-                                    if (tmp[1,1] == round(tmp[1,1])) {
+                              if (input$GSCAmethod=='GSCAdefault') {
+                                    for (i in 1:Maindata$dim) {
+                                          eval(parse(text=paste0("updateSliderInput(session,'GSCAnumericpoislider",i,"',value=c(tmp[",i,",1],tmp[",i,",2]))")))
+                                    }
+                              } else {
+                                    if (Maindata$dim == 1) {
+                                          GSCAoneinfo$sampleslidernum <- nrow(tmp)
+                                          for (i in 1:GSCAoneinfo$sampleslidernum) {
+                                                eval(parse(text=paste0("updateSliderInput(session,'GSCAonesampleslider",i,"',value=c(tmp[",i,",1],tmp[",i,",2]))")))
+                                          } 
+                                    } else if (Maindata$dim == 2) {
+                                          polycord <<- as.matrix(tmp)
+                                          polynum <<- max(polycord[,3])
+                                          actiontaken <<- 1
+                                    } else {
                                           GSCAthreeinfo$sampleslidernum <- nrow(tmp)
                                           for (i in 1:GSCAthreeinfo$sampleslidernum) {
                                                 eval(parse(text=paste0("updateSliderInput(session,'GSCAthreesampleslider",i,"',value=c(tmp[",i,",1],tmp[",i,",2]))")))
                                           }                                  
-                                    } else {
-                                          for (i in 1:Maindata$dim) {
-                                                eval(parse(text=paste0("updateSliderInput(session,'GSCAthreevalueslider",i,"',value=c(tmp[",i,",1],tmp[",i,",2]))")))
-                                          }
                                     }
                               }
                         })
@@ -1433,8 +1521,8 @@ shinyServer(function(input, output, session) {
                               wellPanel(
                                     helpText("Change Plotting Details"),
                                     textInput("Downloadmaintitletwo","Enter Main Title","GSCA result"),
-                                    textInput("Downloadxlabtwo","Enter Title for X Axis",Maindata$patterndata[1,1]),
-                                    textInput("Downloadylabtwo","Enter Title for Y Axis",Maindata$patterndata[2,1]),
+                                    textInput("Downloadxlabtwo","Enter Title for X Axis",Maindata$genesetname[1]),
+                                    textInput("Downloadylabtwo","Enter Title for Y Axis",Maindata$genesetname[2]),
                                     textInput("Downloadxlimmintwo","Enter minimum value of X Axis",min(Maindata$GSCAscore[1,])),
                                     textInput("Downloadxlimmaxtwo","Enter maximum value of X Axis",max(Maindata$GSCAscore[1,])),
                                     textInput("Downloadylimmintwo","Enter minimum value of Y Axis",min(Maindata$GSCAscore[2,])),
@@ -1557,26 +1645,34 @@ shinyServer(function(input, output, session) {
             colone <- input$Downloadcolone
             if (colone == "NULL")
                   colone <- NULL
-            par(mfrow=c(as.numeric(input$InputN)+1,1),oma=c(0,0,2,0))
-            hist(Maindata$GSCAscore,xlab=input$Downloadxlabone,ylab=input$Downloadylabone,xlim=as.numeric(c(input$Downloadxlimminone,input$Downloadxlimmaxone)),col=colone,main="All Biological contexts")
+            par(mfrow=c(length(Maindata$downloadcontext)+1,1),oma=c(0,0,2,0))
             if (input$Downloadregionselect == 'Precise') {
-                  abline(v=Maindata$cutoffval[1], lty=2)      
+                  hist(Maindata$GSCAscore,xlab=input$Downloadxlabone,ylab=input$Downloadylabone,xlim=as.numeric(c(input$Downloadxlimminone,input$Downloadxlimmaxone)),col=colone,main="All Biological contexts")
+                  abline(v=Maindata$cutoffval[1,1], lty=2)
+                  abline(v=Maindata$cutoffval[1,2], lty=2)     
             } else {
-                  abline(v=c(input$GSCAoneslider[1],input$GSCAoneslider[2]), lty=2)
+                  selectsample <- NULL
+                  for (i in 1:GSCAoneinfo$sampleslidernum) {
+                        if(!is.null(eval(parse(text=paste0("input$GSCAonesampleslider",i,"[1]"))))) 
+                              eval(parse(text=paste0("selectsample <- union(selectsample,input$GSCAonesampleslider",i,"[1]:input$GSCAonesampleslider",i,"[2])")))
+                  }
+                  selectsample <- order(Maindata$GSCAscore)[selectsample]
+                  colcolorall <- rep("black",ncol(Maindata$GSCAscore))
+                  colcolorall[selectsample] <- "cyan"
+                  plot(1:ncol(Maindata$GSCAscore),sort(Maindata$GSCAscore),xaxs="i",yaxs="i",cex.main=2,xlab="",ylab="Gene expression value",col=colcolorall[order(Maindata$GSCAscore)])
+                  legend("topleft",legend=c("Selected samples","Not selected samples"),pch=c(20,20),pt.bg=c("cyan","black"),col=c("cyan","black"),cex=0.8)
             }
             if (!is.null(Maindata$downloadcontext)) {
                   for(INDEX in Maindata$downloadcontext) {
                         hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlab=input$Downloadxlabone,ylab=input$Downloadylabone,xlim=as.numeric(c(input$Downloadxlimminone,input$Downloadxlimmaxone)),col=colone,main=substr(INDEX,1,25))
                         if (input$Downloadregionselect == 'Precise') {
                               abline(v=Maindata$cutoffval[1], lty=2)      
-                        } else {
-                              abline(v=c(input$GSCAoneslider[1],input$GSCAoneslider[2]), lty=2)
                         }
                   }     
             }
             title(input$Downloadmaintitleone,outer=T)
-      }
-      
+      } 
+
       downloadtwofunc <- function() {
             cortext <- paste0("Correlation: ",round(Maindata$twocorr,3),"; ","Correlation p-value: ",round(Maindata$twocorrp,3),"; ","Slope: ",round(Maindata$twoslope,3),"; ","Slope p-value: ",round(Maindata$twoslopep,3))
             if (input$Downloadregionselect == 'Precise') {
@@ -1588,7 +1684,10 @@ shinyServer(function(input, output, session) {
                         }
                   }
                   points(Maindata$GSCAscore[1,setdiff(Maindata$downloadsample,toprankingsample)],Maindata$GSCAscore[2,setdiff(Maindata$downloadsample,toprankingsample)],cex=0.7,pch=20)
-                  abline(v=Maindata$cutoffval[1], h=Maindata$cutoffval[2], lty=2,lwd=2)
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,1]), lty=2,lwd=2,col="blue")
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,2],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,1]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
+                  lines(c(Maindata$cutoffval[1,2],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
                   if (!is.null(Maindata$downloadcontext)) {
                         i <- 1
                         for(INDEX in Maindata$downloadcontext) {
@@ -1673,13 +1772,13 @@ shinyServer(function(input, output, session) {
             } else if (!input$Downloadthreecoldendplotone && !(input$Downloadthreerowvplotone && !is.null(input$Downloadthreerowdendplotone) && input$Downloadthreerowdendplotone)) {
                   threeonedendro <- "none"
             }
-            par(oma=c(0.5,0,0.5,max(nchar(Maindata$patterndata[,1]))/ifelse(input$Downloadthreerotatelabplotone,2,1.5)))
+            par(oma=c(0.5,0,0.5,max(nchar(Maindata$genesetname))/ifelse(input$Downloadthreerotatelabplotone,2,1.5)))
             colcolorall <- rep("cyan",ncol(Maindata$GSCAscore))
             colcolorall[Maindata$downloadsample] <- "blue"
             tmprowv <- F
             if (input$Downloadthreerowvplotone)
                   tmprowv <- Maindata$GSCArowclust
-            heatmap.2(Maindata$GSCAscore,col=threepalette(input$Downloadthreecolplotone),Colv=as.dendrogram(Maindata$GSCAclust),srtRow=ifelse(input$Downloadthreerotatelabplotone,-45,0),dendrogram=threeonedendro,trace="none",Rowv=tmprowv,labCol=NA,ColSideColors=colcolorall,main=input$Downloadmaintitlethreeplotone)
+            heatmap.2(Maindata$threesupscore,col=threepalette(input$Downloadthreecolplotone),Colv=as.dendrogram(Maindata$GSCAclust),srtRow=ifelse(input$Downloadthreerotatelabplotone,-45,0),dendrogram=threeonedendro,trace="none",Rowv=tmprowv,labCol=NA,ColSideColors=colcolorall,main=input$Downloadmaintitlethreeplotone)
             legend("bottomleft",legend=c("Selected Sample","Unselected Sample"),lwd=1,col=c("blue","cyan"),cex=as.numeric(input$Downloadlegcexthreeone))           
       }
       
@@ -1695,7 +1794,7 @@ shinyServer(function(input, output, session) {
                   threetwodendro <- "none"
             }
             if (!is.null(Maindata$downloadcontext)) {
-                  par(oma=c(0.5,0,0.5,max(nchar(Maindata$patterndata[,1]))/ifelse(input$Downloadthreerotatelabplotone,2,1.5)))
+                  par(oma=c(0.5,0,0.5,max(nchar(Maindata$genesetname))/ifelse(input$Downloadthreerotatelabplotone,2,1.5)))
                   i <- 1
                   for(INDEX in Maindata$downloadcontext) {
                         colcolorselect[Maindata$tab$SampleType %in% INDEX] <- COLORS[i]
@@ -1704,7 +1803,7 @@ shinyServer(function(input, output, session) {
                   tmprowv <- F
                   if (input$Downloadthreerowvplottwo)
                         tmprowv <- Maindata$GSCArowclust
-                  heatmap.2(Maindata$GSCAscore[,Maindata$downloadsample],col=threepalette(input$Downloadthreecolplottwo),labCol=NA,Rowv=tmprowv,srtRow=ifelse(input$Downloadthreerotatelabplottwo,-45,0),dendrogram=threetwodendro,trace="none",ColSideColors=colcolorselect[Maindata$downloadsample],main=input$Downloadmaintitlethreeplottwo)
+                  heatmap.2(Maindata$threesupscore[,Maindata$downloadsample],col=threepalette(input$Downloadthreecolplottwo),labCol=NA,Rowv=tmprowv,srtRow=ifelse(input$Downloadthreerotatelabplottwo,-45,0),dendrogram=threetwodendro,trace="none",ColSideColors=colcolorselect[Maindata$downloadsample],main=input$Downloadmaintitlethreeplottwo)
                   leg.txt <- substr(Maindata$downloadcontext,1,25)
                   legend("bottomleft",legend=leg.txt,lwd=1,col=COLORS,cex=as.numeric(input$Downloadlegcexthreetwo))
             }
