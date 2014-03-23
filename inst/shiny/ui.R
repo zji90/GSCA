@@ -32,10 +32,10 @@ shinyUI(pageWithSidebar(
             helpText(a("Show User Manual",href="GSCAmanual.pdf",target="_blank")),
             wellPanel(
                   radioButtons("Mainmethod","Main Menu",
-                               list("Input Geneset"="Input",
-                                    "Select Geneset and Compendium"="Select",
-                                    "GSCA"="GSCA",
-                                    "Download"="Download",
+                               list("Input geneset"="Input",
+                                    "Select geneset and compendium"="Select",
+                                    "GSCA analysis"="GSCA",
+                                    "Save results"="Download",
                                     "About"="About")
                   )
             ),
@@ -44,15 +44,15 @@ shinyUI(pageWithSidebar(
                              wellPanel(
                                    h5("Input Geneset"),
                                    radioButtons("InputGenesetmethod","",
-                                                list("Specify Gene ID"="InputspecifyGeneset",
-                                                     "Upload Geneset File"="InputuploadGeneset"
+                                                list("Specify gene ID"="InputspecifyGeneset",
+                                                     "Upload geneset file"="InputuploadGeneset"
                                                 )
                                    ),   
-                                   textInput("InputGenesetname","Input Geneset Name","Geneset 1"),
+                                   textInput("InputGenesetname","Input geneset name","Geneset 1"),
                                    conditionalPanel(condition="input.InputGenesetmethod == 'InputspecifyGeneset'",
                                                     helpText("Multiple Entrez GeneID should be seperated by ;"),
-                                                    textInput("InputActGeneID","Specify Activated Entrez GeneID"),
-                                                    textInput("InputRepGeneID","Specify Repressed Entrez GeneID")
+                                                    textInput("InputActGeneID","Specify activated Entrez GeneID"),
+                                                    textInput("InputRepGeneID","Specify repressed Entrez GeneID")
                                    ),
                                    conditionalPanel(condition="input.InputGenesetmethod == 'InputuploadGeneset'",
                                                     helpText("First column: Entrez GeneID"),
@@ -74,13 +74,13 @@ shinyUI(pageWithSidebar(
                                    ),
                                    p(actionButton("Inputgenesetadd","Add geneset"))
                              ),
-                             helpText("Save current genedata as csv file"),
+                             helpText("Save current genesets as csv file"),
                              p(downloadButton("Savegenedatafile","Save")),
                              wellPanel(
-                                   h5("Delete Existing Genedata"),
+                                   h5("Delete existing geneset"),
                                    uiOutput("Inputgenesetdeleteui"),
-                                   p(actionButton("Inputgenesetdelete","Delete selected genedata")),
-                                   p(actionButton("Inputgenesetreset","Reset all genedata"))
+                                   p(actionButton("Inputgenesetdelete","Delete selected geneset")),
+                                   p(actionButton("Inputgenesetreset","Reset all genesets"))
                              )
             ),
             
@@ -169,13 +169,16 @@ shinyUI(pageWithSidebar(
             conditionalPanel(condition="input.Mainmethod=='Download'",
                              wellPanel(
                                    h5("Download GSCA outputs"),
-                                   radioButtons("Downloadregionselect","Choose pattern of interest type",choices=c("Precise","Interactive")),
+                                   radioButtons("Downloadregionselect","Choose POI type",choices=c("Numeric","Interactive")),
                                    wellPanel(
+                                         h5("Download ranking table"),
                                          selectInput("Downloadranktabletype","Select File Type",choices=c("csv","txt")),
                                          textInput("Downloadranktablefilename","Enter File Name","GSCA Ranking Table"),
                                          p(downloadButton("Downloadranktable","Save Ranking Table"))
                                    ),
-                                   uiOutput("Downloadsidebarui")
+                                   wellPanel(
+                                         h5("Download plots"),
+                                          uiOutput("Downloadsidebarui"))
                              )
             )               
       ),
@@ -191,7 +194,7 @@ shinyUI(pageWithSidebar(
             ),
             conditionalPanel(condition="input.Mainmethod=='Select'",
                              tabsetPanel(
-                                   tabPanel("Analysis data summary",
+                                   tabPanel("Genesets summary",
                                             dataTableOutput("OutputDataSummary"),
                                             uiOutput("Outputmissinggenesetreport"),
                                             conditionalPanel(condition="input.Summarycompmethod=='upload'",
