@@ -518,7 +518,7 @@ shinyServer(function(input, output, session) {
       
       #Numeric POI
       output$numericpoisliderui <- renderUI({
-            if (!is.null(Maindata$dim))
+            if (!is.null(Maindata$dim) && input$Mainmethod=='GSCA')
                   lapply(1:Maindata$dim, function(i) {
                         tmpmin <- mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,])
                         sliderInput(inputId = paste0("GSCAnumericpoislider",i), label = Maindata$genesetname[i], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(tmpmin, max(Maindata$GSCAscore[i,])))
@@ -526,7 +526,7 @@ shinyServer(function(input, output, session) {
       })
       
       observe({
-            if (!is.null(Maindata$dim)) {
+            if (!is.null(Maindata$dim) && !is.null(Maindata$GSCAscore) && input$Mainmethod=='GSCA') {
                   selectsample <- 1:nrow(Maindata$tab)
                   cutoffval <- matrix(0,Maindata$dim,2)
                   for (i in 1:Maindata$dim) {
@@ -538,7 +538,7 @@ shinyServer(function(input, output, session) {
                   }            
                   Maindata$defaultsample <- selectsample
                   Maindata$cutoffval <- cutoffval
-            }
+                  }
       })
       
       output$numericpoimoreopgenesetnameui <- renderUI({
@@ -736,7 +736,7 @@ shinyServer(function(input, output, session) {
       output$plotenrichedareaui <- renderUI({
             if (!is.null(Maindata$dim))
                   if (Maindata$dim == 2)
-                        checkboxInput("Inputenrichedareaonly","Show Enriched Context only in interested region")
+                        checkboxInput("Inputenrichedareaonly","Show enriched context only in POI")
       })
       
       output$GSCAdefaultplottwo <- renderPlot({  
@@ -1579,7 +1579,7 @@ shinyServer(function(input, output, session) {
       
       observe({
             if (input$Mainmethod=='Download') {
-                  if (input$Downloadregionselect == 'Precise') {
+                  if (input$Downloadregionselect == 'Numeric') {
                         Maindata$downloadsample <- Maindata$defaultsample
                         Maindata$downloadcontext <- Maindata$defaultcontext
                         Maindata$downloadranking <- Maindata$defaultranking
@@ -1646,7 +1646,7 @@ shinyServer(function(input, output, session) {
             if (colone == "NULL")
                   colone <- NULL
             par(mfrow=c(length(Maindata$downloadcontext)+1,1),oma=c(0,0,2,0))
-            if (input$Downloadregionselect == 'Precise') {
+            if (input$Downloadregionselect == 'Numeric') {
                   hist(Maindata$GSCAscore,xlab=input$Downloadxlabone,ylab=input$Downloadylabone,xlim=as.numeric(c(input$Downloadxlimminone,input$Downloadxlimmaxone)),col=colone,main="All Biological contexts")
                   abline(v=Maindata$cutoffval[1,1], lty=2)
                   abline(v=Maindata$cutoffval[1,2], lty=2)     
@@ -1665,7 +1665,7 @@ shinyServer(function(input, output, session) {
             if (!is.null(Maindata$downloadcontext)) {
                   for(INDEX in Maindata$downloadcontext) {
                         hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlab=input$Downloadxlabone,ylab=input$Downloadylabone,xlim=as.numeric(c(input$Downloadxlimminone,input$Downloadxlimmaxone)),col=colone,main=substr(INDEX,1,25))
-                        if (input$Downloadregionselect == 'Precise') {
+                        if (input$Downloadregionselect == 'Numeric') {
                               abline(v=Maindata$cutoffval[1], lty=2)      
                         }
                   }     
@@ -1675,7 +1675,7 @@ shinyServer(function(input, output, session) {
 
       downloadtwofunc <- function() {
             cortext <- paste0("Correlation: ",round(Maindata$twocorr,3),"; ","Correlation p-value: ",round(Maindata$twocorrp,3),"; ","Slope: ",round(Maindata$twoslope,3),"; ","Slope p-value: ",round(Maindata$twoslopep,3))
-            if (input$Downloadregionselect == 'Precise') {
+            if (input$Downloadregionselect == 'Numeric') {
                   plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],col="#00000022",pch=20,cex=0.7,xlab=input$Downloadxlabtwo,ylab=input$Downloadylabtwo,xlim = as.numeric(c(input$Downloadxlimmintwo,input$Downloadxlimmaxtwo)), ylim = as.numeric(c(input$Downloadylimmintwo,input$Downloadylimmaxtwo)),main=input$Downloadmaintitletwo,cex.lab=1.5)
                   toprankingsample <- NULL
                   if (!is.null(Maindata$downloadcontext)) {
