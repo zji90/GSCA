@@ -695,7 +695,8 @@ shinyServer(function(input, output, session) {
                   if (Maindata$dim == 1) {
                         tagList(
                               helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
-                              plotOutput("GSCAdefaultplotone",height=300*(length(Maindata$GSCAcontext)+1))
+                              plotOutput("GSCAdefaultplotoneone",height=300),
+                              plotOutput("GSCAdefaultplotonetwo",height=300*length(Maindata$GSCAcontext))
                         )
                   } else if (Maindata$dim == 2) {
                         div(align="center",
@@ -716,19 +717,24 @@ shinyServer(function(input, output, session) {
             }      
       })
       
-      output$GSCAdefaultplotone <- renderPlot({
+      output$GSCAdefaultplotoneone <- renderPlot({
             if (Maindata$dim == 1) {
-                  par(mfrow=c(length(Maindata$GSCAcontext)+1,1),oma=c(0,0,2,0))
                   hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All sample in the compendium",cex.main=2)
                   abline(v=Maindata$cutoffval[1,1], lty=2)
                   abline(v=Maindata$cutoffval[1,2], lty=2)
+                  GSCAstatus$status <- 0
+            }
+      })
+      
+      output$GSCAdefaultplotonetwo <- renderPlot({
+            if (Maindata$dim == 1) {
+                  par(mfrow=c(length(Maindata$GSCAcontext),1),oma=c(0,0,2,0))
                   if (!is.null(Maindata$GSCAcontext))
                         for(INDEX in Maindata$GSCAcontext) {
                               hist(Maindata$GSCAscore[Maindata$tab$SampleType %in% INDEX],xlim=range(Maindata$GSCAscore),main=substr(INDEX,1,25),xlab="Sample Score",cex.main=2)
                               abline(v=Maindata$cutoffval[1,1], lty=2)
                               abline(v=Maindata$cutoffval[1,2], lty=2)
                         }
-                  GSCAstatus$status <- 0
             }
       })
       
