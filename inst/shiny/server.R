@@ -185,7 +185,7 @@ shinyServer(function(input, output, session) {
       #Delete genedata
       output$Inputgenesetdeleteui <- renderUI({
             if (!is.null(Rawdata$genedata))
-                  selectInput("Inputdeletegenesetselect","Hold Control(Win) or Command(Mac) to enable multiple selection",unique(Rawdata$genedata$Genesetname),multiple=T)
+                  selectInput("Inputdeletegenesetselect","",unique(Rawdata$genedata$Genesetname),multiple=T)
       })
       
       observe({   
@@ -407,7 +407,7 @@ shinyServer(function(input, output, session) {
       #When reentering GSCA page, GSCAmethod should be set to GSCAdefault
       observe({
             if (input$Mainmethod == "Input" | input$Mainmethod == "Select" | input$Mainmethod == "Download")
-                  updateRadioButtons(session,"GSCAmethod",choices=list("Numeric POI"="GSCAdefault","Interactive POI"="GSCAinteractive"),selected="Numeric POI")
+                  updateRadioButtons(session,"GSCAmethod",choices=list("Numeric POI"="GSCAdefault","Interactive POI"="GSCAinteractive"),selected="GSCAdefault")
       })
       
       #Function to calculate enriched samples
@@ -635,7 +635,7 @@ shinyServer(function(input, output, session) {
       #Specify Context
       output$InputGSCAspecifycontextui <- renderUI({
             if (!is.null(Maindata$Ranking))
-                  selectInput("GSCAspecifycontext","Hold Control(Win) or Command(Mac) to enable multiple selection",Maindata$Ranking[,"SampleType"],multiple=T)
+                  selectInput("GSCAspecifycontext","",Maindata$Ranking[,"SampleType"],multiple=T)
       })
       
       #Establish GSCA Context
@@ -919,7 +919,7 @@ shinyServer(function(input, output, session) {
                   par(oma=c(0,0,0,0),mar=c(5.1,0,0,0))
                   colcolorall <- rep("black",ncol(Maindata$GSCAscore))
                   colcolorall[selectsample] <- "cyan"
-                  plot(1:ncol(Maindata$GSCAscore),sort(Maindata$GSCAscore),xaxs="i",yaxs="i",cex.main=2,xlab="",ylab="",col=colcolorall[order(Maindata$GSCAscore)])
+                  plot(1:ncol(Maindata$GSCAscore),sort(Maindata$GSCAscore),xaxs="i",yaxs="i",cex.main=2,xlab="",ylab="",pch=16,col=colcolorall[order(Maindata$GSCAscore)])
                   legend("topleft",legend=c("Selected samples","Not selected samples"),pch=c(20,20),pt.bg=c("cyan","black"),col=c("cyan","black"),cex=0.8)    
             }
       })
@@ -1665,7 +1665,7 @@ shinyServer(function(input, output, session) {
                   selectsample <- order(Maindata$GSCAscore)[selectsample]
                   colcolorall <- rep("black",ncol(Maindata$GSCAscore))
                   colcolorall[selectsample] <- "cyan"
-                  plot(1:ncol(Maindata$GSCAscore),sort(Maindata$GSCAscore),xaxs="i",yaxs="i",cex.main=2,xlab="",ylab="Gene expression value",col=colcolorall[order(Maindata$GSCAscore)])
+                  plot(1:ncol(Maindata$GSCAscore),sort(Maindata$GSCAscore),xaxs="i",yaxs="i",cex.main=2,xlab="",ylab="Gene expression value",pch=16,col=colcolorall[order(Maindata$GSCAscore)])
                   legend("topleft",legend=c("Selected samples","Not selected samples"),pch=c(20,20),pt.bg=c("cyan","black"),col=c("cyan","black"),cex=0.8)
             }
             if (!is.null(Maindata$downloadcontext)) {
@@ -1874,5 +1874,7 @@ shinyServer(function(input, output, session) {
                   dev.off()
             }
       )
+      
+
       
 })
