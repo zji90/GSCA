@@ -65,12 +65,12 @@ shinyUI(pageWithSidebar(
                                                                  c('Comma(csv)'=',',
                                                                    'Semicolon'=';',
                                                                    'Tab'='\t'),
-                                                                 'Comma(csv)'),
+                                                                 ','),
                                                     radioButtons('InputGenesetquote', 'Quote',
-                                                                 c(None='',
+                                                                 c('None'='',
                                                                    'Double Quote'='"',
                                                                    'Single Quote'="'"),
-                                                                 'Double Quote')
+                                                                 '"')
                                    ),
                                    p(actionButton("Inputgenesetadd","Add geneset"))
                              ),
@@ -126,7 +126,7 @@ shinyUI(pageWithSidebar(
                                                           wellPanel(
                                                                 h5("Numeric POI"),
                                                                 uiOutput("numericpoisliderui"),
-                                                                checkboxInput("numericpoimoreopcheck","More options"),
+                                                                checkboxInput("numericpoimoreopcheck","More POI cutoff options"),
                                                                 conditionalPanel(condition="input.numericpoimoreopcheck==1",
                                                                                  uiOutput("numericpoimoreopgenesetnameui"),
                                                                                  selectInput("numericpoimoreopbound","Choose upper or lower bound",
@@ -142,14 +142,14 @@ shinyUI(pageWithSidebar(
                                                           )
                                          ),
                                          conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",uiOutput("InputGSCAsidebar")),
+                                         uiOutput("plotenrichedareaui"),
+                                         uiOutput("heatmapcolorsuppressui"),
+                                         uiOutput("heatmapthreerowvui"),
                                          wellPanel(
-                                               h5("Options"),
-                                               uiOutput("plotenrichedareaui"),
-                                               uiOutput("heatmapcolorsuppressui"),
-                                               uiOutput("heatmapthreerowvui"),
-                                               textInput("Inputpvalco","Enrichment P-value cutoff","0.05"),
-                                               textInput("Inputfoldchangeco","Enrichment Foldchange cutoff","1.5"),
-                                               radioButtons("Inputcontexttype","Choose Biological Context displaying Method",
+                                               h5("Specify biological contexts"),
+                                               textInput("Inputpvalco","Enrichment adjusted p-value cutoff","0.05"),
+                                               textInput("Inputfoldchangeco","Enrichment foldchange cutoff","1.5"),
+                                               radioButtons("Inputcontexttype","Choose biological context displaying method",
                                                             list("Display top ranked contexts"="Toprank",
                                                                  "Display specified contexts"="Specify")),
                                                conditionalPanel(condition="input.Inputcontexttype=='Toprank'",
