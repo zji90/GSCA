@@ -14,7 +14,7 @@ GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,scaledata=F,Pval.co=0
             #setting path of data package
             path <- system.file("extdata",package=paste0("Affy",chipdata,"Expr"))
             #read in gene names
-            compengene <- sub(".rda","",list.files(path))
+            load(paste0(path,"/geneid.rda"))
             #read in reference tables for given compendium
             if(chipdata == "hgu133a") {
                   if (!require(Affyhgu133aExpr)) {
@@ -54,7 +54,7 @@ GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,scaledata=F,Pval.co=0
             #check whether each geneset has at least one gene on the compendium
             genesetname <- NULL
             for (tmpgenesetname in unique(genedata[,1])) {
-                  if(sum(compengene %in% genedata[genedata[,1]==tmpgenesetname,2]) == 0) {
+                  if(sum(geneid %in% genedata[genedata[,1]==tmpgenesetname,2]) == 0) {
                         warning(paste("No matching target genes found on the compendium for gene set",tmpgenesetname))
                   } else {
                         genesetname <- c(genesetname, tmpgenesetname)
@@ -71,19 +71,19 @@ GSCAeda <- function(genedata,pattern,chipdata,SearchOutput,scaledata=F,Pval.co=0
             for (genesetid in 1:length(genesetname)) {
                   ###Scoring geneset activity
                   singlegeneset <- genesetname[genesetid]
-                  currentgeneset <- genedata[genedata[,1] == singlegeneset & genedata[,2] %in% compengene,]
+                  currentgeneset <- genedata[genedata[,1] == singlegeneset & genedata[,2] %in% geneid,]
                   score <- rep(0, nrow(tab))
                   for (i in 1:nrow(currentgeneset)) {
-                        load(paste0(path,"/",currentgeneset[i,2],".rda"))
+                        e <- as.vector(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,which(geneid==currentgeneset[i,2]))))/1000
                         if (scaledata)
                               e <- scale(e)
                         score <- score + currentgeneset[i,3]*e
                   }
                   score <- score/nrow(currentgeneset)
                   
-                  missinggene <- setdiff(genedata[singlegeneset == genedata[,1],2],compengene)
+                  missinggene <- setdiff(genedata[singlegeneset == genedata[,1],2],geneid)
                   genesetmissinggene[genesetid] <- length(missinggene)
-                  genesettotalgenenum[genesetid] <- length(genedata[,1] == singlegeneset && genedata[,2] %in% compengene)
+                  genesettotalgenenum[genesetid] <- length(genedata[,1] == singlegeneset && genedata[,2] %in% geneid)
                   activity[genesetid,] <- score
                   ###Find samples matching the given pattern
                   singlepattern <- pattern[pattern[,1]==singlegeneset,]

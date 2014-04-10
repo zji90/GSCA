@@ -256,7 +256,7 @@ shinyServer(function(input, output, session) {
       
       #Update Maindata information
       observe({   
-            if (input$Summarycompmethod=='available') {
+            if (input$Summarycompmethod=='available' && !is.null(input$Summarycompselect)) {
                   if (!is.null(input$Summarycompselect)) {
                         if(input$Summarycompselect=="moe4302"){
                               data(Affymoe4302Exprtab)
@@ -273,7 +273,7 @@ shinyServer(function(input, output, session) {
                         }
                   }
                   path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
-                  compengene <- sub(".rda","",list.files(path))
+                  load(paste0(path,"/geneid.rda"))
             } else {
                   input$Summaryuploadtabfile
                   if (!is.null(input$Summaryuploadtabfile)) {
@@ -282,10 +282,11 @@ shinyServer(function(input, output, session) {
                   }
                   if (!is.null(input$Summaryuploadgeneexprfile))
                         Maindata$uploadgeneexpr <- as.matrix(read.table(input$Summaryuploadgeneexprfile$datapath,stringsAsFactors=F,blank.lines.skip=TRUE,row.names=1))
-                  compengene <- row.names(Maindata$uploadgeneexpr)
+                  geneid <- row.names(Maindata$uploadgeneexpr)
             }
             if (!is.null(Rawdata$genedata)) {
-                  Maindata$genedata <- Rawdata$genedata[Rawdata$genedata[,2] %in% compengene & Rawdata$genedata[,1] %in% input$Selectedgeneset,]
+                  Maindata$geneid <- geneid
+                  Maindata$genedata <- Rawdata$genedata[Rawdata$genedata[,2] %in% geneid & Rawdata$genedata[,1] %in% input$Selectedgeneset,]
                   Maindata$dim <- length(unique((Maindata$genedata[,1])))
                   Maindata$genesetname <- unique(Maindata$genedata[,1])
             }            
@@ -343,20 +344,18 @@ shinyServer(function(input, output, session) {
       observe({
             if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) > 1) {
                   genebreakdata$geneset <- tmpgeneset <- Maindata$genedata[Maindata$genedata$Genesetname==input$genesetbreakdownchoose,]
-                  tmpgeneexpr <- matrix(0, nrow(tmpgeneset), nrow(Maindata$tab))
-                  rownames(tmpgeneexpr) <- tmpgeneset[,2]
+
                   if (nrow(tmpgeneset) > 1) {
-                        for (i in 1:nrow(tmpgeneset)) {
-                              if (input$Summarycompmethod=='available') {
-                                    path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
-                                    load(paste0(path,"/",tmpgeneset[i,2],".rda"))
-                              } else {
-                                    e <- Maindata$uploadgeneexpr[tmpgeneset[i,2],]
-                              }
-                              if (input$Summarycompscale)
-                                    e <- scale(e)
-                              tmpgeneexpr[i,] <- tmpgeneset[i,3]*e
-                        }
+                        if (input$Summarycompmethod=='available') {
+                              path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
+                              tmpgeneexpr <- t(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,match(tmpgeneset[,2],Maindata$geneid))))/1000
+                        } else {
+                              tmpgeneexpr <- Maindata$uploadgeneexpr[tmpgeneset[,2],]
+                        }        
+                        if (input$Summarycompscale)
+                              tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale))
+                        tmpgeneexpr <- sweep(tmpgeneexpr,1,tmpgeneset[,3],"*")       
+                        rownames(tmpgeneexpr) <- tmpgeneset[,2]
                         genebreakdata$expr <- tmpgeneexpr
                         genebreakdata$hc <- hclust(dist(tmpgeneexpr))
                   }
@@ -466,18 +465,15 @@ shinyServer(function(input, output, session) {
                                     ###Calculate Score
                                     singlegeneset <- Maindata$genesetname[genesetid]
                                     currentgeneset <- Maindata$genedata[Maindata$genedata[,1] == singlegeneset,]
-                                    tmpgeneexpr <- matrix(0, nrow(currentgeneset), nrow(Maindata$tab))
-                                    for (i in 1:nrow(currentgeneset)) {
-                                          if (input$Summarycompmethod=='available') {
-                                                path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
-                                                load(paste0(path,"/",currentgeneset[i,2],".rda"))
-                                          } else {
-                                                e <- Maindata$uploadgeneexpr[currentgeneset[i,2],]
-                                          }
-                                          if (input$Summarycompscale)
-                                                e <- scale(e)
-                                          tmpgeneexpr[i,] <- currentgeneset[i,3]*e
-                                    }
+                                    if (input$Summarycompmethod=='available') {
+                                          path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
+                                          tmpgeneexpr <- t(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,match(currentgeneset[,2],Maindata$geneid))))/1000
+                                    } else {
+                                          tmpgeneexpr <- Maindata$uploadgeneexpr[currentgeneset[,2],]
+                                    }        
+                                    if (input$Summarycompscale)
+                                          tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale))
+                                    tmpgeneexpr <- sweep(tmpgeneexpr,1,currentgeneset[,3],"*")            
                                     if (input$Summarygenesetactmethod == "average") {
                                           score <- colMeans(tmpgeneexpr)         
                                     } else {

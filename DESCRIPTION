@@ -1,8 +1,8 @@
 Package: GSCA
 Type: Package
 Title: GSCA: Gene Set Context Analysis
-Version: 0.99.2
-Date: 2014-2-9
+Version: 1.0.0
+Date: 2014-4-10
 Author: Zhicheng Ji, Hongkai Ji
 Maintainer: Zhicheng Ji <zji4@jhu.edu>
 Description: GSCA takes as input several lists of activated and
@@ -14,6 +14,6 @@ Description: GSCA takes as input several lists of activated and
 License: GPL(>=2)
 LazyLoad: yes
 Imports: graphics
-Depends: shiny, sp, gplots, ggplot2, reshape2, RColorBrewer
+Depends: shiny, sp, gplots, ggplot2, reshape2, RColorBrewer, rhdf5
 Suggests: Affyhgu133aExpr, Affymoe4302Expr, Affyhgu133A2Expr, Affyhgu133Plus2Expr
 biocViews: GeneExpression, Visualization, GUI
