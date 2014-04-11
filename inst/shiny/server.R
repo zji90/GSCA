@@ -226,16 +226,16 @@ shinyServer(function(input, output, session) {
       output$Summarycompselectui <- renderUI({
             complist <- list()
             if (require(Affyhgu133aExpr)) {
-                  complist <- c(complist,"Affymetrix Human hgu133a Array (GPL96)"="hgu133a")
+                  complist <- c(complist,"Affymetrix Human hgu133a Array, GPL96 (11778 samples)"="hgu133a")
             } 
             if (require(Affymoe4302Expr)) {
-                  complist <- c(complist,"Affymetrix Mouse 430 2.0 Array (GPL1261)"="moe4302")
+                  complist <- c(complist,"Affymetrix Mouse 430 2.0 Array, GPL1261 (9444 samples)"="moe4302")
             }
             if (require(Affyhgu133Plus2Expr)) {
-                  complist <- c(complist,"Affymetrix Human Genome U133 Plus 2.0 Array (GPL570)"="hgu133Plus2")
+                  complist <- c(complist,"Affymetrix Human Genome U133 Plus 2.0 Array, GPL570 (5153 samples)"="hgu133Plus2")
             }
             if (require(Affyhgu133A2Expr)) {
-                  complist <- c(complist,"Affymetrix Human Genome U133A 2.0 Array (GPL571)"="hgu133A2")
+                  complist <- c(complist,"Affymetrix Human Genome U133A 2.0 Array, GPL571 (313 samples)"="hgu133A2")
             }
             radioButtons("Summarycompselect","Select Compendium", complist)
       })
@@ -243,13 +243,13 @@ shinyServer(function(input, output, session) {
       output$Summarycompinfo <- renderUI({
             if (!is.null(input$Summarycompselect)) {
                   if(input$Summarycompselect=="moe4302"){
-                        p(helpText("This compendium contains 9444 mouse profiles on 20630 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL1261",target="_blank"))
+                        p(helpText("This compendium contains 20630 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL1261",target="_blank"))
                   } else if (input$Summarycompselect=="hgu133a"){
-                        p(helpText("This compendium contains 11778 human profiles on 12495 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL96",target="_blank"))
+                        p(helpText("This compendium contains 12495 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL96",target="_blank"))
                   } else if (input$Summarycompselect=="hgu133Plus2"){
-                        p(helpText("This compendium contains 5153 human profiles on 19944 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL570",target="_blank"))
+                        p(helpText("This compendium contains 19944 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL570",target="_blank"))
                   } else if (input$Summarycompselect=="hgu133A2"){
-                        p(helpText("This compendium contains 313 human profiles on 12494 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL571",target="_blank"))
+                        p(helpText("This compendium contains 12494 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL571",target="_blank"))
                   }    
             }
       })
