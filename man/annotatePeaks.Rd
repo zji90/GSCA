@@ -42,8 +42,7 @@ Zhicheng Ji, Hongkai Ji
 ### Read in example ChIP-seq analyzed data output from GSE11431
 ### for Oct4 in ESCs directly downloaded from NCBI GEO
 path <- system.file("extdata",package="GSCA")
-inputfile <- read.delim(paste(path,"GSM288346_ES_Oct4.txt",sep="/"),
-                        header=FALSE,stringsAsFactors=FALSE)
+inputfile <- read.delim(paste(path,"GSM288346_ES_Oct4.txt",sep="/"), header=FALSE,stringsAsFactors=FALSE)
 
 ### Note that 1st column is chr, 2nd and 3rd columns are starting and ending sites of peaks
 ### Remaining columns are other output from the peak detection algorithm

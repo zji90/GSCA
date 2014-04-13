@@ -7,7 +7,7 @@ GSCAplot <- function(GSCAoutput,N=5,plotfile=NULL,Title=NULL){
       chipdata <- GSCAoutput$Chipdata
       STYLES <- c(15:18,3)
       COLORS <- brewer.pal(5,"Set1")
-
+      
       if(chipdata == "hgu133a") {
             if (!require(Affyhgu133aExpr)) {
                   stop("Affyhgu133aExpr Package is not found")
@@ -72,7 +72,7 @@ GSCAplot <- function(GSCAoutput,N=5,plotfile=NULL,Title=NULL){
             for(i in 1:N) {
                   INDEX <- Ranking[i,"SampleType"]
                   points(Score[1,][tab$SampleType %in% INDEX],Score[2,][tab$SampleType %in% INDEX],
-                        col=COLORS[i],pch=STYLES[i],bg=COLORS[i])
+                         col=COLORS[i],pch=STYLES[i],bg=COLORS[i])
             }
             leg.txt <- c(substr(Ranking[1:N,"SampleType"],1,25),"Selected Samples","Not Selected Samples")
             if (length(leg.txt)==2) {
