@@ -6,8 +6,6 @@
 ##       Maintainer:Zhicheng Ji (zji4@jhu.edu)      ##
 ######################################################
 
-library(shiny)
-
 sidebarPanel3 <- function (...) 
 {
       div(class = "span3", tags$form(class = "well", ...))
@@ -126,7 +124,7 @@ shinyUI(pageWithSidebar(
                                                           wellPanel(
                                                                 h5("Numeric POI"),
                                                                 uiOutput("numericpoisliderui"),
-                                                                checkboxInput("numericpoimoreopcheck","More POI cutoff options"),
+                                                                checkboxInput("numericpoimoreopcheck","More POI cutoff options",value=T),
                                                                 conditionalPanel(condition="input.numericpoimoreopcheck==1",
                                                                                  uiOutput("numericpoimoreopgenesetnameui"),
                                                                                  selectInput("numericpoimoreopbound","Choose upper or lower bound",
@@ -228,8 +226,8 @@ shinyUI(pageWithSidebar(
                                             uiOutput("GSCAinteractiveplotthreezoominallpartsui"),
                                             uiOutput("GSCAinteractiveplotthreeplotplusui")
                                    ),
-                                   tabPanel("Ranking Table",dataTableOutput("GSCArankingtable")),
-                                   tabPanel("3D scatterplot",helpText("Should have X11 installed on your computer; Only available with three genesets"),webGLOutput("RGLplot",height="800px"))
+                                   tabPanel("Ranking Table",dataTableOutput("GSCArankingtable"))
+                                   #tabPanel("3D scatterplot",helpText("Should have X11 installed on your computer; Only available with three genesets"),webGLOutput("RGLplot",height="800px"))
                              )                
             ),
             conditionalPanel(condition="input.Mainmethod=='Download'",
