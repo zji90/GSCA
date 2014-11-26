@@ -680,7 +680,7 @@ shinyServer(function(input, output, session) {
                               p(actionButton('undo', 'Undo last Operation')),
                               p(actionButton('reset', 'Reset'))
                         )
-                  } else if (Maindata$dim == 3) {             
+                  } else if (Maindata$dim >= 3) {             
                         p(actionButton("GSCAinteractivethreeupdate","Update Sample Selection"))
                   }
             }
