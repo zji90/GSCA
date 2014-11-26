@@ -14,6 +14,6 @@ Description: GSCA takes as input several lists of activated and
 License: GPL(>=2)
 LazyLoad: yes
 Imports: graphics
-Depends: shiny, sp, gplots, ggplot2, reshape2, RColorBrewer, rhdf5, rgl, shinyRGL
+Depends: shiny, sp, gplots, ggplot2, reshape2, RColorBrewer, rhdf5
 Suggests: Affyhgu133aExpr, Affymoe4302Expr, Affyhgu133A2Expr, Affyhgu133Plus2Expr
 biocViews: GeneExpression, Visualization, GUI
