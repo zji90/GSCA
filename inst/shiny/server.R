@@ -847,10 +847,10 @@ shinyServer(function(input, output, session) {
                               lapply(1:ifelse(is.null(GSCAthreeinfo$sampleslidernum),1,GSCAthreeinfo$sampleslidernum) , function(i) {
                                     sliderInput(inputId = paste0("GSCAthreesampleslider",i),"",min=0,max=ncol(Maindata$GSCAscore),value=c(threesampleslidervalue[i,1],threesampleslidervalue[i,2]),step=1,width='1000px')
                               }),                              
-                              plotOutput("GSCAinteractiveplotthreecolbar",height=20,width='1000px'),
+                              plotOutput("GSCAinteractiveplotthreecolbar",height=20,width='1000px'),                              
                               plotOutput("GSCAinteractiveplotthreeheatmap",width='1000px'),
-                              plotOutput("GSCAinteractiveplotthreecolbarunder",height=20,width='1000px'),
-                              textOutput("GSCARinteractiveplotthreeheatmaprowlab")
+                              #plotOutput("GSCARinteractiveplotthreeheatmaprowlab"),
+                              plotOutput("GSCAinteractiveplotthreecolbarunder",height=20,width='1000px')
                         )                        
                   }     
             }      
@@ -1126,25 +1126,24 @@ shinyServer(function(input, output, session) {
                   })
       })
       
-      output$GSCARinteractiveplotthreeheatmaprowlab <- renderText({
-            #par(mar = c(0,0,0,0))
-            #plot(c(1, 1), c(Maindata$dim, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-            #pos <- seq(1.5-1/2/Maindata$dim,Maindata$dim-0.5+1/2/Maindata$dim,length.out=Maindata$dim)
-            if (input$heatmapthreerowv) {
-                  Rowv <- rowMeans(Maindata$GSCAscore)
-                  hcr <- hclust(dist(Maindata$GSCAscore))
-                  ddr <- as.dendrogram(hcr)
-                  ddr <- reorder(ddr, Rowv)
-                  rowInd <- order.dendrogram(ddr)
-                  names <- rev(row.names(Maindata$GSCAscore)[rowInd])
-            } else {
-                  names <- row.names(Maindata$GSCAscore)
-            }
-            #for (i in 1:Maindata$dim) {
-            #      text(1,pos[i],names[i],cex=1.3)
-            #}
-            paste0("From top to bottom: ",paste0(names,collapse = ","))
-      })
+      #       output$GSCARinteractiveplotthreeheatmaprowlab <- renderText({
+      #             par(mar = c(0,0,0,0))
+      #             plot(c(1, 1), c(Maindata$dim, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      #             pos <- seq(1.5-1/2/Maindata$dim,Maindata$dim-0.5+1/2/Maindata$dim,length.out=Maindata$dim)
+      #             if (input$heatmapthreerowv) {
+      #                   Rowv <- rowMeans(Maindata$GSCAscore)
+      #                   hcr <- hclust(dist(Maindata$GSCAscore))
+      #                   ddr <- as.dendrogram(hcr)
+      #                   ddr <- reorder(ddr, Rowv)
+      #                   rowInd <- order.dendrogram(ddr)
+      #                   names <- rev(row.names(Maindata$GSCAscore)[rowInd])
+      #             } else {
+      #                   names <- row.names(Maindata$GSCAscore)
+      #             }
+      #             for (i in 1:Maindata$dim) {
+      #                   text(1,pos[i],names[i],cex=1.3)
+      #             }
+      #       })
       
       output$GSCAinteractiveplotthreecolbar <- renderPlot({
             if (Maindata$dim >= 3) { 
@@ -1182,6 +1181,20 @@ shinyServer(function(input, output, session) {
                         image(1:ncol(Maindata$GSCAscore),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[rowInd,Maindata$GSCAclust$order]),col=bluered(100),axes=F,useRaster=T)
                   } else {
                         image(1:ncol(Maindata$GSCAscore),1:nrow(Maindata$GSCAscore),t(Maindata$threesupscore[nrow(Maindata$GSCAscore):1,Maindata$GSCAclust$order]),col=bluered(100),axes=F,useRaster=T)
+                  }
+                  pos <- 1:Maindata$dim
+                  if (input$heatmapthreerowv) {
+                        Rowv <- rowMeans(Maindata$GSCAscore)
+                        hcr <- hclust(dist(Maindata$GSCAscore))
+                        ddr <- as.dendrogram(hcr)
+                        ddr <- reorder(ddr, Rowv)
+                        rowInd <- order.dendrogram(ddr)
+                        names <- row.names(Maindata$GSCAscore)[rowInd]
+                  } else {
+                        names <- rev(row.names(Maindata$GSCAscore))
+                  }
+                  for (i in 1:Maindata$dim) {
+                        text(0.5*ncol(Maindata$GSCAscore),pos[i],names[i],cex=1.5)
                   }
             }
       })
@@ -1360,24 +1373,24 @@ shinyServer(function(input, output, session) {
             }
       })
       
-      output$GSCAinteractiveplotthreeheatmapzoominplotlab <- renderPlot({
-            par(mar = c(0,0,0,0))
-            plot(c(1, 1), c(Maindata$dim, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-            pos <- seq(1.5-1/2/Maindata$dim,Maindata$dim-0.5+1/2/Maindata$dim,length.out=Maindata$dim)
-            if (input$heatmapthreerowv) {
-                  Rowv <- rowMeans(Maindata$GSCAscore)
-                  hcr <- hclust(dist(Maindata$GSCAscore))
-                  ddr <- as.dendrogram(hcr)
-                  ddr <- reorder(ddr, Rowv)
-                  rowInd <- order.dendrogram(ddr)
-                  names <- row.names(Maindata$GSCAscore)[rowInd]
-            } else {
-                  names <- rev(row.names(Maindata$GSCAscore))
-            }
-            for (i in 1:Maindata$dim) {
-                  text(1,pos[i],names[i],cex=1.2)
-            }
-      })
+#       output$GSCAinteractiveplotthreeheatmapzoominplotlab <- renderPlot({
+#             par(mar = c(0,0,0,0))
+#             plot(c(1, 1), c(Maindata$dim, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+#             pos <- seq(1.5-1/2/Maindata$dim,Maindata$dim-0.5+1/2/Maindata$dim,length.out=Maindata$dim)
+#             if (input$heatmapthreerowv) {
+#                   Rowv <- rowMeans(Maindata$GSCAscore)
+#                   hcr <- hclust(dist(Maindata$GSCAscore))
+#                   ddr <- as.dendrogram(hcr)
+#                   ddr <- reorder(ddr, Rowv)
+#                   rowInd <- order.dendrogram(ddr)
+#                   names <- row.names(Maindata$GSCAscore)[rowInd]
+#             } else {
+#                   names <- rev(row.names(Maindata$GSCAscore))
+#             }
+#             for (i in 1:Maindata$dim) {
+#                   text(1,pos[i],names[i],cex=1.2)
+#             }
+#       })
       
       output$GSCAinteractiveplotthreeplus <- renderPlot({
             if (Maindata$dim >= 3 && length(Maindata$selectsample) > 0 && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
