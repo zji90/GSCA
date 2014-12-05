@@ -13,6 +13,7 @@ require(RColorBrewer)
 #require(shinyRGL)
 #require(rgl)
 require(rhdf5)
+require(GSCA)
 ###two genedata case initiate
 polycord <- NULL
 resetvalue <- 0
@@ -691,13 +692,13 @@ shinyServer(function(input, output, session) {
             if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) != 0) {
                   if (Maindata$dim == 1) {
                         tagList(
-                              helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
+                              h4(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
                               plotOutput("GSCAdefaultplotoneone",height=300),
                               plotOutput("GSCAdefaultplotonetwo",height=300*length(Maindata$GSCAcontext))
                         )
                   } else if (Maindata$dim == 2) {
                         div(align="center",
-                            helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
+                            h4(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
                             plotOutput("GSCAdefaultplottwo",width=900,height=900),
                             helpText(paste0("Correlation: ",Maindata$twocorr)),
                             helpText(paste0("Pearson Correlation Test p-value: ",Maindata$twocorrp)),
@@ -707,7 +708,7 @@ shinyServer(function(input, output, session) {
                   } else {
                         tagList(
                               plotOutput("GSCAdefaultplotthree"),
-                              helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
+                              h4(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
                               plotOutput("GSCAdefaultplotthreeplus")
                         )
                   }
@@ -824,6 +825,7 @@ shinyServer(function(input, output, session) {
                   if (Maindata$dim == 1) {
                         tagList(
                               helpText("Select sample range using sliders. The range would be the union set of multiple sliders. Click 'Update Sample Selection' button on the left sidepanel after selection finishes."),
+                              helpText('If the slider and the plot are not aligned, please zoom in the webpage. Windows: Hold "Control" and press "-"; Mac: Hold "Command" and press "-"'),
                               actionButton("GSCAonesampleaddslider","Add Slider"),
                               actionButton("GSCAonesampledeleteslider","Delete Slider"),
                               lapply(1:ifelse(is.null(GSCAoneinfo$sampleslidernum),1,GSCAoneinfo$sampleslidernum) , function(i) {
@@ -831,17 +833,18 @@ shinyServer(function(input, output, session) {
                               }),
                               plotOutput("GSCAinteractiveplotoneone",height=300,width='1000px'),
                               plotOutput("GSCAinteractiveplotonetwo",height=300*length(Maindata$GSCAcontext)),
-                              helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found",""))
+                              h4(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found",""))
                         )
                   } else if (Maindata$dim == 2) {
                         div(align="center",
                             plotOutput("GSCAinteractiveplottwo",clickId="coords",width=900,height=900),
                             plotOutput("GSCAinteractiveplottwoplus",width=900,height=900),
-                            helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found",""))
+                            h4(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found",""))
                         )      
                   } else {
                         tagList(          
                               helpText("Select sample range using sliders. The range would be the union set of multiple sliders. Click 'Update Sample Selection' button on the left sidepanel after selection finishes."),
+                              helpText('If the slider and the heatmap are not aligned, please zoom in the webpage. Windows: Hold "Control" and press "-"; Mac: Hold "Command" and press "-"'),
                               actionButton("GSCAthreesampleaddslider","Add Slider"),
                               actionButton("GSCAthreesampledeleteslider","Delete Slider"),                              
                               lapply(1:ifelse(is.null(GSCAthreeinfo$sampleslidernum),1,GSCAthreeinfo$sampleslidernum) , function(i) {
@@ -859,7 +862,7 @@ shinyServer(function(input, output, session) {
       output$GSCAinteractiveplotthreeplotplusui <- renderUI({
             if (!is.null(Maindata$dim) && Maindata$dim > 2 && input$GSCAmethod=='GSCAinteractive')
                   tagList(
-                        helpText(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
+                        h4(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
                         plotOutput("GSCAinteractiveplotthreeplus"))
       })
       
@@ -1373,24 +1376,24 @@ shinyServer(function(input, output, session) {
             }
       })
       
-#       output$GSCAinteractiveplotthreeheatmapzoominplotlab <- renderPlot({
-#             par(mar = c(0,0,0,0))
-#             plot(c(1, 1), c(Maindata$dim, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
-#             pos <- seq(1.5-1/2/Maindata$dim,Maindata$dim-0.5+1/2/Maindata$dim,length.out=Maindata$dim)
-#             if (input$heatmapthreerowv) {
-#                   Rowv <- rowMeans(Maindata$GSCAscore)
-#                   hcr <- hclust(dist(Maindata$GSCAscore))
-#                   ddr <- as.dendrogram(hcr)
-#                   ddr <- reorder(ddr, Rowv)
-#                   rowInd <- order.dendrogram(ddr)
-#                   names <- row.names(Maindata$GSCAscore)[rowInd]
-#             } else {
-#                   names <- rev(row.names(Maindata$GSCAscore))
-#             }
-#             for (i in 1:Maindata$dim) {
-#                   text(1,pos[i],names[i],cex=1.2)
-#             }
-#       })
+      #       output$GSCAinteractiveplotthreeheatmapzoominplotlab <- renderPlot({
+      #             par(mar = c(0,0,0,0))
+      #             plot(c(1, 1), c(Maindata$dim, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+      #             pos <- seq(1.5-1/2/Maindata$dim,Maindata$dim-0.5+1/2/Maindata$dim,length.out=Maindata$dim)
+      #             if (input$heatmapthreerowv) {
+      #                   Rowv <- rowMeans(Maindata$GSCAscore)
+      #                   hcr <- hclust(dist(Maindata$GSCAscore))
+      #                   ddr <- as.dendrogram(hcr)
+      #                   ddr <- reorder(ddr, Rowv)
+      #                   rowInd <- order.dendrogram(ddr)
+      #                   names <- row.names(Maindata$GSCAscore)[rowInd]
+      #             } else {
+      #                   names <- rev(row.names(Maindata$GSCAscore))
+      #             }
+      #             for (i in 1:Maindata$dim) {
+      #                   text(1,pos[i],names[i],cex=1.2)
+      #             }
+      #       })
       
       output$GSCAinteractiveplotthreeplus <- renderPlot({
             if (Maindata$dim >= 3 && length(Maindata$selectsample) > 0 && !all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
@@ -1908,6 +1911,47 @@ shinyServer(function(input, output, session) {
             }
       )
       
+      #####   Mainmethod : Utilities   #####
+      
+      data("geneIDdata")
+      Utidata <- reactiveValues()
+      
+      observe({
+            if (input$Utimethod=="Input") {
+                  UtiFileHandle <- input$UtiFile  
+                  if (!is.null(UtiFileHandle)) {
+                        Utidata$Maindata <- Utidata$rawdata <- read.table(UtiFileHandle$datapath,header=input$Utiheader,sep=input$Utisep,quote=input$Utiquote,stringsAsFactors=F,blank.lines.skip=TRUE)            
+                  }
+            }
+      })
+      
+      output$utishowdata <- renderDataTable(Utidata$Maindata)
+      
+      output$Uticonvertselectcolui <- renderUI({
+            if (!is.null(Utidata$Maindata))
+                  selectInput("Uticonvertselectcol","Select column to be converted",1:ncol(Utidata$Maindata))
+      })
+      
+      observe({
+            if (input$Uticonvertbut > 0) {
+                  isolate({
+                        colid <- as.numeric(input$Uticonvertselectcol)
+                        fromname <- paste(input$Utifromspecies,input$Utifromtype,sep="_")
+                        toname <- paste(input$Utitospecies,input$Utitotype,sep="_")                        
+                        Utidata$Maindata[,colid] <- geneIDdata[match(Utidata$Maindata[,colid], geneIDdata[,fromname]),toname] 
+                        Utidata$Maindata <- Utidata$Maindata[complete.cases(Utidata$Maindata),]
+                  })
+            }
+      })
+      
+      observe({
+            if (input$Utiresetbut > 0) {
+                  isolate({
+                        Utidata$Maindata <- Utidata$rawdata
+                  })
+            }
+      })
       
       
 })
+

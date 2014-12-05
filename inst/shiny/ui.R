@@ -29,6 +29,7 @@ shinyUI(pageWithSidebar(
                                     "Select geneset and compendium"="Select",
                                     "GSCA analysis"="GSCA",
                                     "Save results"="Download",
+                                    "Utilities"="Utilities",
                                     "About"="About")
                   )
             ),
@@ -173,8 +174,43 @@ shinyUI(pageWithSidebar(
                                          h5("Download plots"),
                                          uiOutput("Downloadsidebarui"))
                              )
-            )               
-            ,width=3),
+            ),
+            conditionalPanel(condition="input.Mainmethod=='Utilities'",                              
+                             h5("ENTREZ ID Conversion Tool"),
+                             wellPanel(
+                                   radioButtons("Utimethod","",c("Input File"="Input","Convert and Download"="Convert")),
+                                   conditionalPanel(condition="input.Utimethod=='Input'",                                                    
+                                                    fileInput('UtiFile', 'Choose File'),
+                                                    checkboxInput('Utiheader', 'Header', FALSE),
+                                                    radioButtons('Utisep', 'Separator',
+                                                                 c('Comma(csv)'=',',
+                                                                   'Semicolon'=';',
+                                                                   'Tab'='\t'),
+                                                                 ','),
+                                                    radioButtons('Utiquote', 'Quote',
+                                                                 c('None'='',
+                                                                   'Double Quote'='"',
+                                                                   'Single Quote'="'"),
+                                                                 '"')                  
+                                   ),
+                                   conditionalPanel(condition="input.Utimethod=='Convert'",
+                                                    uiOutput("Uticonvertselectcolui"),
+                                                    selectInput("Utifromspecies","Select original species",list("Human"="human","Mouse"="mouse")),
+                                                    selectInput("Utifromtype","Select original data type",list("ENTREZ ID"="ENTREZ","Gene Name"="genename")),
+                                                    selectInput("Utitospecies","Select target species",list("Human"="human","Mouse"="mouse")),
+                                                    selectInput("Utitotype","Select target data type",list("ENTREZ ID"="ENTREZ","Gene Name"="genename")),
+                                                    p(actionButton("Uticonvertbut","Convert"),actionButton("Utiresetbut","Reset")),
+                                                    downloadButton("Utidownloadbut","Download")
+                                   )                                   
+                             )
+                             
+                             
+                             
+                             
+                             
+            )
+            ,width=3),      
+      
       
       mainPanel(
             uiOutput("GSCAstatusui"),
@@ -230,6 +266,9 @@ shinyUI(pageWithSidebar(
                                    tabPanel("Plot",uiOutput("Downloadshowplotui")),
                                    tabPanel("Ranking Table",dataTableOutput("Downloadshowrankingtable"))
                              )
+            ),
+            conditionalPanel(condition="input.Mainmethod=='Utilities'",
+                              dataTableOutput("utishowdata")                
             ),
             conditionalPanel(condition="input.Mainmethod=='About'",
                              p('GSCA: Gene Set Context Analysis'),
