@@ -84,6 +84,12 @@ shinyUI(pageWithSidebar(
                                          h5("Select Geneset"),
                                          uiOutput("Summarydataselect")
                                    ),
+                                   checkboxInput("Summaryswitchordertf","Switch gene set order"),
+                                   conditionalPanel(condition = "input.Summaryswitchordertf==1",
+                                                    helpText("Switch the order of two gene sets"),
+                                                    uiOutput("Summaryswitchorderui"),
+                                                    p(actionButton("Summaryswitchbut","Switch"))
+                                                    ),
                                    wellPanel(
                                          h5("Select Compendium"),
                                          radioButtons("Summarycompmethod","",

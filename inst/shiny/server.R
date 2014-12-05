@@ -216,11 +216,32 @@ shinyServer(function(input, output, session) {
       ######  Mainmethod : Summary  ######
       
       Maindata <- reactiveValues()
-      
+            
       #Sidebar checkbox group for selecting dataset
       output$Summarydataselect <- renderUI({
             if (!is.null(Rawdata$genedata)) {
                   checkboxGroupInput("Selectedgeneset","",unique(Rawdata$genedata[,1]),selected=unique(Rawdata$genedata[,1]))
+            }
+      })
+      
+      #Change geneset order
+      output$Summaryswitchorderui <- renderUI({
+            tagList(
+                  selectInput("Summaryswitchgs1","Gene set 1",Rawdata$genedata$Genesetname),
+                  selectInput("Summaryswitchgs2","Gene set 2",Rawdata$genedata$Genesetname)
+            )
+      })
+      
+      observe({
+            if(input$Summaryswitchbut > 0) {
+                  isolate({                        
+                        id1 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs1)
+                        id2 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs2)
+                        tmp <- 1:nrow(Rawdata$genedata)
+                        tmp[id1] <- id2
+                        tmp[id2] <- id1
+                        Rawdata$genedata <- Rawdata$genedata[tmp,]
+                  })
             }
       })
       
