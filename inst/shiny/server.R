@@ -1952,6 +1952,13 @@ shinyServer(function(input, output, session) {
             }
       })
       
+      output$Utidownloadbut <- downloadHandler(
+            filename = function() { "ConvertedID.csv" },
+            content = function(file) {
+                  write.csv(Utidata$Maindata,file,row.names=F)     
+            }
+      )
+      
       
 })
 
