@@ -1960,7 +1960,7 @@ shinyServer(function(input, output, session) {
                         fromname <- paste(input$Utifromspecies,input$Utifromtype,sep="_")
                         toname <- paste(input$Utitospecies,input$Utitotype,sep="_")                        
                         Utidata$Maindata[,colid] <- geneIDdata[match(Utidata$Maindata[,colid], geneIDdata[,fromname]),toname] 
-                        Utidata$Maindata <- Utidata$Maindata[complete.cases(Utidata$Maindata),]
+                        Utidata$Maindata <- Utidata$Maindata[complete.cases(Utidata$Maindata),,drop=F]
                   })
             }
       })
