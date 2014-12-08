@@ -237,9 +237,29 @@ shinyServer(function(input, output, session) {
                   isolate({                        
                         id1 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs1)
                         id2 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs2)
-                        tmp <- 1:nrow(Rawdata$genedata)
-                        tmp[id1] <- id2
-                        tmp[id2] <- id1
+                        if (id1[1] < id2[1]) {
+                              header <- id1
+                              tailer <- id2
+                        } else {
+                              header <- id2
+                              tailer <- id1
+                        }
+                        if(header[1] != 1) {
+                              bfhead <- 1:(header[1]-1)
+                        } else {
+                              bfhead <- NULL
+                        }
+                        if (tailer[length(tailer)] == nrow(Rawdata$genedata)) {
+                              aftail <- NULL
+                        } else {
+                              aftail <- (tailer[length(tailer)] + 1):nrow(Rawdata$genedata)
+                        }
+                        if (header[length(header)] == tailer[1] - 1) {
+                              midpart <- NULL
+                        } else {
+                              midpart <- (header[length(header)]+1):(tailer[1] - 1)
+                        }
+                        tmp <- c(bfhead,id2,midpart,id1,aftail)
                         Rawdata$genedata <- Rawdata$genedata[tmp,]
                   })
             }
