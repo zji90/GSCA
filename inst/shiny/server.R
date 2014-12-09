@@ -234,7 +234,8 @@ shinyServer(function(input, output, session) {
       
       observe({
             if(input$Summaryswitchbut > 0) {
-                  isolate({                        
+                  isolate({              
+                        if (nchar(input$Summaryswitchgs1) > 0 && nchar(input$Summaryswitchgs2) > 0) {
                         id1 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs1)
                         id2 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs2)
                         if (id1[1] < id2[1]) {
@@ -259,8 +260,9 @@ shinyServer(function(input, output, session) {
                         } else {
                               midpart <- (header[length(header)]+1):(tailer[1] - 1)
                         }
-                        tmp <- c(bfhead,id2,midpart,id1,aftail)
+                        tmp <- c(bfhead,tailer,midpart,header,aftail)
                         Rawdata$genedata <- Rawdata$genedata[tmp,]
+                        }
                   })
             }
       })
@@ -395,8 +397,15 @@ shinyServer(function(input, output, session) {
                         } else {
                               tmpgeneexpr <- Maindata$uploadgeneexpr[tmpgeneset[,2],]
                         }        
-                        if (input$Summarycompscale)
-                              tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale))
+                        if (input$Summarycompscale) {                              
+                              if(input$Summarycompscalemet=="zmuv") {
+                                    tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale))   
+                              } else if(input$Summarycompscalemet=="zm") {
+                                    tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale,scale=F))
+                              } else if(input$Summarycompscalemet=="uv") {
+                                    tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale,center=F))
+                              }
+                        }                              
                         tmpgeneexpr <- sweep(tmpgeneexpr,1,tmpgeneset[,3],"*")       
                         rownames(tmpgeneexpr) <- tmpgeneset[,2]
                         genebreakdata$expr <- tmpgeneexpr
@@ -436,9 +445,13 @@ shinyServer(function(input, output, session) {
       observe({
             if (input$genesetbreakdownaddbutton > 0)
                   isolate({
-                        tmpgeneset <- genebreakdata$geneset
-                        for (i in 1:nrow(tmpgeneset)) {
-                              tmpgeneset[i,1] <-paste(tmpgeneset[i,1],genebreakdata$cutree[as.character(tmpgeneset[i,2])],sep="_")                        
+                        tmpgeneset <- genebreakdata$geneset  
+                        tmpnum <- 1
+                        while (paste0(tmpgeneset[1,1],"_breakdown",tmpnum,"_",genebreakdata$cutree[as.character(tmpgeneset[1,2])]) %in% Rawdata$genedata$Genesetname) {
+                              tmpnum <- tmpnum + 1
+                        }
+                        for (i in 1:nrow(tmpgeneset)) {                              
+                              tmpgeneset[i,1] <- paste0(tmpgeneset[i,1],"_breakdown",tmpnum,"_",genebreakdata$cutree[as.character(tmpgeneset[i,2])])
                         }
                         Rawdata$genedata <- rbind(Rawdata$genedata,tmpgeneset)
                   })
@@ -514,8 +527,15 @@ shinyServer(function(input, output, session) {
                                     } else {
                                           tmpgeneexpr <- Maindata$uploadgeneexpr[currentgeneset[,2],]
                                     }        
-                                    if (input$Summarycompscale)
-                                          tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale))
+                                    if (input$Summarycompscale) {                              
+                                          if(input$Summarycompscalemet=="zmuv") {
+                                                tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale))   
+                                          } else if(input$Summarycompscalemet=="zm") {
+                                                tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale,scale=F))
+                                          } else if(input$Summarycompscalemet=="uv") {
+                                                tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale,center=F))
+                                          }
+                                    }  
                                     tmpgeneexpr <- sweep(tmpgeneexpr,1,currentgeneset[,3],"*")            
                                     if (input$Summarygenesetactmethod == "average") {
                                           score <- colMeans(tmpgeneexpr)         

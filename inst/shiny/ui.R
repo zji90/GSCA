@@ -107,7 +107,9 @@ shinyUI(pageWithSidebar(
                                    ),
                                    wellPanel(
                                          h5("Other options"),
-                                         checkboxInput("Summarycompscale","Scale expression values across samples"),
+                                         checkboxInput("Summarycompscale","Scaling and centering expression values across samples"),
+                                         conditionalPanel("input.Summarycompscale==1",
+                                         radioButtons("Summarycompscalemet","",list("Centering and scaling"="zmuv","Only centering"="zm","Only scaling"="uv"))),
                                          radioButtons("Summarygenesetactmethod","Choose method of defining geneset activity",
                                                       list("Weighted average"="average",
                                                            "Median"="median"))
