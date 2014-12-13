@@ -1603,13 +1603,14 @@ shinyServer(function(input, output, session) {
                                     helpText("Change Plotting Details"),
                                     textInput("Downloadmaintitletwo","Enter Main Title","GSCA result"),
                                     textInput("Downloadpointsizetwo","Point size",1),
+                                    textInput("Downloadcextwo","Font size",1.7),
                                     textInput("Downloadxlabtwo","Enter Title for X Axis",Maindata$genesetname[1]),
                                     textInput("Downloadylabtwo","Enter Title for Y Axis",Maindata$genesetname[2]),
                                     textInput("Downloadxlimmintwo","Enter minimum value of X Axis",min(Maindata$GSCAscore[1,])),
                                     textInput("Downloadxlimmaxtwo","Enter maximum value of X Axis",max(Maindata$GSCAscore[1,])),
                                     textInput("Downloadylimmintwo","Enter minimum value of Y Axis",min(Maindata$GSCAscore[2,])),
                                     textInput("Downloadylimmaxtwo","Enter maximum value of Y Axis",max(Maindata$GSCAscore[2,])),
-                                    textInput("Downloadlegcextwo","Enter legend size",0.8),
+                                    textInput("Downloadlegcextwo","Enter legend size",0.6),
                                     checkboxInput("Downloadlegpostftwo","Change legend position",value=F),
                                     conditionalPanel(condition="input.Downloadlegpostftwo=='1'",
                                                      textInput("Downloadlegposxtwo","x-axis position",0),
@@ -1762,7 +1763,7 @@ shinyServer(function(input, output, session) {
       } 
       
       downloadtwofunc <- function() {
-            par(cex.main=2,cex.lab=2,cex.axis=2,mar=c(5,5,5,2),xpd=T)
+            par(cex=input$Downloadcextwo,mar=c(6,6,6,2),xpd=T)
             cortext <- paste0("Correlation: ",round(Maindata$twocorr,3),"; ","Correlation p-value: ",round(Maindata$twocorrp,3),"; ","Slope: ",round(Maindata$twoslope,3),"; ","Slope p-value: ",round(Maindata$twoslopep,3))
             if (input$Downloadregionselect == 'Numeric') {
                   plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],cex=as.numeric(input$Downloadpointsizetwo),col="#00000022",pch=20,xlab=input$Downloadxlabtwo,ylab=input$Downloadylabtwo,xlim = as.numeric(c(input$Downloadxlimmintwo,input$Downloadxlimmaxtwo)), ylim = as.numeric(c(input$Downloadylimmintwo,input$Downloadylimmaxtwo)),main=input$Downloadmaintitletwo)
