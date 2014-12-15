@@ -280,8 +280,8 @@ shinyUI(pageWithSidebar(
             ),
             conditionalPanel(condition="input.Mainmethod=='About'",
                              p('GSCA: Gene Set Context Analysis'),
-                             p('Current Version: 1.0.0'),
-                             p('Release Date: 2014-3-20'),
+                             p('Current Version: 1.5.0'),
+                             p('Release Date: 2014-12-15'),
                              p('Author: Zhicheng Ji,Hongkai Ji'),
                              p('Maintainer: Zhicheng Ji <zji4@jhu.edu>'),
                              p(a("Visit web page of our lab",href="http://www.biostat.jhsph.edu/~hji/",target="_blank"))

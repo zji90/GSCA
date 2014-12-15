@@ -57,14 +57,27 @@ shinyServer(function(input, output, session) {
       
       output$GSCAstatusui <- renderUI({
             if (!is.null(GSCAstatus$status) && GSCAstatus$status) {
-                  tags$h5("GSCA status: Computing...Please Wait...")
-            } else {
                   tagList(
-                        conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                         tags$h5("GSCA status: Computing...Please Wait...")),
-                        conditionalPanel(condition="!$('html').hasClass('shiny-busy')",
-                                         tags$h5("GSCA status: idle"))
-                  )
+                        tags$head(
+                              tags$link(rel="stylesheet", type="text/css",href="style.css"),
+                              tags$script(type="text/javascript", src = "busy.js")
+                        ),
+                        
+                        div(class = "busy",  
+                            p("Calculation in progress.."), 
+                            img(src="ajaxloaderq.gif")
+                        )
+                  )        
+            } else {
+                  conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                   tags$head(
+                                         tags$link(rel="stylesheet", type="text/css",href="style.css"),
+                                         tags$script(type="text/javascript", src = "busy.js")
+                                   ),                                   
+                                   div(class = "busy",  
+                                       p("Calculation in progress.."), 
+                                       img(src="ajaxloaderq.gif")
+                                   ))                  
             }
       })
       
@@ -216,7 +229,7 @@ shinyServer(function(input, output, session) {
       ######  Mainmethod : Summary  ######
       
       Maindata <- reactiveValues()
-            
+      
       #Sidebar checkbox group for selecting dataset
       output$Summarydataselect <- renderUI({
             if (!is.null(Rawdata$genedata)) {
@@ -236,32 +249,32 @@ shinyServer(function(input, output, session) {
             if(input$Summaryswitchbut > 0) {
                   isolate({              
                         if (nchar(input$Summaryswitchgs1) > 0 && nchar(input$Summaryswitchgs2) > 0) {
-                        id1 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs1)
-                        id2 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs2)
-                        if (id1[1] < id2[1]) {
-                              header <- id1
-                              tailer <- id2
-                        } else {
-                              header <- id2
-                              tailer <- id1
-                        }
-                        if(header[1] != 1) {
-                              bfhead <- 1:(header[1]-1)
-                        } else {
-                              bfhead <- NULL
-                        }
-                        if (tailer[length(tailer)] == nrow(Rawdata$genedata)) {
-                              aftail <- NULL
-                        } else {
-                              aftail <- (tailer[length(tailer)] + 1):nrow(Rawdata$genedata)
-                        }
-                        if (header[length(header)] == tailer[1] - 1) {
-                              midpart <- NULL
-                        } else {
-                              midpart <- (header[length(header)]+1):(tailer[1] - 1)
-                        }
-                        tmp <- c(bfhead,tailer,midpart,header,aftail)
-                        Rawdata$genedata <- Rawdata$genedata[tmp,]
+                              id1 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs1)
+                              id2 <- which(Rawdata$genedata$Genesetname==input$Summaryswitchgs2)
+                              if (id1[1] < id2[1]) {
+                                    header <- id1
+                                    tailer <- id2
+                              } else {
+                                    header <- id2
+                                    tailer <- id1
+                              }
+                              if(header[1] != 1) {
+                                    bfhead <- 1:(header[1]-1)
+                              } else {
+                                    bfhead <- NULL
+                              }
+                              if (tailer[length(tailer)] == nrow(Rawdata$genedata)) {
+                                    aftail <- NULL
+                              } else {
+                                    aftail <- (tailer[length(tailer)] + 1):nrow(Rawdata$genedata)
+                              }
+                              if (header[length(header)] == tailer[1] - 1) {
+                                    midpart <- NULL
+                              } else {
+                                    midpart <- (header[length(header)]+1):(tailer[1] - 1)
+                              }
+                              tmp <- c(bfhead,tailer,midpart,header,aftail)
+                              Rawdata$genedata <- Rawdata$genedata[tmp,]
                         }
                   })
             }
