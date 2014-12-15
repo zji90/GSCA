@@ -154,7 +154,7 @@ shinyServer(function(input, output, session) {
       
       output$OutputCurrentGenedatawarnui <- renderUI({
             if (input$InputGenesetmethod == 'InputuploadGeneset' && is.null(Currentdata$genedata))
-                  helpText("If nothing appears, make sure entries in weight column are all numeric and try following: change the separator; change the quote; check the header option")
+                  helpText("If nothing appears, make sure entries in weight column are all numeric and try the followings: change the separator; change the quote; check the header option")
       })
       
       output$OutputCurrentGenedata <- renderDataTable(Currentdata$genedata)
@@ -177,7 +177,7 @@ shinyServer(function(input, output, session) {
                   namelist <- list()
                   for (i in unique(Rawdata$genedata$Genesetname))
                         eval(parse(text=paste0("namelist <- c(namelist,`",i,"`=i)")))
-                  checkboxGroupInput("Indigenesetname","Choose Geneset Name",namelist)
+                  checkboxGroupInput("Indigenesetname","Choose Gene Set",namelist)
             }
       })
       
@@ -191,7 +191,7 @@ shinyServer(function(input, output, session) {
       
       output$OutputGenedataname <- renderText({
             if (is.null(Rawdata$genedata)){
-                  "No input genedata in GSCA"
+                  "No gene set"
             } else {
                   do.call("paste",c(as.list(unique(Rawdata$genedata$Genesetname)),sep=","))
             }
@@ -240,8 +240,8 @@ shinyServer(function(input, output, session) {
       #Change geneset order
       output$Summaryswitchorderui <- renderUI({
             tagList(
-                  selectInput("Summaryswitchgs1","Gene set 1",Rawdata$genedata$Genesetname),
-                  selectInput("Summaryswitchgs2","Gene set 2",Rawdata$genedata$Genesetname)
+                  selectInput("Summaryswitchgs1","Gene Set 1",Rawdata$genedata$Genesetname),
+                  selectInput("Summaryswitchgs2","Gene Set 2",Rawdata$genedata$Genesetname)
             )
       })
       
@@ -359,7 +359,7 @@ shinyServer(function(input, output, session) {
                               sumtable[i,2] <- sum(Rawdata$genedata[,1] == sumtable[i,1])
                               sumtable[i,3] <- sum(Maindata$genedata[,1] == sumtable[i,1])
                         }
-                        names(sumtable) <- c("Genesetname","Original Number of Genes","Number of Genes in Compendium")
+                        names(sumtable) <- c("Gene Set","Original Number of Genes","Number of Genes in Compendium")
                         sumtable
                   }
       })    
@@ -369,7 +369,7 @@ shinyServer(function(input, output, session) {
             if (!is.null(Maindata$dim))
                   if (Maindata$dim != length(input$Selectedgeneset)) {
                         tagList(
-                              br(h4("Following genedata do not contain any gene in the selected compendium, thus omitted:")),
+                              br(h4("Following gene sets do not contain any gene in the selected compendium, thus omitted:")),
                               textOutput("Outputmissinggenesetreporttext")
                         )
                   }
@@ -390,13 +390,13 @@ shinyServer(function(input, output, session) {
                         if (sum(Maindata$genedata$Genesetname==i) > 1)
                               eval(parse(text=paste0("namelist <- c(namelist,`",i,"`=i)")))
                   if (length(namelist) > 0)
-                        radioButtons("genesetbreakdownchoose","Choose one of the geneset with at least two genes.",namelist)
+                        radioButtons("genesetbreakdownchoose","Choose one of the gene sets with at least two genes",namelist)
             }
       })
       
       output$genesetbreakdowntreenumui <- renderUI({
             if (!is.null(genebreakdata$expr))
-                  sliderInput("genesetbreakdowntreenum","Choose number of groups",min=1,max=min(12,nrow(genebreakdata$expr)),value=1,step=1)
+                  sliderInput("genesetbreakdowntreenum","Choose number of clusters",min=1,max=min(12,nrow(genebreakdata$expr)),value=1,step=1)
       })
       
       observe({
@@ -513,7 +513,7 @@ shinyServer(function(input, output, session) {
                   FIN <- FIN[order(as.numeric(FIN[,"Adj.Pvalue"],-1*as.numeric(FIN[,"Active"]),decreasing=FALSE)),]
                   FIN[,4] <- signif(FIN[,4],3)
                   if(is.null(dim(FIN)) | nrow(FIN)==0) {
-                        message("No significant biological contexts found.")
+                        message("No significantly enriched biological contexts found.")
                   } else {
                         FIN <- cbind(1:nrow(FIN),FIN)
                         colnames(FIN)[1] <- "Rank"
@@ -616,7 +616,7 @@ shinyServer(function(input, output, session) {
       output$numericpoimoreopgenesetnameui <- renderUI({
             if (!is.null(Maindata$genesetname))
                   tagList(
-                        selectInput("numericpoimoreopselectgene","Select geneset",Maindata$genesetname)
+                        selectInput("numericpoimoreopselectgene","Select Gene Set",Maindata$genesetname)
                   )
       })
       
@@ -749,10 +749,10 @@ shinyServer(function(input, output, session) {
                         p(actionButton("GSCAinteractiveoneupdate","Update Sample Selection"))
                   } else if (Maindata$dim == 2) {
                         tagList(
-                              helpText("Build polygon by clicking on the scatterplot"),
+                              helpText("Draw polygon by clicking on the scatterplot"),
                               p(actionButton('finishpolygon', 'Finish Drawing Polygon')),
                               p(actionButton('addpolygon', 'Add New Polygon')),
-                              p(actionButton('undo', 'Undo last Operation')),
+                              p(actionButton('undo', 'Undo Last Operation')),
                               p(actionButton('reset', 'Reset'))
                         )
                   } else if (Maindata$dim >= 3) {             
@@ -791,7 +791,7 @@ shinyServer(function(input, output, session) {
       
       output$GSCAdefaultplotoneone <- renderPlot({
             if (Maindata$dim == 1) {
-                  hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All sample in the compendium",cex.main=2)
+                  hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All samples in the compendium",cex.main=2)
                   abline(v=Maindata$cutoffval[1,1], lty=2)
                   abline(v=Maindata$cutoffval[1,2], lty=2)
                   GSCAstatus$status <- 0
@@ -863,9 +863,9 @@ shinyServer(function(input, output, session) {
                   if (input$heatmapthreerowv)
                         tmprowv <- Maindata$GSCArowclust
                   if (!all(Maindata$threesupscore==Maindata$threesupscore[1,1])) {
-                        heatmap.2(Maindata$threesupscore,col=bluered(100),symbreaks=F,Colv=as.dendrogram(Maindata$GSCAclust),dendrogram="none",trace="none",Rowv=tmprowv,labCol=NA,ColSideColors=colcolorall,main="All Sample Heatmap",useRaster=T)
+                        heatmap.2(Maindata$threesupscore,col=bluered(100),symbreaks=F,Colv=as.dendrogram(Maindata$GSCAclust),dendrogram="none",trace="none",Rowv=tmprowv,labCol=NA,ColSideColors=colcolorall,main="All Samples",useRaster=T)
                   }
-                  legend("bottomleft",legend=c("Selected Sample","Unselected Sample"),lwd=1,col=c("blue","cyan"))
+                  legend("bottomleft",legend=c("Selected Samples","Not Selected Samples"),lwd=1,col=c("blue","cyan"))
                   GSCAstatus$status <- 0
             }
       })
@@ -883,12 +883,12 @@ shinyServer(function(input, output, session) {
                               colcolorselect[Maindata$tab$SampleType %in% INDEX] <- COLORS[i]
                               i <- i+1
                         }
-                        heatmap.2(Maindata$threesupscore[,Maindata$defaultsample],symbreaks=F,col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$defaultsample],main="Selected Sample Heatmap",useRaster=T,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101))
+                        heatmap.2(Maindata$threesupscore[,Maindata$defaultsample],symbreaks=F,col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$defaultsample],main="Selected Samples",useRaster=T,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101))
                         leg.txt <- substr(Maindata$GSCAcontext,1,25)
                         legend("bottomleft",legend=leg.txt,lwd=1,col=COLORS)
                   } else {
                         if (length(Maindata$defaultsample) > 1)
-                              heatmap.2(Maindata$threesupscore[,Maindata$defaultsample],symbreaks=F,col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101))
+                              heatmap.2(Maindata$threesupscore[,Maindata$defaultsample],symbreaks=F,col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Samples",useRaster=T,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101))
                   }
             }
       })
@@ -898,7 +898,7 @@ shinyServer(function(input, output, session) {
             if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) != 0) {
                   if (Maindata$dim == 1) {
                         tagList(
-                              helpText("Select sample range using sliders. The range would be the union set of multiple sliders. Click 'Update Sample Selection' button on the left sidepanel after selection finishes."),
+                              helpText("Select sample range using sliders. The range would be the union of multiple sliders. After selection, click 'Update Sample Selection' button on the left sidepanel."),
                               helpText('If the slider and the plot are not aligned, please zoom in the webpage. Windows: Hold "Control" and press "-"; Mac: Hold "Command" and press "-"'),
                               actionButton("GSCAonesampleaddslider","Add Slider"),
                               actionButton("GSCAonesampledeleteslider","Delete Slider"),
@@ -917,7 +917,7 @@ shinyServer(function(input, output, session) {
                         )      
                   } else {
                         tagList(          
-                              helpText("Select sample range using sliders. The range would be the union set of multiple sliders. Click 'Update Sample Selection' button on the left sidepanel after selection finishes."),
+                              helpText("Select sample range using sliders. The range would be the union set of multiple sliders. After selection, click 'Update Sample Selection' button on the left sidepanel."),
                               helpText('If the slider and the heatmap are not aligned, please zoom in the webpage. Windows: Hold "Control" and press "-"; Mac: Hold "Command" and press "-"'),
                               actionButton("GSCAthreesampleaddslider","Add Slider"),
                               actionButton("GSCAthreesampledeleteslider","Delete Slider"),                              
@@ -1147,7 +1147,7 @@ shinyServer(function(input, output, session) {
                               checkboxInput("heatmapcolorsuppresscheck","Suppress heatmap color range"),
                               conditionalPanel("input.heatmapcolorsuppresscheck == 1",
                                                helpText("Note: this function only impacts heatmap display. GSCA results will not change."),
-                                               sliderInput("heatmapcolorsuppressslider","choose value boundaries",min=min(Maindata$GSCAscore),max=max(Maindata$GSCAscore),value=c(min(Maindata$GSCAscore),max(Maindata$GSCAscore)))
+                                               sliderInput("heatmapcolorsuppressslider","Choose color boundaries",min=min(Maindata$GSCAscore),max=max(Maindata$GSCAscore),value=c(min(Maindata$GSCAscore),max(Maindata$GSCAscore)))
                               )
                         )
                   }
@@ -1283,10 +1283,10 @@ shinyServer(function(input, output, session) {
                         tagList(
                               checkboxInput("GSCAinteractiveplotthreeheatmapzoomincheck","Heatmap zoom in"),
                               conditionalPanel("input.GSCAinteractiveplotthreeheatmapzoomincheck==1",
-                                               helpText("Zoom in part of the heatmap with selected samples"),
-                                               checkboxInput("GSCAinteractiveplotthreeheatmapzoominrealtime","Real time zoom in"),
+                                               helpText("Zoom in selected part of the heatmap"),
+                                               checkboxInput("GSCAinteractiveplotthreeheatmapzoominrealtime","Real time zoom in",value = T),
                                                conditionalPanel("input.GSCAinteractiveplotthreeheatmapzoominrealtime==0",
-                                                                p(actionButton("GSCAinteractiveplotthreeheatmapzoominupdate","Update sample selection"))),
+                                                                p(actionButton("GSCAinteractiveplotthreeheatmapzoominupdate","Update Sample Selection"))),
                                                uiOutput("GSCAinteractiveplotthreeheatmapzoominplotui")
                               )
                         )
@@ -1488,11 +1488,11 @@ shinyServer(function(input, output, session) {
                                           i <- i+1
                                     }
                                     leg.txt <- substr(Maindata$GSCAcontext,1,25)
-                                    heatmap.2(Maindata$threesupscore[,Maindata$selectsample],symbreaks=F,col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$selectsample],main="Selected Sample Heatmap",useRaster=T,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101))
+                                    heatmap.2(Maindata$threesupscore[,Maindata$selectsample],symbreaks=F,col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",ColSideColors=colcolorselect[Maindata$selectsample],main="Selected Samples",useRaster=T,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101))
                                     legend("bottomleft",legend=leg.txt,lwd=1,col=COLORS)
                               } else {
                                     if (length(Maindata$selectsample) > 1)
-                                          heatmap.2(Maindata$threesupscore[,Maindata$selectsample],symbreaks=F,col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Sample Heatmap",useRaster=T,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101))
+                                          heatmap.2(Maindata$threesupscore[,Maindata$selectsample],symbreaks=F,col=bluered,labCol=NA,Rowv=tmprowv,dendrogram="none",trace="none",main="Selected Samples",useRaster=T,breaks=seq(min(Maindata$threesupscore),max(Maindata$threesupscore),length.out=101))
                               }
                         })
                   }
@@ -1587,15 +1587,15 @@ shinyServer(function(input, output, session) {
                   if (Maindata$dim == 1) {
                         tagList(
                               wellPanel(
-                                    selectInput("Downloadplotonetype","Select File Type for Plot",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
-                                    textInput("Downloadplotonefilename","Enter File Name","GSCA Plot"),
-                                    textInput("Downloadplotonefilewidth","Enter plot width (inches)",10),
-                                    textInput("Downloadplotonefileheight","Enter plot height (inches)",3*(as.numeric(input$InputN)+1)),
+                                    selectInput("Downloadplotonetype","Select File Type",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
+                                    textInput("Downloadplotonefilename","File Name","GSCA Plot"),
+                                    textInput("Downloadplotonefilewidth","Plot Width (inches)",10),
+                                    textInput("Downloadplotonefileheight","Plot Height (inches)",3*(as.numeric(input$InputN)+1)),
                                     p(downloadButton("Downloadplotone","Save Plot"))
                               ),
                               wellPanel(
                                     helpText("Change Plotting Details"),
-                                    textInput("Downloadmaintitleone","Enter Main Title","GSCA result"),
+                                    textInput("Downloadmaintitleone","Enter Main Title",""),
                                     textInput("Downloadxlabone","Enter Title for X Axis","SampleScore"),
                                     textInput("Downloadylabone","Enter Title for Y Axis","Frequency"),
                                     textInput("Downloadxlimminone","Enter minimum value of X Axis",min(Maindata$GSCAscore)),
@@ -1606,62 +1606,62 @@ shinyServer(function(input, output, session) {
                   } else if (Maindata$dim == 2) {
                         tagList(
                               wellPanel(
-                                    selectInput("Downloadplottwotype","Select File Type for Plot",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
-                                    textInput("Downloadplottwofilename","Enter File Name","GSCA Plot"),
-                                    textInput("Downloadplottwofilewidth","Enter plot width (inches)",15),
-                                    textInput("Downloadplottwofileheight","Enter plot height (inches)",15),
+                                    selectInput("Downloadplottwotype","Select File Type",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
+                                    textInput("Downloadplottwofilename","File Name","GSCA Plot"),
+                                    textInput("Downloadplottwofilewidth","Plot Width (inches)",15),
+                                    textInput("Downloadplottwofileheight","Plot Height (inches)",15),
                                     p(downloadButton("Downloadplottwo","Save Plot"))
                               ),
                               wellPanel(
                                     helpText("Change Plotting Details"),
-                                    textInput("Downloadmaintitletwo","Enter Main Title","GSCA result"),
+                                    textInput("Downloadmaintitletwo","Enter Main Title",""),
                                     textInput("Downloadpointsizetwo","Point size",1),
                                     textInput("Downloadcextwo","Font size",1.7),
-                                    textInput("Downloadxlabtwo","Enter Title for X Axis",Maindata$genesetname[1]),
-                                    textInput("Downloadylabtwo","Enter Title for Y Axis",Maindata$genesetname[2]),
-                                    textInput("Downloadxlimmintwo","Enter minimum value of X Axis",min(Maindata$GSCAscore[1,])),
-                                    textInput("Downloadxlimmaxtwo","Enter maximum value of X Axis",max(Maindata$GSCAscore[1,])),
-                                    textInput("Downloadylimmintwo","Enter minimum value of Y Axis",min(Maindata$GSCAscore[2,])),
-                                    textInput("Downloadylimmaxtwo","Enter maximum value of Y Axis",max(Maindata$GSCAscore[2,])),
-                                    textInput("Downloadlegcextwo","Enter legend size",0.6),
-                                    checkboxInput("Downloadlegpostftwo","Change legend position",value=F),
+                                    textInput("Downloadxlabtwo","Title for X Axis",Maindata$genesetname[1]),
+                                    textInput("Downloadylabtwo","Title for Y Axis",Maindata$genesetname[2]),
+                                    textInput("Downloadxlimmintwo","Minimum Value of X Axis",min(Maindata$GSCAscore[1,])),
+                                    textInput("Downloadxlimmaxtwo","Maximum Value of X Axis",max(Maindata$GSCAscore[1,])),
+                                    textInput("Downloadylimmintwo","Minimum Value of Y Axis",min(Maindata$GSCAscore[2,])),
+                                    textInput("Downloadylimmaxtwo","Maximum Value of Y Axis",max(Maindata$GSCAscore[2,])),
+                                    textInput("Downloadlegcextwo","Legend Size",0.6),
+                                    checkboxInput("Downloadlegpostftwo","Change Legend Position",value=F),
                                     conditionalPanel(condition="input.Downloadlegpostftwo=='1'",
                                                      textInput("Downloadlegposxtwo","x-axis position",0),
                                                      textInput("Downloadlegposytwo","y-axis position",0)
                                     ),
-                                    checkboxInput("Downloadcorvaluetwo","Show correlation and p-value")
+                                    checkboxInput("Downloadcorvaluetwo","Show Correlation and p-value")
                               )
                         )
                   } else {
                         tagList(
                               wellPanel(
-                                    selectInput("Downloadplotthreeplotonetype","Select File Type for Heatmap One",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
-                                    textInput("Downloadplotthreeplotonefilename","Enter File Name","GSCA Heatmap One"),
-                                    textInput("Downloadplotthreeplotonefilewidth","Enter plot width (inches)",20),
-                                    textInput("Downloadplotthreeplotonefileheight","Enter plot height (inches)",8),
+                                    selectInput("Downloadplotthreeplotonetype","File Type for Heatmap One",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
+                                    textInput("Downloadplotthreeplotonefilename","File Name","GSCA Heatmap One"),
+                                    textInput("Downloadplotthreeplotonefilewidth","Plot Width (inches)",20),
+                                    textInput("Downloadplotthreeplotonefileheight","Plot Height (inches)",8),
                                     p(downloadButton("Downloadplotthreeplotone","Save Heatmap One")),
-                                    selectInput("Downloadplotthreeplottwotype","Select File Type for Heatmap Two",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
-                                    textInput("Downloadplotthreeplottwofilename","Enter File Name","GSCA Heatmap Two"),
-                                    textInput("Downloadplotthreeplottwofilewidth","Enter plot width (inches)",20),
-                                    textInput("Downloadplotthreeplottwofileheight","Enter plot height (inches)",8),
+                                    selectInput("Downloadplotthreeplottwotype","File Type for Heatmap Two",choices=c("pdf","png","ps","jpeg","bmp","tiff")),
+                                    textInput("Downloadplotthreeplottwofilename","File Name","GSCA Heatmap Two"),
+                                    textInput("Downloadplotthreeplottwofilewidth","Plot Width (inches)",20),
+                                    textInput("Downloadplotthreeplottwofileheight","Plot Height (inches)",8),
                                     p(downloadButton("Downloadplotthreeplottwo","Save Heatmap Two"))
                               ),
                               wellPanel(
                                     helpText("Change Plotting Details"),
-                                    textInput("Downloadmaintitlethreeplotone","Enter Main Title For Heatmap One","All Sample Heatmap"),
-                                    textInput("Downloadmaintitlethreeplottwo","Enter Main Title For Heatmap Two","Selected Sample Heatmap"),
-                                    selectInput("Downloadthreecolplotone","Select Palette for Heatmap One",choices=c("Bluered","Heat","Rainbow","Terrain","Topo","CM","gray")),
-                                    selectInput("Downloadthreecolplottwo","Select Palette for Heatmap Two",choices=c("Bluered","Heat","Rainbow","Terrain","Topo","CM","gray")),
+                                    textInput("Downloadmaintitlethreeplotone","Main Title For Heatmap One","All Samples"),
+                                    textInput("Downloadmaintitlethreeplottwo","Main Title For Heatmap Two","Selected Samples"),
+                                    selectInput("Downloadthreecolplotone","Palette for Heatmap One",choices=c("Bluered","Heat","Rainbow","Terrain","Topo","CM","gray")),
+                                    selectInput("Downloadthreecolplottwo","Palette for Heatmap Two",choices=c("Bluered","Heat","Rainbow","Terrain","Topo","CM","gray")),
                                     checkboxInput("Downloadthreecoldendplotone","Display Column Histogram in Heatmap One (Could take some time)"),
                                     checkboxInput("Downloadthreecoldendplottwo","Display Column Histogram in Heatmap Two"),
-                                    checkboxInput("Downloadthreerowvplotone","Cluster on rows in Heatmap One"),
+                                    checkboxInput("Downloadthreerowvplotone","Cluster on Rows in Heatmap One"),
                                     uiOutput("Downloadthreerowdendplotoneui"),
-                                    checkboxInput("Downloadthreerowvplottwo","Cluster on rows in Heatmap Two"),
+                                    checkboxInput("Downloadthreerowvplottwo","Cluster on Rows in Heatmap Two"),
                                     uiOutput("Downloadthreerowdendplottwoui"),
-                                    checkboxInput("Downloadthreerotatelabplotone","Rotate row label in Heatmap One"),
-                                    checkboxInput("Downloadthreerotatelabplottwo","Rotate row label in Heatmap Two"),
-                                    textInput("Downloadlegcexthreeone","Enter legend size in Heatmap One",1),
-                                    textInput("Downloadlegcexthreetwo","Enter legend size in Heatmap Two",1)
+                                    checkboxInput("Downloadthreerotatelabplotone","Rotate Row Label in Heatmap One"),
+                                    checkboxInput("Downloadthreerotatelabplottwo","Rotate Row Label in Heatmap Two"),
+                                    textInput("Downloadlegcexthreeone","Legend Size in Heatmap One",1),
+                                    textInput("Downloadlegcexthreetwo","Legend Size in Heatmap Two",1)
                               )
                         )
                   }
@@ -1761,7 +1761,7 @@ shinyServer(function(input, output, session) {
                   colcolorall <- rep("black",ncol(Maindata$GSCAscore))
                   colcolorall[selectsample] <- "cyan"
                   plot(1:ncol(Maindata$GSCAscore),sort(Maindata$GSCAscore),xaxs="i",yaxs="i",cex.main=2,xlab="",ylab="Gene expression value",pch=16,col=colcolorall[order(Maindata$GSCAscore)])
-                  legend("topleft",legend=c("Selected samples","Not selected samples"),pch=c(20,20),pt.bg=c("cyan","black"),col=c("cyan","black"),cex=0.8)
+                  legend("topleft",legend=c("Selected Samples","Not Selected Samples"),pch=c(20,20),pt.bg=c("cyan","black"),col=c("cyan","black"),cex=0.8)
             }
             if (!is.null(Maindata$downloadcontext)) {
                   for(INDEX in Maindata$downloadcontext) {
@@ -1896,7 +1896,7 @@ shinyServer(function(input, output, session) {
             if (input$Downloadthreerowvplotone)
                   tmprowv <- Maindata$GSCArowclust
             heatmap.2(Maindata$threesupscore,symbreaks=F,col=threepalette(input$Downloadthreecolplotone),Colv=as.dendrogram(Maindata$GSCAclust),srtRow=ifelse(input$Downloadthreerotatelabplotone,-45,0),dendrogram=threeonedendro,trace="none",Rowv=tmprowv,labCol=NA,ColSideColors=colcolorall,main=input$Downloadmaintitlethreeplotone)
-            legend("bottomleft",legend=c("Selected Sample","Unselected Sample"),lwd=1,col=c("blue","cyan"),cex=as.numeric(input$Downloadlegcexthreeone))           
+            legend("bottomleft",legend=c("Selected Samples","Not Selected Samples"),lwd=1,col=c("blue","cyan"),cex=as.numeric(input$Downloadlegcexthreeone))           
       }
       
       downloadthreetwofunc <- function() {
