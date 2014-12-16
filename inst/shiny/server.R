@@ -589,25 +589,44 @@ shinyServer(function(input, output, session) {
       })
       
       #Numeric POI
-      output$numericpoisliderui <- renderUI({
-            if (!is.null(Maindata$dim) && input$Mainmethod=='GSCA')
-                  lapply(1:Maindata$dim, function(i) {
-                        tmpmin <- mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,])
-                        sliderInput(inputId = paste0("GSCAnumericpoislider",i), label = Maindata$genesetname[i], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(tmpmin, max(Maindata$GSCAscore[i,])))
-                  })
+      output$numericpoiui <- renderUI({
+            if (!is.null(Maindata$dim) && input$Mainmethod=='GSCA') {
+                  if (input$numericpoimethod == "slider") {
+                        lapply(1:Maindata$dim, function(i) {
+                              tmpmin <- mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,])
+                              sliderInput(inputId = paste0("GSCAnumericpoislider",i), label = Maindata$genesetname[i], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(tmpmin, max(Maindata$GSCAscore[i,])))
+                        })      
+                  } else {
+                        lapply(1:Maindata$dim, function(i) {
+                              tmpmin <- mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,])
+                              list(textInput(inputId = paste0("GSCAnumericpoitextlower",i), label = paste(Maindata$genesetname[i],"Lower Bound"), tmpmin)
+                                   ,textInput(inputId = paste0("GSCAnumericpoitextupper",i), label = paste(Maindata$genesetname[i],"Upper Bound"), max(Maindata$GSCAscore[i,])))
+                        })
+                  }
+            }                  
       })
       
       observe({
             if (!is.null(Maindata$dim) && !is.null(Maindata$GSCAscore) && input$Mainmethod=='GSCA') {
                   selectsample <- 1:nrow(Maindata$tab)
                   cutoffval <- matrix(0,Maindata$dim,2)
-                  for (i in 1:Maindata$dim) {
-                        if(!is.null(eval(parse(text=paste0("input$GSCAnumericpoislider",i,"[1]"))))) {
-                              eval(parse(text=paste0("cutoffval[",i,",1] <- input$GSCAnumericpoislider",i,"[1]")))
-                              eval(parse(text=paste0("cutoffval[",i,",2] <- input$GSCAnumericpoislider",i,"[2]")))
-                              selectsample <- intersect(selectsample,which(Maindata$GSCAscore[i,] >= cutoffval[i,1] & Maindata$GSCAscore[i,] <= cutoffval[i,2]))
-                        }
-                  }            
+                  if (input$numericpoimethod == "slider") {
+                        for (i in 1:Maindata$dim) {
+                              if(!is.null(eval(parse(text=paste0("input$GSCAnumericpoislider",i,"[1]"))))) {
+                                    eval(parse(text=paste0("cutoffval[",i,",1] <- input$GSCAnumericpoislider",i,"[1]")))
+                                    eval(parse(text=paste0("cutoffval[",i,",2] <- input$GSCAnumericpoislider",i,"[2]")))
+                                    selectsample <- intersect(selectsample,which(Maindata$GSCAscore[i,] >= cutoffval[i,1] & Maindata$GSCAscore[i,] <= cutoffval[i,2]))
+                              }
+                        }            
+                  } else {
+                        for (i in 1:Maindata$dim) {
+                              if(!is.null(eval(parse(text=paste0("input$GSCAnumericpoitextlower",i))))) {
+                                    eval(parse(text=paste0("cutoffval[",i,",1] <- as.numeric(input$GSCAnumericpoitextlower",i,")")))
+                                    eval(parse(text=paste0("cutoffval[",i,",2] <- as.numeric(input$GSCAnumericpoitextupper",i,")")))
+                                    selectsample <- intersect(selectsample,which(Maindata$GSCAscore[i,] >= cutoffval[i,1] & Maindata$GSCAscore[i,] <= cutoffval[i,2]))
+                              }
+                        }   
+                  }
                   Maindata$defaultsample <- selectsample
                   Maindata$cutoffval <- cutoffval
             }
@@ -642,9 +661,17 @@ shinyServer(function(input, output, session) {
                               value <- as.numeric(quantile(tmpscore,tmpinput))
                         }
                         if (input$numericpoimoreopbound == 'Upper') {
-                              eval(parse(text=paste0('updateSliderInput(session,"GSCAnumericpoislider', id ,'",label = Maindata$genesetname[',id,'],value=c(input$GSCAnumericpoislider', id, '[1],value))')))                                    
+                              if (input$numericpoimethod == "slider") {
+                                    eval(parse(text=paste0('updateSliderInput(session,"GSCAnumericpoislider', id ,'",label = Maindata$genesetname[',id,'],value=c(input$GSCAnumericpoislider', id, '[1],value))')))                                    
+                              } else {
+                                    eval(parse(text=paste0('updateTextInput(session,"GSCAnumericpoitextupper', id ,'",label = paste(Maindata$genesetname[',id,'],"Upper Bound"),value=value)')))                                                            
+                              }
                         } else {
-                              eval(parse(text=paste0('updateSliderInput(session,"GSCAnumericpoislider', id ,'",label = Maindata$genesetname[',id,'],value=c(value,input$GSCAnumericpoislider', id, '[2]))')))                                    
+                              if (input$numericpoimethod == "slider") {
+                                    eval(parse(text=paste0('updateSliderInput(session,"GSCAnumericpoislider', id ,'",label = Maindata$genesetname[',id,'],value=c(value,input$GSCAnumericpoislider', id, '[2]))')))                                    
+                              } else {
+                                    eval(parse(text=paste0('updateTextInput(session,"GSCAnumericpoitextlower', id ,'",label = paste(Maindata$genesetname[',id,'],"Lower Bound"),value=value)')))
+                              }
                         }
                         
                   })
@@ -1556,8 +1583,15 @@ shinyServer(function(input, output, session) {
                         if (!is.null(input$GSCAinteractiveload)) { 
                               tmp <- read.table(input$GSCAinteractiveload$datapath)
                               if (input$GSCAmethod=='GSCAdefault') {
-                                    for (i in 1:Maindata$dim) {
-                                          eval(parse(text=paste0("updateSliderInput(session,'GSCAnumericpoislider",i,"',value=c(tmp[",i,",1],tmp[",i,",2]))")))
+                                    if (input$numericpoimethod == "slider") {
+                                          for (i in 1:Maindata$dim) {
+                                                eval(parse(text=paste0("updateSliderInput(session,'GSCAnumericpoislider",i,"',value=c(tmp[",i,",1],tmp[",i,",2]))")))
+                                          }
+                                    } else {
+                                          for (i in 1:Maindata$dim) {
+                                                eval(parse(text=paste0('updateTextInput(session,"GSCAnumericpoitextlower', i,'",value=tmp[',i,',1])')))
+                                                eval(parse(text=paste0('updateTextInput(session,"GSCAnumericpoitextupper', i,'",value=tmp[',i,',2])')))
+                                          }     
                                     }
                               } else {
                                     if (Maindata$dim == 1) {

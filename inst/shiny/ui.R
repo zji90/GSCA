@@ -127,7 +127,8 @@ shinyUI(pageWithSidebar(
                                          conditionalPanel(condition="input.GSCAmethod=='GSCAdefault'",
                                                           wellPanel(
                                                                 h5("Numeric POI"),
-                                                                uiOutput("numericpoisliderui"),
+                                                                radioButtons("numericpoimethod","",list("Slider Bar"="slider","Exact Number"="number")),
+                                                                uiOutput("numericpoiui"),
                                                                 checkboxInput("numericpoimoreopcheck","More POI cutoff options",value=T),
                                                                 conditionalPanel(condition="input.numericpoimoreopcheck==1",
                                                                                  uiOutput("numericpoimoreopgenesetnameui"),
