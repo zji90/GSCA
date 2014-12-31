@@ -8,7 +8,6 @@ which represent a broad spectrum of biological contexts such as different cell l
 ## GSCA and Data Package Installation
 
 Currently GSCA software can be installed via Github (recommended) and Bioconductor. 
-
 Users should have R installed on their computer before installing GSCA. R can be downloaded here: http://www.r-project.org/
 
 ### Install Data Packages
@@ -30,13 +29,11 @@ biocLite("Affyhgu133A2Expr")
 
 ### Install GSCA via Github (Recommended)
 To install the latest version of GSCA package via Github, run following commands in R:
-
 ```{r }
 install.packages("devtools")
 library(devtools)
 devtools::install_github("GSCA","zji90")
 ```
-
 To invoke user interface after installation, run following commands in R:
 ```{r }
 library(GSCA)
@@ -59,7 +56,6 @@ For users who are not familiar with GSCA, here is a demonstration video on Youtu
 ## FAQ
 ### 1. Can I directly use the gene expression profiles in the four data packages?
 Yes. The four data packages are built primarily for the use of GSCA, but can also be used for other purposes. Note that the four data packages are stored in hdf5 format.
-
 To build a complete gene expression matrix for Affymoe4302Expr data package for example, run the following commands in R:
 ```{r }
 # Install the rhdf5 package on Bioconductor if you haven't done so
