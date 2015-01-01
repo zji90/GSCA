@@ -72,7 +72,11 @@ colnames(geneexpr) <- Affymoe4302Exprtab[,1]
 colnames(geneexpr) <- Affymoe4302Exprtab[,3]
 ```
 
+### 2. How can I reproduce the results for the interactive POI system?
+GSCA offers a convenient function for users to save the old POI in both numeric and interactive POI systems. The function appears at the bottom-left region of the GSCA user interface. Users can load the POI file into the GSCA system next time when they want to reproduce the GSCA analysis results with the same POI.
 
+### 3. Why I cannot reproduce the pattern of interest (POI) using save/load POI function?
+To correctly load the saved POI file, you should have the exact setting as the setting you used when you saved the POI file. The gene sets, scaling options and choice of numeric/interactive POI system should be exactly the same in order to load the POI. In most cases the problem happens when you fail to choose the same scaling option.
 
 
 
