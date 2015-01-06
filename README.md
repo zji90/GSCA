@@ -8,7 +8,7 @@ which represent a broad spectrum of biological contexts such as different cell l
 ## GSCA and Data Package Installation
 
 Currently GSCA software can be installed via Github (recommended) and Bioconductor. 
-Users should have R installed on their computer before installing GSCA. R can be downloaded here: http://www.r-project.org/
+Users should have R installed on their computer before installing GSCA. R can be downloaded here: http://www.r-project.org/. To ensure that GSCA GUI runs stably, users are highly recommended to install Rstudio which is a user interface of R. Rstudio can be downloaded here: http://www.rstudio.com/products/rstudio/download/. 
 
 ### Install Data Packages
 To run GSCA, users should first install at least one of the four data packages in R, which can be done by running the following commands:
