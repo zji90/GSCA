@@ -819,8 +819,8 @@ shinyServer(function(input, output, session) {
                         div(align="center",
                             h4(ifelse(is.null(Maindata$GSCAcontext),"No significantly enriched biological contexts found","")),
                             plotOutput("GSCAdefaultplottwo",width=900,height=900),
-                            helpText(paste0("Correlation: ",Maindata$twocorr)),
-                            helpText(paste0("Pearson Correlation Test p-value: ",Maindata$twocorrp)),
+                            helpText(paste0("Pearson Correlation Coefficient: ",Maindata$twocorr)),
+                            helpText(paste0("Pearson Correlation Coefficient t-test p-value: ",Maindata$twocorrp)),
                             helpText(paste0("Regression Slope: ",Maindata$twoslope)),
                             helpText(paste0("Regression Slope t-test p-value: ",Maindata$twoslopep))
                         )
@@ -1646,11 +1646,11 @@ shinyServer(function(input, output, session) {
                               ),
                               wellPanel(
                                     helpText("Change Plotting Details"),
-                                    textInput("Downloadmaintitleone","Enter Main Title",""),
-                                    textInput("Downloadxlabone","Enter Title for X Axis","SampleScore"),
-                                    textInput("Downloadylabone","Enter Title for Y Axis","Frequency"),
-                                    textInput("Downloadxlimminone","Enter minimum value of X Axis",min(Maindata$GSCAscore)),
-                                    textInput("Downloadxlimmaxone","Enter maximum value of X Axis",max(Maindata$GSCAscore)),
+                                    textInput("Downloadmaintitleone","Main Title",""),
+                                    textInput("Downloadxlabone","Title for X Axis","SampleScore"),
+                                    textInput("Downloadylabone","Title for Y Axis","Frequency"),
+                                    textInput("Downloadxlimminone","Minimum value of X Axis",min(Maindata$GSCAscore)),
+                                    textInput("Downloadxlimmaxone","Maximum value of X Axis",max(Maindata$GSCAscore)),
                                     selectInput("Downloadcolone","Select filling color",c("NULL","gray","red","blue","green","yellow","purple"))
                               )
                         )
@@ -1665,7 +1665,7 @@ shinyServer(function(input, output, session) {
                               ),
                               wellPanel(
                                     helpText("Change Plotting Details"),
-                                    textInput("Downloadmaintitletwo","Enter Main Title",""),
+                                    textInput("Downloadmaintitletwo","Main Title",""),
                                     textInput("Downloadpointsizetwo","Point size",1),
                                     textInput("Downloadcextwo","Font size",2),
                                     textInput("Downloadxlabtwo","Title for X Axis",Maindata$genesetname[1]),

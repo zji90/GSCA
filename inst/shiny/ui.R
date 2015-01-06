@@ -94,7 +94,7 @@ shinyUI(pageWithSidebar(
                                          h5("Select Compendium"),
                                          radioButtons("Summarycompmethod","",
                                                       list("Select available GSCA compendium"="available",
-                                                           "Upload your own compendium"="upload")),
+                                                           "Upload user's own compendium"="upload")),
                                          conditionalPanel(condition="input.Summarycompmethod=='available'",
                                                           uiOutput("Summarycompselectui"),
                                                           uiOutput("Summarycompinfo")
@@ -106,11 +106,11 @@ shinyUI(pageWithSidebar(
                                          )
                                    ),
                                    wellPanel(
-                                         h5("Other Options"),
+                                         h5("Scaling Options"),
                                          checkboxInput("Summarycompscale","Scaling and centering expression values across samples"),
                                          conditionalPanel("input.Summarycompscale==1",
                                          radioButtons("Summarycompscalemet","",list("Centering and Scaling"="zmuv","Only Centering"="zm","Only Scaling"="uv"))),
-                                         radioButtons("Summarygenesetactmethod","Choose method of defining geneset activity",
+                                         radioButtons("Summarygenesetactmethod","Choose averaging method for gene set activity",
                                                       list("Weighted average"="average",
                                                            "Median"="median"))
                                    )
@@ -239,15 +239,17 @@ shinyUI(pageWithSidebar(
                                             conditionalPanel(condition="input.Summarycompmethod=='upload'",
                                                              checkboxInput("Summarycompuploadinfo","Hide instructions"),
                                                              conditionalPanel(condition="input.Summarycompuploadinfo==0",
-                                                                              h4("Important! See instructions before preparing files"),
-                                                                              p('GSCA requires rigorous file format if you want to upload your own gene expression data and annotation files'),
-                                                                              p('For gene expression data file: the file should be in txt format and entries should be separated by space. Each row stands for expression for one gene. Row order SHOULD correspond to the column order in the gene expression data file (For example, first row should annotate the first column in gene expression data). The first column should be gene ENTREZ ID and all other columns stands for expression in samples. Data types in all entries should be numeric. DO NOT include header in the file.'),
-                                                                              p('For annotation file: the file should be in txt format and entries should be separated by space. Each row stands for a sample. First column: sample ID; Second column: experiment ID; Third column: sampleType. NO space is allowed in any of the entries and they SHOULD be replaced by other separators like "_". DO NOT include header in the file.'),
+                                                                              h4("Important! Read instructions before preparing files"),
+                                                                              p('GSCA requires rigorous file format if users want to upload their own gene expression data and annotation files'),
+                                                                              p('For gene expression data file: the file should be in txt format and should be separated by space. Each row corresponds to the expression of one single gene. The first column should be gene ENTREZ ID and all other columns are the gene expressions in all samples. All fields should be numeric. DO NOT include header in the file.'),
+                                                                              p('For annotation file: the file should be in txt format and should be separated by space. Each row corresponds to one single sample. First column: sample ID; Second column: experiment ID; Third column: sampleType. NO space is allowed in any of the entries and they SHOULD be replaced by other separators like "_". DO NOT include header in the file.'),
+                                                                              p('Each column in the gene expression file (except the first geneID column) SHOULD correspond to each row in the annotation file in order.'),
                                                                               p('Files unable to meet the requirements could fail to be read in or lead to unpredictable error.'),
                                                                               p('Example for gene expression data file:'),
                                                                               p(br('10000 -0.315 -0.457 -0.658 -0.685 -0.651 -0.677'),br('10001 0.166 0.009 0.098 -1.108 -1.183 -1.446'),br('10002 -0.303 -0.39 -0.149 -0.686 -1.068 0.066')),
                                                                               p('Example for annotation file:'),
-                                                                              p(br('GSM132917 GSE5681 skidlcl_cells:normal'),br('GSM132918 GSE5681 skidlcl_cells:normal'),br('GSM132920 GSE5681 skidlcl_cells:normal'),br('GSM148748 GSE6475 skin:normal'),br('GSM148763 GSE6475 skin:normal'),br('GSM148765 GSE6475 skin:normal'))
+                                                                              p(br('GSM132917 GSE5681 skidlcl_cells:normal'),br('GSM132918 GSE5681 skidlcl_cells:normal'),br('GSM132920 GSE5681 skidlcl_cells:normal'),br('GSM148748 GSE6475 skin:normal'),br('GSM148763 GSE6475 skin:normal'),br('GSM148765 GSE6475 skin:normal')),
+                                                                              p('The expression of gene 10001 in sample GSM132918 is thus 0.009')
                                                              )
                                             ),
                                             dataTableOutput("OutputDataSummary"),
@@ -284,10 +286,11 @@ shinyUI(pageWithSidebar(
             ),
             conditionalPanel(condition="input.Mainmethod=='About'",
                              p('GSCA: Gene Set Context Analysis'),
-                             p('Current Version: 1.5.0'),
-                             p('Release Date: 2014-12-15'),
+                             p('Current Version: 1.5.2'),
+                             p('Release Date: 2015-1-6'),
                              p('Author: Zhicheng Ji,Hongkai Ji'),
                              p('Maintainer: Zhicheng Ji <zji4@jhu.edu>'),
+                             p(a("Visit my home page",href="http://www.biostat.jhsph.edu/~zji4/",target="_blank")),
                              p(a("Visit web page of our lab",href="http://www.biostat.jhsph.edu/~hji/",target="_blank"))
             )
             
