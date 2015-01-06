@@ -8,7 +8,7 @@ which represent a broad spectrum of biological contexts such as different cell l
 ## GSCA and Data Package Installation
 
 Currently GSCA software can be installed via Github (recommended) and Bioconductor. 
-Users should have R installed on their computer before installing GSCA. R can be downloaded here: http://www.r-project.org/. To ensure that GSCA GUI runs stably, users are highly recommended to install Rstudio which is a user interface of R. Rstudio can be downloaded here: http://www.rstudio.com/products/rstudio/download/. 
+Users should have R installed on their computer before installing GSCA. R can be downloaded here: http://www.r-project.org/. To ensure that GSCA GUI runs stably, users are recommended (but not required) to install Rstudio which is a user interface of R. Rstudio can be downloaded here: http://www.rstudio.com/products/rstudio/download/. 
 
 ### Install Data Packages
 To run GSCA, users should first install at least one of the four data packages in R, which can be done by running the following commands:
@@ -54,7 +54,10 @@ GSCA user interface can be directly launched online without installing R or any 
 For users who are not familiar with GSCA, here is a demonstration video on Youtube for a quick walk-through: https://www.youtube.com/watch?v=1OeZ1PAUMhw
 
 ## FAQ
-### 1. Can I directly use the gene expression profiles in the four data packages?
+### 1. Why GSCA GUI does not react in Chrome?
+Due to the potential compatibility issues, in some cases GSCA GUI may not react in Chrome. One solution is to change the default web browser to IE (Windows) or Safari (Mac) and launch GSCA GUI again in R. Another solution is to download and install Rstudio and launch GSCA GUI within Rstudio.
+
+### 2. Can I directly use the gene expression profiles in the four data packages?
 Yes. The four data packages are built primarily for the use of GSCA, but can also be used for other purposes. Note that the four data packages are stored in hdf5 format.
 To build a complete gene expression matrix for Affymoe4302Expr data package for example, run the following commands in R:
 ```{r }
@@ -72,10 +75,9 @@ colnames(geneexpr) <- Affymoe4302Exprtab[,1]
 colnames(geneexpr) <- Affymoe4302Exprtab[,3]
 ```
 
-### 2. How can I reproduce the results for the interactive POI system?
+### 3. How can I reproduce the results for the interactive POI system?
 GSCA offers a convenient function for users to save the old POI in both numeric and interactive POI systems. The function appears at the bottom-left region of the GSCA user interface. Users can load the POI file into the GSCA system next time when they want to reproduce the GSCA analysis results with the same POI.
 
-### 3. Why I cannot reproduce the pattern of interest (POI) using save/load POI function?
 To correctly load the saved POI file, you should have the exact setting as the setting you used when you saved the POI file. The gene sets, scaling options and choice of numeric/interactive POI system should be exactly the same in order to load the POI. In most cases the problem happens when you fail to choose the same scaling option.
 
 
