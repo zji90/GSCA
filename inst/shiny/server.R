@@ -284,10 +284,10 @@ shinyServer(function(input, output, session) {
       output$Summarycompselectui <- renderUI({
             complist <- list()
             if (require(Affyhgu133aExpr)) {
-                  complist <- c(complist,"Affymetrix Human hgu133a Array, GPL96 (11778 samples)"="hgu133a")
+                  complist <- c(complist,"Affymetrix Human Genome U133A Array, GPL96 (11778 samples)"="hgu133a")
             } 
             if (require(Affymoe4302Expr)) {
-                  complist <- c(complist,"Affymetrix Mouse 430 2.0 Array, GPL1261 (9444 samples)"="moe4302")
+                  complist <- c(complist,"Affymetrix Mouse Genome 430 2.0 Array, GPL1261 (9444 samples)"="moe4302")
             }
             if (require(Affyhgu133Plus2Expr)) {
                   complist <- c(complist,"Affymetrix Human Genome U133 Plus 2.0 Array, GPL570 (5153 samples)"="hgu133Plus2")
@@ -594,7 +594,7 @@ shinyServer(function(input, output, session) {
                   if (input$numericpoimethod == "slider") {
                         lapply(1:Maindata$dim, function(i) {
                               tmpmin <- mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,])
-                              sliderInput(inputId = paste0("GSCAnumericpoislider",i), label = Maindata$genesetname[i], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(tmpmin, max(Maindata$GSCAscore[i,])))
+                              sliderInput(inputId = paste0("GSCAnumericpoislider",i), label = Maindata$genesetname[i], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(tmpmin, max(Maindata$GSCAscore[i,])))                        
                         })      
                   } else {
                         lapply(1:Maindata$dim, function(i) {
@@ -604,6 +604,14 @@ shinyServer(function(input, output, session) {
                         })
                   }
             }                  
+      })
+      
+      output$numericpoitext <- renderUI({
+            if (!is.null(Maindata$dim)) {
+            lapply(1:Maindata$dim, function(i) {
+                  helpText(paste0(Maindata$genesetname[i],": ",round(mean(eval(parse(text=paste0("input$GSCAnumericpoislider",i,"[1]")))>Maindata$GSCAscore[i,]),3),"-",round(mean(eval(parse(text=paste0("input$GSCAnumericpoislider",i,"[2]")))>Maindata$GSCAscore[i,]),3)))
+            })
+            }
       })
       
       observe({
@@ -853,11 +861,7 @@ shinyServer(function(input, output, session) {
                               toprankingsample <- union(toprankingsample,which(Maindata$tab$SampleType %in% INDEX))
                         }
                   }
-                  points(Maindata$GSCAscore[1,setdiff(Maindata$selectsample,toprankingsample)],Maindata$GSCAscore[2,setdiff(Maindata$selectsample,toprankingsample)],cex=0.7,pch=20)
-                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,1]), lty=2,lwd=2,col="blue")
-                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,2],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
-                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,1]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
-                  lines(c(Maindata$cutoffval[1,2],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
+                  points(Maindata$GSCAscore[1,setdiff(Maindata$selectsample,toprankingsample)],Maindata$GSCAscore[2,setdiff(Maindata$selectsample,toprankingsample)],cex=0.7,pch=20)                  
                   if (!is.null(Maindata$GSCAcontext)) {
                         i <- 1
                         for(INDEX in Maindata$GSCAcontext) {
@@ -877,6 +881,10 @@ shinyServer(function(input, output, session) {
                   } else {
                         legend("topleft",legend=leg.txt,pch=c(STYLES[1:(length(leg.txt)-2)],20,20),pt.bg=c(COLORS[1:(length(leg.txt)-2)],"black","#00000022"),col=c(COLORS[1:(length(leg.txt)-2)],"black","#00000022"),cex=0.8)     
                   }
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,1]), lty=2,lwd=4,col="blue")
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,2],Maindata$cutoffval[2,2]), lty=2,lwd=4,col="blue")
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,1]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=4,col="blue")
+                  lines(c(Maindata$cutoffval[1,2],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=4,col="blue")
                   GSCAstatus$status <- 0
             }
       })
@@ -1014,7 +1022,7 @@ shinyServer(function(input, output, session) {
                   colcolorall <- rep("black",ncol(Maindata$GSCAscore))
                   colcolorall[selectsample] <- "cyan"
                   plot(1:ncol(Maindata$GSCAscore),sort(Maindata$GSCAscore),xaxs="i",yaxs="i",cex.main=2,xlab="",ylab="",pch=16,col=colcolorall[order(Maindata$GSCAscore)])
-                  legend("topleft",legend=c("Selected samples","Not selected samples"),pch=c(20,20),pt.bg=c("cyan","black"),col=c("cyan","black"),cex=0.8)    
+                  legend("topleft",legend=c("Selected samples","Not selected samples"),pch=c(20,20),pt.bg=c("cyan","black"),col=c("cyan","black"),cex=1.2)    
             }
       })
       
@@ -1055,7 +1063,7 @@ shinyServer(function(input, output, session) {
             if (Maindata$dim == 2) { 
                   inputcoords <- get.coords()
                   input$GSCAinteractiveloadbutton
-                  par(cex.main=2,cex.lab=2,cex.axis=2,mar=c(5,5,5,2),xpd=T)
+                  par(cex=1.5,mar=c(5,5,5,2),xpd=T)
                   plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],pch=20, xlab=Maindata$genesetname[1],ylab=Maindata$genesetname[2],cex.lab=1.5)
                   if (input$reset != resetvalue) {
                         polycord <<- NULL
@@ -1108,11 +1116,11 @@ shinyServer(function(input, output, session) {
                               tmpcord <- polycord[polycord[,3]==j,]
                               if (is.matrix(tmpcord) && nrow(tmpcord) > 1) {
                                     for (i in 1:(nrow(tmpcord)-1)) 
-                                          lines(c(tmpcord[i,1],tmpcord[i+1,1]),c(tmpcord[i,2],tmpcord[i+1,2]),type="l",col="blue")
+                                          lines(c(tmpcord[i,1],tmpcord[i+1,1]),c(tmpcord[i,2],tmpcord[i+1,2]),type="l",col="blue",lwd=4)
                                     if (j==polynum && finishpolygonaction == 0) {
-                                          lines(c(tmpcord[1,1],tmpcord[nrow(tmpcord),1]),c(tmpcord[1,2],tmpcord[nrow(tmpcord),2]),type="l",col="blue",lty=2)
+                                          lines(c(tmpcord[1,1],tmpcord[nrow(tmpcord),1]),c(tmpcord[1,2],tmpcord[nrow(tmpcord),2]),type="l",col="blue",lty=2,lwd=4)
                                     } else {
-                                          lines(c(tmpcord[1,1],tmpcord[nrow(tmpcord),1]),c(tmpcord[1,2],tmpcord[nrow(tmpcord),2]),type="l",col="blue")
+                                          lines(c(tmpcord[1,1],tmpcord[nrow(tmpcord),1]),c(tmpcord[1,2],tmpcord[nrow(tmpcord),2]),type="l",col="blue",lwd=4)
                                     }
                               }
                         }
@@ -1126,14 +1134,6 @@ shinyServer(function(input, output, session) {
             if (Maindata$dim == 2) { 
                   if (sum(inpoly$tf) != 0) {
                         plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,],ylim=c(min(Maindata$GSCAscore[2,]),1.15*max(Maindata$GSCAscore[2,])),xlab=Maindata$genesetname[1],ylab=Maindata$genesetname[2],pch=20,cex=0.7,col="#00000022",cex.lab=1.5)            
-                        for (j in 1:polynum) {
-                              tmpcord <- polycord[polycord[,3]==j,]
-                              if (is.matrix(tmpcord) && nrow(tmpcord) > 2) {
-                                    for (i in 1:(nrow(tmpcord)-1)) 
-                                          lines(c(tmpcord[i,1],tmpcord[i+1,1]),c(tmpcord[i,2],tmpcord[i+1,2]),type="l",col="blue",lty=2,lwd=2)
-                                    lines(c(tmpcord[1,1],tmpcord[nrow(tmpcord),1]),c(tmpcord[1,2],tmpcord[nrow(tmpcord),2]),type="l",col="blue",lty=2,lwd=2)
-                              }
-                        }
                         toprankingsample <- NULL
                         if (!is.null(Maindata$GSCAcontext)) {
                               for(INDEX in Maindata$GSCAcontext) {
@@ -1157,6 +1157,14 @@ shinyServer(function(input, output, session) {
                               legend("topleft",legend=leg.txt,pch=c(20,20),pt.bg=c("black","#00000022"),col=c("black","#00000022"),cex=0.8)                        
                         } else {
                               legend("topleft",legend=leg.txt,pch=c(STYLES[1:(length(leg.txt)-2)],20,20),pt.bg=c(COLORS[1:(length(leg.txt)-2)],"black","#00000022"),col=c(COLORS[1:(length(leg.txt)-2)],"black","#00000022"),cex=0.8)                        
+                        }
+                        for (j in 1:polynum) {
+                              tmpcord <- polycord[polycord[,3]==j,]
+                              if (is.matrix(tmpcord) && nrow(tmpcord) > 2) {
+                                    for (i in 1:(nrow(tmpcord)-1)) 
+                                          lines(c(tmpcord[i,1],tmpcord[i+1,1]),c(tmpcord[i,2],tmpcord[i+1,2]),type="l",col="blue",lty=2,lwd=4)
+                                    lines(c(tmpcord[1,1],tmpcord[nrow(tmpcord),1]),c(tmpcord[1,2],tmpcord[nrow(tmpcord),2]),type="l",col="blue",lty=2,lwd=4)
+                              }
                         }
                   }
             }
@@ -1576,8 +1584,7 @@ shinyServer(function(input, output, session) {
             }
       )
       
-      observe({
-            
+      observe({            
             if (input$GSCAinteractiveloadbutton > 0)
                   isolate({
                         if (!is.null(input$GSCAinteractiveload)) { 
@@ -1650,14 +1657,14 @@ shinyServer(function(input, output, session) {
                                     helpText("Change Plotting Details"),
                                     textInput("Downloadmaintitletwo","Enter Main Title",""),
                                     textInput("Downloadpointsizetwo","Point size",1),
-                                    textInput("Downloadcextwo","Font size",1.7),
+                                    textInput("Downloadcextwo","Font size",2),
                                     textInput("Downloadxlabtwo","Title for X Axis",Maindata$genesetname[1]),
                                     textInput("Downloadylabtwo","Title for Y Axis",Maindata$genesetname[2]),
                                     textInput("Downloadxlimmintwo","Minimum Value of X Axis",min(Maindata$GSCAscore[1,])),
                                     textInput("Downloadxlimmaxtwo","Maximum Value of X Axis",max(Maindata$GSCAscore[1,])),
                                     textInput("Downloadylimmintwo","Minimum Value of Y Axis",min(Maindata$GSCAscore[2,])),
                                     textInput("Downloadylimmaxtwo","Maximum Value of Y Axis",max(Maindata$GSCAscore[2,])),
-                                    textInput("Downloadlegcextwo","Legend Size",0.6),
+                                    textInput("Downloadlegcextwo","Legend Size",0.5),
                                     checkboxInput("Downloadlegpostftwo","Change Legend Position",value=F),
                                     conditionalPanel(condition="input.Downloadlegpostftwo=='1'",
                                                      textInput("Downloadlegposxtwo","x-axis position",0),
@@ -1820,11 +1827,7 @@ shinyServer(function(input, output, session) {
                               toprankingsample <- union(toprankingsample,which(Maindata$tab$SampleType %in% INDEX))
                         }
                   }
-                  points(Maindata$GSCAscore[1,setdiff(Maindata$downloadsample,toprankingsample)],Maindata$GSCAscore[2,setdiff(Maindata$downloadsample,toprankingsample)],cex=as.numeric(input$Downloadpointsizetwo),pch=20)
-                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,1]), lty=2,lwd=2,col="blue")
-                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,2],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
-                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,1]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
-                  lines(c(Maindata$cutoffval[1,2],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=2,col="blue")
+                  points(Maindata$GSCAscore[1,setdiff(Maindata$downloadsample,toprankingsample)],Maindata$GSCAscore[2,setdiff(Maindata$downloadsample,toprankingsample)],cex=as.numeric(input$Downloadpointsizetwo),pch=20)                  
                   if (!is.null(Maindata$downloadcontext)) {
                         i <- 1
                         for(INDEX in Maindata$downloadcontext) {
@@ -1853,17 +1856,13 @@ shinyServer(function(input, output, session) {
                   }
                   if (input$Downloadcorvaluetwo)
                         mtext(cortext)
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,1]), lty=2,lwd=4,col="blue")
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,2],Maindata$cutoffval[2,2]), lty=2,lwd=4,col="blue")
+                  lines(c(Maindata$cutoffval[1,1],Maindata$cutoffval[1,1]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=4,col="blue")
+                  lines(c(Maindata$cutoffval[1,2],Maindata$cutoffval[1,2]),c(Maindata$cutoffval[2,1],Maindata$cutoffval[2,2]), lty=2,lwd=4,col="blue")
             } else {
                   if (sum(inpoly$tf) != 0) {
                         plot(Maindata$GSCAscore[1,], Maindata$GSCAscore[2,], xlim = as.numeric(c(input$Downloadxlimmintwo,input$Downloadxlimmaxtwo)), ylim = as.numeric(c(input$Downloadylimmintwo,input$Downloadylimmaxtwo)),xlab=input$Downloadxlabtwo,ylab=input$Downloadylabtwo,col="#00000022",pch=20,cex=as.numeric(input$Downloadpointsizetwo),main=input$Downloadmaintitletwo)            
-                        for (j in 1:polynum) {
-                              tmpcord <- polycord[polycord[,3]==j,]
-                              if (is.matrix(tmpcord)) {
-                                    for (i in 1:(nrow(tmpcord)-1)) 
-                                          lines(c(tmpcord[i,1],tmpcord[i+1,1]),c(tmpcord[i,2],tmpcord[i+1,2]),type="l",col="blue",lty=2,lwd=2)
-                                    lines(c(tmpcord[1,1],tmpcord[nrow(tmpcord),1]),c(tmpcord[1,2],tmpcord[nrow(tmpcord),2]),type="l",col="blue",lty=2,lwd=2)
-                              }
-                        }
                         toprankingsample <- NULL
                         if (!is.null(Maindata$downloadcontext)) {
                               for(INDEX in Maindata$downloadcontext) {
@@ -1897,6 +1896,14 @@ shinyServer(function(input, output, session) {
                         }
                         if (input$Downloadcorvaluetwo)
                               mtext(cortext)
+                        for (j in 1:polynum) {
+                              tmpcord <- polycord[polycord[,3]==j,]
+                              if (is.matrix(tmpcord)) {
+                                    for (i in 1:(nrow(tmpcord)-1)) 
+                                          lines(c(tmpcord[i,1],tmpcord[i+1,1]),c(tmpcord[i,2],tmpcord[i+1,2]),type="l",col="blue",lty=2,lwd=4)
+                                    lines(c(tmpcord[1,1],tmpcord[nrow(tmpcord),1]),c(tmpcord[1,2],tmpcord[nrow(tmpcord),2]),type="l",col="blue",lty=2,lwd=4)
+                              }
+                        }
                   }
             }
       }    

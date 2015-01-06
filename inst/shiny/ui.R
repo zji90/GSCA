@@ -45,8 +45,8 @@ shinyUI(pageWithSidebar(
                                    textInput("InputGenesetname","Gene Set name","Geneset 1"),
                                    conditionalPanel(condition="input.InputGenesetmethod == 'InputspecifyGeneset'",
                                                     helpText("Multiple Entrez GeneID should be seperated by ;"),
-                                                    textInput("InputActGeneID","Specify Entrez GeneID for Activated Genes"),
-                                                    textInput("InputRepGeneID","Specify Entrez GeneID for Repressed Genes")
+                                                    textInput("InputActGeneID","Specify Entrez GeneID for Positive Genes"),
+                                                    textInput("InputRepGeneID","Specify Entrez GeneID for Negative Genes")
                                    ),
                                    conditionalPanel(condition="input.InputGenesetmethod == 'InputuploadGeneset'",
                                                     helpText("First column: Entrez GeneID"),
@@ -129,6 +129,8 @@ shinyUI(pageWithSidebar(
                                                                 h5("Numeric POI"),
                                                                 radioButtons("numericpoimethod","",list("Slider Bar"="slider","Exact Number"="number")),
                                                                 uiOutput("numericpoiui"),
+                                                                helpText("Quantile:"),
+                                                                uiOutput("numericpoitext"),
                                                                 checkboxInput("numericpoimoreopcheck","More POI cutoff options",value=T),
                                                                 conditionalPanel(condition="input.numericpoimoreopcheck==1",
                                                                                  uiOutput("numericpoimoreopgenesetnameui"),
@@ -161,9 +163,10 @@ shinyUI(pageWithSidebar(
                                                                 uiOutput("InputGSCAspecifycontextui"))
                                          ),
                                          wellPanel(
-                                               h5("Save/Load POI"), 
-                                               p(downloadButton('GSCAinteractivesavebutton','Save POI')),
-                                               fileInput('GSCAinteractiveload', 'Load POI file'),
+                                               h5("Save Current POI"), 
+                                               p(downloadButton('GSCAinteractivesavebutton','Save Current POI')),
+                                               h5("Load POI"), 
+                                               fileInput('GSCAinteractiveload', 'Choose POI file'),
                                                p(actionButton('GSCAinteractiveloadbutton','Load POI'))
                                          )
                                    )
@@ -233,8 +236,6 @@ shinyUI(pageWithSidebar(
             conditionalPanel(condition="input.Mainmethod=='Select'",
                              tabsetPanel(
                                    tabPanel("Gene Set Summary",
-                                            dataTableOutput("OutputDataSummary"),
-                                            uiOutput("Outputmissinggenesetreport"),
                                             conditionalPanel(condition="input.Summarycompmethod=='upload'",
                                                              checkboxInput("Summarycompuploadinfo","Hide instruction for upload"),
                                                              conditionalPanel(condition="input.Summarycompuploadinfo==0",
@@ -248,7 +249,9 @@ shinyUI(pageWithSidebar(
                                                                               p('Example for annotation file:'),
                                                                               p(br('GSM132917 GSE5681 skidlcl_cells:normal'),br('GSM132918 GSE5681 skidlcl_cells:normal'),br('GSM132920 GSE5681 skidlcl_cells:normal'),br('GSM148748 GSE6475 skin:normal'),br('GSM148763 GSE6475 skin:normal'),br('GSM148765 GSE6475 skin:normal'))
                                                              )
-                                            )
+                                            ),
+                                            dataTableOutput("OutputDataSummary"),
+                                            uiOutput("Outputmissinggenesetreport")
                                    ),
                                    tabPanel("Gene Set Breakdown",
                                             uiOutput("genesetbreakdownnameui"),
