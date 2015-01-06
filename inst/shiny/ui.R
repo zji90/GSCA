@@ -64,14 +64,14 @@ shinyUI(pageWithSidebar(
                                                                  c('None'='',
                                                                    'Double Quote'='"',
                                                                    'Single Quote'="'"),
-                                                                 '"')
+                                                                 '')
                                    ),
                                    p(actionButton("Inputgenesetadd","Add Gene Set"))
                              ),
                              helpText("Save current gene sets as csv file"),
                              p(downloadButton("Savegenedatafile","Save")),
                              wellPanel(
-                                   h5("Delete existing geneset"),
+                                   h5("Delete existing gene set"),
                                    uiOutput("Inputgenesetdeleteui"),
                                    p(actionButton("Inputgenesetdelete","Delete Selected Gene Set")),
                                    p(actionButton("Inputgenesetreset","Reset All Gene Sets"))
@@ -203,7 +203,7 @@ shinyUI(pageWithSidebar(
                                                                  c('None'='',
                                                                    'Double Quote'='"',
                                                                    'Single Quote'="'"),
-                                                                 '"')                  
+                                                                 '')                  
                                    ),
                                    conditionalPanel(condition="input.Utimethod=='Convert'",
                                                     uiOutput("Uticonvertselectcolui"),
@@ -228,7 +228,7 @@ shinyUI(pageWithSidebar(
             uiOutput("GSCAstatusui"),
             conditionalPanel(condition="input.Mainmethod=='Input'",
                              tabsetPanel(
-                                   tabPanel("Input Gene Set",uiOutput("OutputCurrentGenedatawarnui"),dataTableOutput("OutputCurrentGenedata"),br(h4("All gene sets in GSCA:")),textOutput("OutputGenedataname")),
+                                   tabPanel("Input Gene Set",uiOutput("OutputCurrentGenedatainstui"),h4("Current gene set"),dataTableOutput("OutputCurrentGenedata"),br(h4("All gene sets in GSCA")),textOutput("OutputGenedataname")),
                                    tabPanel("Gene Set Summary", dataTableOutput("OutputAllGenedata")), 
                                    tabPanel("Gene Set Details", uiOutput("Indigenesetnameui"), dataTableOutput("Indigeneset"))
                              )
@@ -237,7 +237,7 @@ shinyUI(pageWithSidebar(
                              tabsetPanel(
                                    tabPanel("Gene Set Summary",
                                             conditionalPanel(condition="input.Summarycompmethod=='upload'",
-                                                             checkboxInput("Summarycompuploadinfo","Hide instruction for upload"),
+                                                             checkboxInput("Summarycompuploadinfo","Hide instructions"),
                                                              conditionalPanel(condition="input.Summarycompuploadinfo==0",
                                                                               h4("Important! See instructions before preparing files"),
                                                                               p('GSCA requires rigorous file format if you want to upload your own gene expression data and annotation files'),

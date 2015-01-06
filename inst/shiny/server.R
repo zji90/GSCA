@@ -152,9 +152,19 @@ shinyServer(function(input, output, session) {
             }
       })
       
-      output$OutputCurrentGenedatawarnui <- renderUI({
-            if (input$InputGenesetmethod == 'InputuploadGeneset' && is.null(Currentdata$genedata))
-                  helpText("If nothing appears, make sure entries in weight column are all numeric and try the followings: change the separator; change the quote; check the header option")
+      output$OutputCurrentGenedatainstui <- renderUI({
+            if (input$InputGenesetmethod == 'InputuploadGeneset') {
+                  tagList(
+                        checkboxInput("Inputuploadinfo","Hide instructions"),
+                        conditionalPanel(condition="input.Inputuploadinfo==0",
+                                         h4("Preparing gene set file"),                                         
+                                         p('The gene set file should contain two or three columns. First column: ENTREZ GeneID. Second column: weight (should be numeric). Optional third column: gene set name.'),
+                                         p("Make sure the separator, the quote and the header options are all correctly specified. Otherwise the data will not be read in."),
+                                         p('Example gene set file:'),
+                                         p(br('ENTREZ_ID weight'),br('14632 1'),br('14633 1'),br('14634 1'))                                         
+                        )
+                  )
+            }                  
       })
       
       output$OutputCurrentGenedata <- renderDataTable(Currentdata$genedata)
