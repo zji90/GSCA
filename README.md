@@ -53,6 +53,10 @@ GSCA user interface can be directly launched online without installing R or any 
 ## GSCA Demonstration Video
 For users who are not familiar with GSCA, here is a demonstration video on Youtube for a quick walk-through: https://www.youtube.com/watch?v=1OeZ1PAUMhw
 
+## Contact the Author
+Author: Zhicheng Ji, Hongkai Ji
+Maintainer: Zhicheng Ji (zji4@jhu.edu)
+
 ## FAQ
 ### 1. Why GSCA GUI does not react in some web browser?
 Due to the potential compatibility issues, in some cases GSCA GUI may not react in some web browser (especially Chrome on Mac). One solution is to download and install Rstudio and launch GSCA GUI within Rstudio. Another solution is to change the default web browser to IE (Windows) or Safari (Mac) and launch GSCA GUI again in R, or change to a computer with another operating system (Windows is recommended). 
