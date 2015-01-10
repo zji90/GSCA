@@ -55,6 +55,7 @@ For users who are not familiar with GSCA, here is a demonstration video on Youtu
 
 ## Contact the Author
 Author: Zhicheng Ji, Hongkai Ji
+
 Maintainer: Zhicheng Ji (zji4@jhu.edu)
 
 ## FAQ
