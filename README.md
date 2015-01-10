@@ -60,7 +60,7 @@ Maintainer: Zhicheng Ji (zji4@jhu.edu)
 
 ## FAQ
 ### 1. Why GSCA GUI does not react in some web browser?
-Due to the potential compatibility issues, in some cases GSCA GUI may not react in some web browser (especially Chrome on Mac). One solution is to download and install Rstudio and launch GSCA GUI within Rstudio. Another solution is to change the default web browser to IE (Windows) or Safari (Mac) and launch GSCA GUI again in R, or change to a computer with another operating system (Windows is recommended). 
+Due to the potential compatibility issues of javascript, in some cases GSCA GUI may not react in some web browser (especially Chrome on Mac). One solution is to download and install Rstudio and launch GSCA GUI within Rstudio. Another solution is to change the default web browser to IE (Windows) or Safari (Mac) and launch GSCA GUI again in R, or change to a computer with another operating system (Windows is recommended). 
 
 ### 2. Can I directly use the gene expression profiles in the four data packages?
 Yes. The four data packages are built primarily for the use of GSCA, but can also be used for other purposes. Note that the four data packages are stored in hdf5 format.
