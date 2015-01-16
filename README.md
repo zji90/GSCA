@@ -65,7 +65,7 @@ Maintainer: Zhicheng Ji (zji4@jhu.edu)
 
 ## FAQ
 ### 1. Why GSCA GUI does not react in my web browser?
-Due to the potential compatibility issues of javascript, in some cases GSCA GUI may not react in Chrome on Mac OSX system. This is a problem of Chrome and will be fixed in future versions of GSCA. One solution is to download and install Rstudio and launch GSCA GUI within Rstudio. Another solution is to change the default web browser to IE (Windows) or Safari (Mac) and launch GSCA GUI again in R, or change to a computer with another operating system (Windows is recommended). 
+Due to the potential compatibility issues of javascript, in some cases GSCA GUI may not react in Chrome on Mac OSX system. This is a problem of Chrome and will be fixed in future versions of GSCA. One solution is to download and install Rstudio (http://www.rstudio.com/products/rstudio/download/) and launch GSCA GUI within Rstudio. Another solution is to change the default web browser to IE (Windows) or Safari (Mac) and launch GSCA GUI again in R, or change to a computer with another operating system (Windows is recommended). 
 
 ### 2. Can I upload my own database/compendium?
 Yes. GSCA provides the function for users to upload their own compendium which includes a gene expression file and an annotation file. The function is under "Select geneset and compendium" -> "Upload your own compendium". Please read carefully the instrutions before preparing these files as these files should follow some rigorous formats.
