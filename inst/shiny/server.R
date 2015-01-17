@@ -603,12 +603,12 @@ shinyServer(function(input, output, session) {
             if (!is.null(Maindata$dim) && input$Mainmethod=='GSCA') {
                   if (input$numericpoimethod == "slider") {
                         lapply(1:Maindata$dim, function(i) {
-                              tmpmin <- min(mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,]),max(Maindata$GSCAscore[i,])-0.1)
+                              tmpmin <- min(mean(Maindata$GSCAscore[i,])+sd(Maindata$GSCAscore[i,]),max(Maindata$GSCAscore[i,])-0.1)
                               sliderInput(inputId = paste0("GSCAnumericpoislider",i), label = Maindata$genesetname[i], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(tmpmin, max(Maindata$GSCAscore[i,])))                        
                         })      
                   } else {
                         lapply(1:Maindata$dim, function(i) {
-                              tmpmin <- min(mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,]),max(Maindata$GSCAscore[i,])-0.1)
+                              tmpmin <- min(mean(Maindata$GSCAscore[i,])+sd(Maindata$GSCAscore[i,]),max(Maindata$GSCAscore[i,])-0.1)
                               list(textInput(inputId = paste0("GSCAnumericpoitextlower",i), label = paste(Maindata$genesetname[i],"Lower Bound"), tmpmin)
                                    ,textInput(inputId = paste0("GSCAnumericpoitextupper",i), label = paste(Maindata$genesetname[i],"Upper Bound"), max(Maindata$GSCAscore[i,])))
                         })
