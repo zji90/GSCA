@@ -30,6 +30,8 @@ biocLite("Affyhgu133A2Expr")
 ### Install GSCA via Github (Recommended)
 To install the latest version of GSCA package via Github, run following commands in R:
 ```{r }
+source("http://bioconductor.org/biocLite.R")
+biocLite("rhdf5")
 if (!require("devtools"))
   install.packages("devtools")
 devtools::install_github("GSCA","zji90")
