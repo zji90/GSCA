@@ -21,12 +21,12 @@ shinyUI(pageWithSidebar(
                   #      tags$style(type='text/css', ".span4 { max-width: 310px; }")
             ),
             
-            helpText(a("Youtube short video demo",href="https://www.youtube.com/watch?v=1OeZ1PAUMhw",target="_blank")),
+            helpText(a("Youtube short video demo",href="https://www.youtube.com/watch?v=wqv_dmlxdcI",target="_blank")),
             helpText(a("Show User Manual",href="GSCAmanual.pdf",target="_blank")),
             wellPanel(
                   radioButtons("Mainmethod","Main Menu",
                                list("Input Gene Set"="Input",
-                                    "Select Compendium"="Select",
+                                    "Select Gene Set and Compendium"="Select",
                                     "GSCA Analysis"="GSCA",
                                     "Save Results"="Download",
                                     "Utilities"="Utilities",
@@ -100,7 +100,7 @@ shinyUI(pageWithSidebar(
                                                           uiOutput("Summarycompinfo")
                                          ),
                                          conditionalPanel(condition="input.Summarycompmethod=='upload'",
-                                                          h5("See instructions on the right!"),
+                                                          h5("Read the instructions on the right!"),
                                                           fileInput('Summaryuploadgeneexprfile', 'Choose gene expression file'),
                                                           fileInput('Summaryuploadtabfile', 'Choose annotation file')
                                          )
@@ -173,8 +173,7 @@ shinyUI(pageWithSidebar(
                              )
             ),
             conditionalPanel(condition="input.Mainmethod=='Download'",
-                             wellPanel(
-                                   h5("Download GSCA outputs"),
+                             wellPanel(                               
                                    radioButtons("Downloadregionselect","Choose POI type",choices=c("Numeric","Interactive")),
                                    wellPanel(
                                          h5("Download ranking table"),
@@ -246,7 +245,7 @@ shinyUI(pageWithSidebar(
                                                                               p('Each column in the gene expression file (except the first geneID column) SHOULD correspond to each row in the annotation file in order.'),
                                                                               p('Files unable to meet the requirements could fail to be read in or lead to unpredictable error.'),
                                                                               p('Example for gene expression data file:'),
-                                                                              p(br('10000 -0.315 -0.457 -0.658 -0.685 -0.651 -0.677'),br('10001 0.166 0.009 0.098 -1.108 -1.183 -1.446'),br('10002 -0.303 -0.39 -0.149 -0.686 -1.068 0.066')),
+                                                                              p(br('10000 -0.315 0.457 0.658 0.685 0.651 0.677'),br('10001 0.166 0.009 0.098 1.108 1.183 1.446'),br('10002 0.303 -0.39 -0.149 0.686 1.068 0.066')),
                                                                               p('Example for annotation file:'),
                                                                               p(br('GSM132917 GSE5681 skidlcl_cells:normal'),br('GSM132918 GSE5681 skidlcl_cells:normal'),br('GSM132920 GSE5681 skidlcl_cells:normal'),br('GSM148748 GSE6475 skin:normal'),br('GSM148763 GSE6475 skin:normal'),br('GSM148765 GSE6475 skin:normal')),
                                                                               p('The expression of gene 10001 in sample GSM132918 is thus 0.009')
@@ -290,6 +289,7 @@ shinyUI(pageWithSidebar(
                              p('Release Date: 2015-1-6'),
                              p('Author: Zhicheng Ji,Hongkai Ji'),
                              p('Maintainer: Zhicheng Ji <zji4@jhu.edu>'),
+                             p(a("GSCA Github home page",href="https://github.com/zji90/GSCA",target="_blank")),
                              p(a("Visit my home page",href="http://www.biostat.jhsph.edu/~zji4/",target="_blank")),
                              p(a("Visit web page of our lab",href="http://www.biostat.jhsph.edu/~hji/",target="_blank"))
             )

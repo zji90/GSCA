@@ -548,7 +548,7 @@ shinyServer(function(input, output, session) {
                                           path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
                                           tmpgeneexpr <- t(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,match(currentgeneset[,2],Maindata$geneid))))/1000
                                     } else {
-                                          tmpgeneexpr <- Maindata$uploadgeneexpr[currentgeneset[,2],]
+                                          tmpgeneexpr <- Maindata$uploadgeneexpr[currentgeneset[,2],,drop=F]
                                     }        
                                     if (input$Summarycompscale) {                              
                                           if(input$Summarycompscalemet=="zmuv") {
@@ -559,7 +559,7 @@ shinyServer(function(input, output, session) {
                                                 tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale,center=F))
                                           }
                                     }  
-                                    tmpgeneexpr <- sweep(tmpgeneexpr,1,currentgeneset[,3],"*")            
+                                    tmpgeneexpr <- sweep(tmpgeneexpr,1,currentgeneset[,3],"*")                                      
                                     if (input$Summarygenesetactmethod == "average") {
                                           score <- colMeans(tmpgeneexpr)         
                                     } else {
@@ -603,12 +603,12 @@ shinyServer(function(input, output, session) {
             if (!is.null(Maindata$dim) && input$Mainmethod=='GSCA') {
                   if (input$numericpoimethod == "slider") {
                         lapply(1:Maindata$dim, function(i) {
-                              tmpmin <- mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,])
+                              tmpmin <- min(mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,]),max(Maindata$GSCAscore[i,])-0.1)
                               sliderInput(inputId = paste0("GSCAnumericpoislider",i), label = Maindata$genesetname[i], min = min(Maindata$GSCAscore[i,]), max = max(Maindata$GSCAscore[i,]), value = c(tmpmin, max(Maindata$GSCAscore[i,])))                        
                         })      
                   } else {
                         lapply(1:Maindata$dim, function(i) {
-                              tmpmin <- mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,])
+                              tmpmin <- min(mean(Maindata$GSCAscore[i,])+2*sd(Maindata$GSCAscore[i,]),max(Maindata$GSCAscore[i,])-0.1)
                               list(textInput(inputId = paste0("GSCAnumericpoitextlower",i), label = paste(Maindata$genesetname[i],"Lower Bound"), tmpmin)
                                    ,textInput(inputId = paste0("GSCAnumericpoitextupper",i), label = paste(Maindata$genesetname[i],"Upper Bound"), max(Maindata$GSCAscore[i,])))
                         })
