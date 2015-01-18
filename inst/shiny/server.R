@@ -171,7 +171,7 @@ shinyServer(function(input, output, session) {
       
       output$OutputAllGenedata <- renderDataTable({
             if (!is.null(Rawdata$genedata) && nrow(Rawdata$genedata)>0) {
-                  sumtable <- data.frame(Genesetname=unique(Rawdata$genedata[,1]),Totalgene=0,Activatedgene=0,Repressedgene=0)
+                  sumtable <- data.frame(Genesetname=unique(Rawdata$genedata[,1]),Totalgene=0,Positivegene=0,Negativegene=0)
                   for (i in 1:nrow(sumtable)) {
                         temp <- Rawdata$genedata[Rawdata$genedata[,1]==sumtable[i,1],]
                         sumtable[i,2] <- nrow(temp)
