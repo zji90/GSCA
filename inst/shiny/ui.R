@@ -285,7 +285,7 @@ shinyUI(pageWithSidebar(
             ),
             conditionalPanel(condition="input.Mainmethod=='About'",
                              p('GSCA: Gene Set Context Analysis'),
-                             p('Current Version: 1.5.2'),
+                             p('Current Version: 1.5.0'),
                              p('Release Date: 2015-1-6'),
                              p('Author: Zhicheng Ji,Hongkai Ji'),
                              p('Maintainer: Zhicheng Ji <zji4@jhu.edu>'),
