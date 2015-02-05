@@ -68,6 +68,7 @@ Maintainer: Zhicheng Ji (zji4@jhu.edu)
 ## FAQ
 ### 1. Why GSCA GUI does not react in my web browser?
 With certain extensions installed on Chrome (e.g. Ghostery), in some cases GSCA GUI may not react normally in Chrome. This is because such extensions prevent some Javascript functions from running and will affect all web applications using these Javascript modules. The easiest solution is to uninstall or unable these extensions when you are running GSCA GUI.
+
 There are other two solutions if the problem still cannot be solved. One solution is to download and install Rstudio (http://www.rstudio.com/products/rstudio/download/) and launch GSCA GUI within Rstudio. Another solution is to change the default web browser to IE (Windows) or Safari (Mac) and launch GSCA GUI again in R, or change to a computer with another operating system. 
 
 ### 2. Can I upload my own database/compendium?
