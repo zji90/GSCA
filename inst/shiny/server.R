@@ -1316,7 +1316,7 @@ shinyServer(function(input, output, session) {
                         names <- rev(row.names(Maindata$GSCAscore))
                   }
                   for (i in 1:Maindata$dim) {
-                        text(0.5*ncol(Maindata$GSCAscore),pos[i],names[i],cex=1.5)
+                        text(0.5*ncol(Maindata$GSCAscore),pos[i],names[i],cex=2)
                   }
             }
       })
