@@ -42,7 +42,7 @@ shinyUI(pageWithSidebar(
                                                      "Upload Gene Set File"="InputuploadGeneset"
                                                 )
                                    ),   
-                                   textInput("InputGenesetname","Gene Set name","Geneset 1"),
+                                   textInput("InputGenesetname","Gene Set name","Geneset_1"),
                                    conditionalPanel(condition="input.InputGenesetmethod == 'InputspecifyGeneset'",
                                                     helpText("Multiple Entrez GeneID should be seperated by ;"),
                                                     textInput("InputActGeneID","Specify Entrez GeneID for Positive Genes"),
@@ -89,7 +89,7 @@ shinyUI(pageWithSidebar(
                                                     helpText("Switch the order of two gene sets"),
                                                     uiOutput("Summaryswitchorderui"),
                                                     p(actionButton("Summaryswitchbut","Switch"))
-                                                    ),
+                                   ),
                                    wellPanel(
                                          h5("Select Compendium"),
                                          radioButtons("Summarycompmethod","",
@@ -106,10 +106,12 @@ shinyUI(pageWithSidebar(
                                          )
                                    ),
                                    wellPanel(
-                                         h5("Scaling Options"),
+                                         h5("Annotation Options"),
+                                         checkboxInput("Summaryannooptions","Single annotation for each sample",value=T),
+                                         h5("Scaling Options"),                                         
                                          checkboxInput("Summarycompscale","Scaling and centering expression values across samples"),
                                          conditionalPanel("input.Summarycompscale==1",
-                                         radioButtons("Summarycompscalemet","",list("Centering and Scaling"="zmuv","Only Centering"="zm","Only Scaling"="uv"))),
+                                                          radioButtons("Summarycompscalemet","",list("Centering and Scaling"="zmuv","Only Centering"="zm","Only Scaling"="uv"))),
                                          radioButtons("Summarygenesetactmethod","Choose averaging method for gene set activity",
                                                       list("Weighted average"="average",
                                                            "Median"="median"))
@@ -121,60 +123,70 @@ shinyUI(pageWithSidebar(
                              wellPanel(
                                    radioButtons("GSCAmethod","",
                                                 list("Numeric POI"="GSCAdefault",
-                                                     "Interactive POI"="GSCAinteractive")
+                                                     "Interactive POI"="GSCAinteractive",
+                                                     "Formulaic POI (For Advanced Users)"="GSCAformula")
                                    ),
                                    wellPanel(
-                                         conditionalPanel(condition="input.GSCAmethod=='GSCAdefault'",
-                                                          wellPanel(
-                                                                h5("Numeric POI"),
-                                                                radioButtons("numericpoimethod","",list("Slider Bar"="slider","Exact Number"="number")),
-                                                                uiOutput("numericpoiui"),
-                                                                helpText("Quantile:"),
-                                                                uiOutput("numericpoitext"),
-                                                                checkboxInput("numericpoimoreopcheck","More POI cutoff options",value=T),
-                                                                conditionalPanel(condition="input.numericpoimoreopcheck==1",
-                                                                                 uiOutput("numericpoimoreopgenesetnameui"),
-                                                                                 selectInput("numericpoimoreopbound","Choose upper or lower bound",
-                                                                                             list("Upper bound" = "Upper",
-                                                                                                  "Lower bound" = "Lower")),
-                                                                                 selectInput("numericpoimoreopcutofftype","Choose cutoff type",
-                                                                                             list("Standard deviation from mean" = "sd",
-                                                                                                  "Normal fit quantile" = "Norm",
-                                                                                                  "Quantile" = "Quantile")),
-                                                                                 textInput("numericpoimoreopvalue","Enter Value","2"),
-                                                                                 p(actionButton("numericpoimoreopbutton","Apply New Cutoff"))
-                                                                )
-                                                          )
+                                         conditionalPanel(condition="input.GSCAmethod=='GSCAdefault'",                                              
+                                                          radioButtons("numericpoimethod","",list("Slider Bar"="slider","Exact Number"="number")),
+                                                          uiOutput("numericpoiui"),
+                                                          helpText("Quantile:"),
+                                                          uiOutput("numericpoitext"),
+                                                          checkboxInput("numericpoimoreopcheck","More POI cutoff options",value=T),
+                                                          conditionalPanel(condition="input.numericpoimoreopcheck==1",
+                                                                           uiOutput("numericpoimoreopgenesetnameui"),
+                                                                           selectInput("numericpoimoreopbound","Choose upper or lower bound",
+                                                                                       list("Upper bound" = "Upper",
+                                                                                            "Lower bound" = "Lower")),
+                                                                           selectInput("numericpoimoreopcutofftype","Choose cutoff type",
+                                                                                       list("Standard deviation from mean" = "sd",
+                                                                                            "Normal fit quantile" = "Norm",
+                                                                                            "Quantile" = "Quantile")),
+                                                                           textInput("numericpoimoreopvalue","Enter Value","2"),
+                                                                           p(actionButton("numericpoimoreopbutton","Apply New Cutoff"))
+                                                          )                                                        
                                          ),
                                          conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",uiOutput("InputGSCAsidebar")),
+                                         conditionalPanel(condition="input.GSCAmethod=='GSCAformula'",
+                                                          textInput("Formulainputtext","Input Formula"),
+                                                          actionButton("Formulaupdatebutton","Update Formula"),
+                                                          checkboxInput("Formulashowinstruct","Show Instructions",value=T),
+                                                          conditionalPanel(condition="input.Formulashowinstruct==1",
+                                                                  p("This function is for users familiar with programming"),
+                                                                  p("Type in Formula (R expression) to define POI"),
+                                                                  p("Suppose there are two gene sets GS1 and GS2"),
+                                                                  p("Following formula defines the POI that GS1 activity is at least 1.5 times GS2 activity and GS2 activity is less than 2:"),
+                                                                  p("GS1 >= 1.5* GS2 & GS2 < 2")
+                                                            )
+                                         ),
                                          uiOutput("plotenrichedareaui"),
                                          uiOutput("heatmapcolorsuppressui"),
-                                         uiOutput("heatmapthreerowvui"),
-                                         wellPanel(
-                                               h5("Specify biological contexts"),
-                                               textInput("Inputpvalco","Enrichment adjusted p-value cutoff","0.05"),
-                                               textInput("Inputfoldchangeco","Enrichment foldchange cutoff","1.5"),
-                                               radioButtons("Inputcontexttype","Choose biological context displaying method",
-                                                            list("Display top ranked contexts"="Toprank",
-                                                                 "Display specified contexts"="Specify")),
-                                               conditionalPanel(condition="input.Inputcontexttype=='Toprank'",
-                                                                uiOutput("InputNslider")),
-                                               conditionalPanel(condition="input.Inputcontexttype=='Specify'",
-                                                                uiOutput("InputGSCAspecifycontextui"))
-                                         ),
-                                         wellPanel(
-                                               h5("Save Current POI"), 
-                                               p(downloadButton('GSCAinteractivesavebutton','Save Current POI')),
-                                               h5("Load POI"), 
-                                               fileInput('GSCAinteractiveload', 'Choose POI file'),
-                                               p(actionButton('GSCAinteractiveloadbutton','Load POI'))
-                                         )
+                                         uiOutput("heatmapthreerowvui")),
+                                   wellPanel(
+                                         h5("Specify biological contexts"),
+                                         textInput("Inputpvalco","Enrichment adjusted p-value cutoff","0.05"),
+                                         textInput("Inputfoldchangeco","Enrichment foldchange cutoff","1.5"),
+                                         radioButtons("Inputcontexttype","Choose biological context displaying method",
+                                                      list("Display top ranked contexts"="Toprank",
+                                                           "Display specified contexts"="Specify")),
+                                         conditionalPanel(condition="input.Inputcontexttype=='Toprank'",
+                                                          uiOutput("InputNslider")),
+                                         conditionalPanel(condition="input.Inputcontexttype=='Specify'",
+                                                          uiOutput("InputGSCAspecifycontextui"))
+                                   ),
+                                   wellPanel(
+                                         h5("Save Current POI"), 
+                                         p(downloadButton('GSCAinteractivesavebutton','Save Current POI')),
+                                         h5("Load POI"), 
+                                         fileInput('GSCAinteractiveload', 'Choose POI file'),
+                                         p(actionButton('GSCAinteractiveloadbutton','Load POI'))
                                    )
+                                   
                              )
             ),
             conditionalPanel(condition="input.Mainmethod=='Download'",
                              wellPanel(                               
-                                   radioButtons("Downloadregionselect","Choose POI type",choices=c("Numeric","Interactive")),
+                                   radioButtons("Downloadregionselect","Choose POI type",choices=c("Numeric","Interactive","Formula")),
                                    wellPanel(
                                          h5("Download ranking table"),
                                          selectInput("Downloadranktabletype","File Type",choices=c("csv","txt")),
@@ -266,7 +278,8 @@ shinyUI(pageWithSidebar(
                              tabsetPanel(
                                    tabPanel("Plot",
                                             conditionalPanel(condition="input.GSCAmethod=='GSCAdefault'",uiOutput("GSCAdefaultplot")),  
-                                            conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",uiOutput("GSCAinteractiveplot")),
+                                            conditionalPanel(condition="input.GSCAmethod=='GSCAinteractive'",uiOutput("GSCAinteractiveplot")),                                            
+                                            conditionalPanel(condition="input.GSCAmethod=='GSCAformula'",uiOutput("GSCAformulaplot")),
                                             uiOutput("GSCAinteractiveplotthreezoominallpartsui"),
                                             uiOutput("GSCAinteractiveplotthreeplotplusui")
                                    ),
@@ -281,7 +294,7 @@ shinyUI(pageWithSidebar(
                              )
             ),
             conditionalPanel(condition="input.Mainmethod=='Utilities'",
-                              dataTableOutput("utishowdata")                
+                             dataTableOutput("utishowdata")                
             ),
             conditionalPanel(condition="input.Mainmethod=='About'",
                              p('GSCA: Gene Set Context Analysis'),
