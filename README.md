@@ -50,7 +50,7 @@ biocLite("GSCA")
 ```
 
 ## GSCA Online User Interface
-GSCA user interface can be directly launched online without installing R or any R package: http://spark.rstudio.com/jzc19900805/GSCA. However, running the GSCA online user interface could be significantly slower than running on a local computer.
+GSCA user interface can be directly launched online without installing R or any R package: https://zhiji.shinyapps.io/GSCA. However, running the GSCA online user interface could be significantly slower than running on a local computer.
 
 ## GSCA Demonstration Video
 For users who are not familiar with GSCA, here is a demonstration video on Youtube for a quick walk-through: https://www.youtube.com/watch?v=wqv_dmlxdcI
