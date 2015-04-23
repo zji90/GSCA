@@ -6,7 +6,7 @@ Gene Set Context Analysis (GSCA) is an open source software package to transform
 which represent a broad spectrum of biological contexts such as different cell lines, tissues, diseases, and developmental time points. Given one or multiple gene sets, GSCA can query the expression compendium to systematically identify biological contexts associated with specific gene set activity patterns. 
 
 ## GSCA Online User Interface
-GSCA user interface can be directly launched online without installing any software package: https://zhiji.shinyapps.io/GSCA. However, currently the online version only allows one concurrent user and running the online user interface could be slower than running GSCA on a local computer. It is thus recommended that users installing GSCA and data packages on their own computers with following procedures.
+GSCA user interface can be directly launched online without installing any software package: https://zhiji.shinyapps.io/GSCA. However, currently the online version only allows one concurrent user and running the online user interface could be slower than running GSCA on a local computer. Users are thus recommended to  install GSCA and data packages on their own computers with following procedures.
 
 ## GSCA and Data Package Installation
 
