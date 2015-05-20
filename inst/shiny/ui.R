@@ -124,7 +124,7 @@ shinyUI(pageWithSidebar(
                                    radioButtons("GSCAmethod","",
                                                 list("Numeric POI"="GSCAdefault",
                                                      "Interactive POI"="GSCAinteractive",
-                                                     "Formulaic POI (For Advanced Users)"="GSCAformula")
+                                                     "Formulaic POI"="GSCAformula")
                                    ),
                                    wellPanel(
                                          conditionalPanel(condition="input.GSCAmethod=='GSCAdefault'",                                              

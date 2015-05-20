@@ -349,7 +349,7 @@ shinyServer(function(input, output, session) {
                                     load(paste0(path,"/tabGPL570.rda"))                                    
                               } else if (input$Summarycompselect=="hgu133A2") {
                                     load(paste0(path,"/tabGPL571.rda"))                                    
-                              }
+                              }                              
                               Maindata$tab <- tab
                         } else {
                               Maindata$tab <- Maindata$oritab
