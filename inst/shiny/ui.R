@@ -107,7 +107,7 @@ shinyUI(pageWithSidebar(
                                    ),
                                    wellPanel(
                                          h5("Annotation Options"),
-                                         checkboxInput("Summaryannooptions","Single annotation for each sample",value=T),
+                                         #radioButtons("Summaryannooptions","Choose Annotation Type",list("Disjoint Annotation"="Disjoint","Multiple Annotation"="Multiple","Disjoint and Multiple Annotation"="Both")),
                                          h5("Scaling Options"),                                         
                                          checkboxInput("Summarycompscale","Scaling and centering expression values across samples"),
                                          conditionalPanel("input.Summarycompscale==1",
