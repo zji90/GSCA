@@ -1,6 +1,8 @@
 GSCA: Gene Set Context Analysis
 ====
 
+GSCA paper: http://nar.oxfordjournals.org/content/early/2015/09/07/nar.gkv873.full?keytype=ref&ijkey=W97qY8qT96ZmYCe
+
 ## Overview
 Gene Set Context Analysis (GSCA) is an open source software package to transform massive amounts of Publicly available gene Expression Data (PED) into a tool for making new discoveries.  GSCA is constructed based on a large collection of human and mouse gene expression data consisting of 25,000+ consistently normalized samples. Users can interactively visualize and examine transcriptional activities of genes and gene sets in these samples
 which represent a broad spectrum of biological contexts such as different cell lines, tissues, diseases, and developmental time points. Given one or multiple gene sets, GSCA can query the expression compendium to systematically identify biological contexts associated with specific gene set activity patterns. 
