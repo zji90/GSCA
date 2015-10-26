@@ -294,31 +294,36 @@ shinyServer(function(input, output, session) {
       output$Summarycompselectui <- renderUI({
             complist <- list()
             if (require(Affyhgu133aExpr)) {
-                  complist <- c(complist,"Affymetrix Human Genome U133A Array, GPL96 (11778 samples)"="hgu133a")
+                  complist <- c(complist,"Affymetrix Human Genome U133A Array, GPL96 (11778 samples)"="Affyhgu133a")
             } 
             if (require(Affymoe4302Expr)) {
-                  complist <- c(complist,"Affymetrix Mouse Genome 430 2.0 Array, GPL1261 (9444 samples)"="moe4302")
+                  complist <- c(complist,"Affymetrix Mouse Genome 430 2.0 Array, GPL1261 (9444 samples)"="Affymoe4302")
             }
             if (require(Affyhgu133Plus2Expr)) {
-                  complist <- c(complist,"Affymetrix Human Genome U133 Plus 2.0 Array, GPL570 (5153 samples)"="hgu133Plus2")
+                  complist <- c(complist,"Affymetrix Human Genome U133 Plus 2.0 Array, GPL570 (5153 samples)"="Affyhgu133Plus2")
             }
             if (require(Affyhgu133A2Expr)) {
-                  complist <- c(complist,"Affymetrix Human Genome U133A 2.0 Array, GPL571 (313 samples)"="hgu133A2")
+                  complist <- c(complist,"Affymetrix Human Genome U133A 2.0 Array, GPL571 (313 samples)"="Affyhgu133A2")
+            }
+            if (require(scRNAseqhumanExpr)) {
+                  complist <- c(complist,"single-cell RNA-seq for human (3056 samples)"="scRNAseqhuman")
             }
             radioButtons("Summarycompselect","Select Compendium", complist)
       })
       
       output$Summarycompinfo <- renderUI({
             if (!is.null(input$Summarycompselect)) {
-                  if(input$Summarycompselect=="moe4302"){
+                  if(input$Summarycompselect=="Affymoe4302"){
                         p(helpText("This compendium contains 20630 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL1261",target="_blank"))
-                  } else if (input$Summarycompselect=="hgu133a"){
+                  } else if (input$Summarycompselect=="Affyhgu133a"){
                         p(helpText("This compendium contains 12495 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL96",target="_blank"))
-                  } else if (input$Summarycompselect=="hgu133Plus2"){
+                  } else if (input$Summarycompselect=="Affyhgu133Plus2"){
                         p(helpText("This compendium contains 19944 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL570",target="_blank"))
-                  } else if (input$Summarycompselect=="hgu133A2"){
+                  } else if (input$Summarycompselect=="Affyhgu133A2"){
                         p(helpText("This compendium contains 12494 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL571",target="_blank"))
-                  }    
+                  } else if (input$Summarycompselect=="scRNAseqhuman"){
+                        p(helpText("This compendium contains 26068 genes"))
+                  }   
             }
       })
       
@@ -326,19 +331,22 @@ shinyServer(function(input, output, session) {
       observe({   
             if (input$Summarycompmethod=='available' && !is.null(input$Summarycompselect)) {
                   if (!is.null(input$Summarycompselect)) {
-                        if (input$Summarycompselect=="moe4302") {
+                        if (input$Summarycompselect=="Affymoe4302") {
                               data(Affymoe4302Exprtab)
                               Maindata$oritab <- Affymoe4302Exprtab
-                        } else if (input$Summarycompselect=="hgu133a") {
+                        } else if (input$Summarycompselect=="Affyhgu133a") {
                               data(Affyhgu133aExprtab)
                               Maindata$oritab <- Affyhgu133aExprtab
-                        } else if (input$Summarycompselect=="hgu133Plus2") {
+                        } else if (input$Summarycompselect=="Affyhgu133Plus2") {
                               data(Affyhgu133Plus2Exprtab)
                               Maindata$oritab <- Affyhgu133Plus2Exprtab
-                        } else if (input$Summarycompselect=="hgu133A2") {
+                        } else if (input$Summarycompselect=="Affyhgu133A2") {
                               data(Affyhgu133A2Exprtab)
                               Maindata$oritab <- Affyhgu133A2Exprtab
-                        } 
+                        } else if (input$Summarycompselect=="scRNAseqhuman") {
+                              data(scRNAseqhumantab)
+                              Maindata$oritab <- scRNAseqhumantab
+                        }
 #                         path <- system.file("extdata",package="GSCA")
 #                         if (input$Summarycompselect=="moe4302") {
 #                               load(paste0(path,"/tabGPL1261.rda"))                                    
@@ -358,7 +366,7 @@ shinyServer(function(input, output, session) {
 #                         }                                    
                         Maindata$tab <- Maindata$oritab
                   }
-                  path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
+                  path <- system.file("extdata",package=paste0(input$Summarycompselect,"Expr"))
                   load(paste0(path,"/geneid.rda"))
             } else {
                   input$Summaryuploadtabfile
@@ -433,7 +441,7 @@ shinyServer(function(input, output, session) {
                   
                   if (nrow(tmpgeneset) > 1) {
                         if (input$Summarycompmethod=='available') {
-                              path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
+                              path <- system.file("extdata",package=paste0(input$Summarycompselect,"Expr"))
                               tmpgeneexpr <- t(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,match(tmpgeneset[,2],Maindata$geneid))))/1000
                         } else {
                               tmpgeneexpr <- Maindata$uploadgeneexpr[tmpgeneset[,2],]
@@ -565,7 +573,7 @@ shinyServer(function(input, output, session) {
                                     singlegeneset <- Maindata$genesetname[genesetid]
                                     currentgeneset <- Maindata$genedata[Maindata$genedata[,1] == singlegeneset,]
                                     if (input$Summarycompmethod=='available') {
-                                          path <- system.file("extdata",package=paste0("Affy",input$Summarycompselect,"Expr"))
+                                          path <- system.file("extdata",package=paste0(input$Summarycompselect,"Expr"))
                                           tmpgeneexpr <- t(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,match(currentgeneset[,2],Maindata$geneid))))/1000
                                     } else {
                                           tmpgeneexpr <- Maindata$uploadgeneexpr[currentgeneset[,2],,drop=F]
