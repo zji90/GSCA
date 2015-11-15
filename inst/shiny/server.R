@@ -294,58 +294,104 @@ shinyServer(function(input, output, session) {
       output$Summarycompselectui <- renderUI({
             complist <- list()
             if (require(Affyhgu133aExpr)) {
-                  complist <- c(complist,"Affymetrix Human Genome U133A Array, GPL96 (11778 samples)"="Affyhgu133a")
+                  complist <- c(complist,"Affymetrix Human Genome U133A Array, GPL96"="Affyhgu133a")
             } 
             if (require(Affymoe4302Expr)) {
-                  complist <- c(complist,"Affymetrix Mouse Genome 430 2.0 Array, GPL1261 (9444 samples)"="Affymoe4302")
+                  complist <- c(complist,"Affymetrix Mouse Genome 430 2.0 Array, GPL1261"="Affymoe4302")
             }
             if (require(Affyhgu133Plus2Expr)) {
-                  complist <- c(complist,"Affymetrix Human Genome U133 Plus 2.0 Array, GPL570 (5153 samples)"="Affyhgu133Plus2")
+                  complist <- c(complist,"Affymetrix Human Genome U133 Plus 2.0 Array, GPL570"="Affyhgu133Plus2")
             }
             if (require(Affyhgu133A2Expr)) {
-                  complist <- c(complist,"Affymetrix Human Genome U133A 2.0 Array, GPL571 (313 samples)"="Affyhgu133A2")
+                  complist <- c(complist,"Affymetrix Human Genome U133A 2.0 Array, GPL571"="Affyhgu133A2")
             }
             if (require(scRNAseqhumanExpr)) {
-                  complist <- c(complist,"single-cell RNA-seq for human (3056 samples)"="scRNAseqhuman")
+                  complist <- c(complist,"single-cell RNA-seq for human"="scRNAseqhuman")
             }
-            radioButtons("Summarycompselect","Select Compendium", complist)
+            if (require(scRNAseqmouseExpr)) {
+                  complist <- c(complist,"single-cell RNA-seq for mouse"="scRNAseqmouse")
+            }
+            selectInput("Summarycompselect","Select Compendium", complist)
       })
       
       output$Summarycompinfo <- renderUI({
             if (!is.null(input$Summarycompselect)) {
                   if(input$Summarycompselect=="Affymoe4302"){
-                        p(helpText("This compendium contains 20630 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL1261",target="_blank"))
+                        p(helpText("This compendium contains 9444 samples and 20630 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL1261",target="_blank"))
                   } else if (input$Summarycompselect=="Affyhgu133a"){
-                        p(helpText("This compendium contains 12495 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL96",target="_blank"))
+                        p(helpText("This compendium contains 11778 samples and 12495 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL96",target="_blank"))
                   } else if (input$Summarycompselect=="Affyhgu133Plus2"){
-                        p(helpText("This compendium contains 19944 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL570",target="_blank"))
+                        p(helpText("This compendium contains 5153 samples and 19944 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL570",target="_blank"))
                   } else if (input$Summarycompselect=="Affyhgu133A2"){
-                        p(helpText("This compendium contains 12494 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL571",target="_blank"))
+                        p(helpText("This compendium contains 313 samples and 12494 genes"),a("NCBI GEO description",href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GPL571",target="_blank"))
                   } else if (input$Summarycompselect=="scRNAseqhuman"){
-                        p(helpText("This compendium contains 26068 genes"))
-                  }   
+                        p(helpText("This compendium contains 3056 samples and 26068 genes"))
+                  } else if (input$Summarycompselect=="scRNAseqmouse"){
+                        p(helpText("This compendium contains 9265 samples and 23116 genes"))
+                  }    
             }
+      })
+      
+      #UI for quality control
+      output$SummaryQualitycontrolui <- renderUI({
+            if (!is.null(input$Summarycompselect) && (input$Summarycompselect=="scRNAseqhuman" | input$Summarycompselect=="scRNAseqmouse")) {
+                  wellPanel(
+                        h5("Quality Control"),
+                        checkboxInput("Summaryqualitytf","Only inlcude samples with following quality",value = T),
+                        textInput("Summaryqualitymaprate","Mapping rate percentage greater than",value=30),
+                        textInput("Summaryqualityreads","Reads more than",value=10000),
+                        textOutput("SummaryQualitycontroltext")
+                  )
+            }
+      })
+      
+      output$SummaryQualitycontroltext <- renderText({
+            if (!is.null(Maindata$maprateselect))
+                  paste0(sum(Maindata$maprateselect)," samples are selected")
       })
       
       #Update Maindata information
       observe({   
             if (input$Summarycompmethod=='available' && !is.null(input$Summarycompselect)) {
                   if (!is.null(input$Summarycompselect)) {
+                        path <- system.file("extdata",package=paste0(input$Summarycompselect,"Expr"))
+                        load(paste0(path,"/geneid.rda"))
                         if (input$Summarycompselect=="Affymoe4302") {
                               data(Affymoe4302Exprtab)
                               Maindata$oritab <- Affymoe4302Exprtab
+                              Maindata$maprateselect <- NULL
                         } else if (input$Summarycompselect=="Affyhgu133a") {
                               data(Affyhgu133aExprtab)
                               Maindata$oritab <- Affyhgu133aExprtab
+                              Maindata$maprateselect <- NULL
                         } else if (input$Summarycompselect=="Affyhgu133Plus2") {
                               data(Affyhgu133Plus2Exprtab)
                               Maindata$oritab <- Affyhgu133Plus2Exprtab
+                              Maindata$maprateselect <- NULL
                         } else if (input$Summarycompselect=="Affyhgu133A2") {
                               data(Affyhgu133A2Exprtab)
                               Maindata$oritab <- Affyhgu133A2Exprtab
+                              Maindata$maprateselect <- NULL
                         } else if (input$Summarycompselect=="scRNAseqhuman") {
                               data(scRNAseqhumantab)
-                              Maindata$oritab <- scRNAseqhumantab
+                              if (!is.null(input$Summaryqualitytf) && input$Summaryqualitytf) {
+                                    load(paste0(path,"/quality.rda"))
+                                    Maindata$maprateselect <- maprate[,1] >= as.numeric(input$Summaryqualitymaprate) & maprate[,2] >= as.numeric(input$Summaryqualityreads)
+                                    Maindata$oritab <- scRNAseqhumantab[Maindata$maprateselect,]
+                              } else {
+                                    Maindata$maprateselect <- NULL
+                                    Maindata$oritab <- scRNAseqhumantab
+                              }
+                        } else if (input$Summarycompselect=="scRNAseqmouse") {
+                              data(scRNAseqmousetab)
+                              if (!is.null(input$Summaryqualitytf) && input$Summaryqualitytf) {
+                                    load(paste0(path,"/quality.rda"))
+                                    Maindata$maprateselect <- maprate[,1] >= as.numeric(input$Summaryqualitymaprate) & maprate[,2] >= as.numeric(input$Summaryqualityreads)
+                                    Maindata$oritab <- scRNAseqmousetab[Maindata$maprateselect,]
+                              } else {
+                                    Maindata$maprateselect <- NULL
+                                    Maindata$oritab <- scRNAseqmousetab
+                              }
                         }
 #                         path <- system.file("extdata",package="GSCA")
 #                         if (input$Summarycompselect=="moe4302") {
@@ -366,8 +412,6 @@ shinyServer(function(input, output, session) {
 #                         }                                    
                         Maindata$tab <- Maindata$oritab
                   }
-                  path <- system.file("extdata",package=paste0(input$Summarycompselect,"Expr"))
-                  load(paste0(path,"/geneid.rda"))
             } else {
                   input$Summaryuploadtabfile
                   if (!is.null(input$Summaryuploadtabfile)) {
@@ -380,7 +424,11 @@ shinyServer(function(input, output, session) {
             }
             if (!is.null(Rawdata$genedata)) {
                   Maindata$geneid <- geneid
-                  Maindata$genedata <- Rawdata$genedata[Rawdata$genedata[,2] %in% geneid & Rawdata$genedata[,1] %in% input$Selectedgeneset,]
+                  if (is.matrix(geneid)) {
+                        Maindata$genedata <- Rawdata$genedata[Rawdata$genedata[,2] %in% geneid[,1] & Rawdata$genedata[,1] %in% input$Selectedgeneset,]
+                  } else {
+                        Maindata$genedata <- Rawdata$genedata[Rawdata$genedata[,2] %in% geneid & Rawdata$genedata[,1] %in% input$Selectedgeneset,]     
+                  }
                   Maindata$dim <- length(unique((Maindata$genedata[,1])))
                   Maindata$genesetname <- unique(Maindata$genedata[,1])
             }            
@@ -442,7 +490,20 @@ shinyServer(function(input, output, session) {
                   if (nrow(tmpgeneset) > 1) {
                         if (input$Summarycompmethod=='available') {
                               path <- system.file("extdata",package=paste0(input$Summarycompselect,"Expr"))
-                              tmpgeneexpr <- t(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,match(tmpgeneset[,2],Maindata$geneid))))/1000
+                              geneid <- Maindata$geneid
+                              if (is.matrix(geneid)) {
+                                    tmpgeneexpr <- NULL
+                                    for (h5id in unique(geneid[,2])) {
+                                          h5gene <- geneid[geneid[,2]==h5id,1]
+                                          currenth5gene <- intersect(h5gene,currentgeneset[,2])
+                                          tmpgeneexpr <- rbind(tmpgeneexpr,t(h5read(paste0(path,"/data",h5id,".h5"),"expr",index=list(NULL,match(currenth5gene,h5gene))))/1000)
+                                    }
+                              } else {
+                                    tmpgeneexpr <- t(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,match(currentgeneset[,2],Maindata$geneid))))/1000
+                              }
+                              if (!is.null(Maindata$maprateselect)) {
+                                    tmpgeneexpr <- tmpgeneexpr[,Maindata$maprateselect,drop=F]
+                              }
                         } else {
                               tmpgeneexpr <- Maindata$uploadgeneexpr[tmpgeneset[,2],]
                         }        
@@ -506,6 +567,102 @@ shinyServer(function(input, output, session) {
                   })
       })
       
+      ######  Explore Compendium  ######
+      
+      output$Exploreselectui <- renderUI({
+            tagList(
+                  helpText("Samples selected by any of the following will be highlighted"),
+                        selectInput("Exploreselectsample","Select Sample",Maindata$tab$SampleID,multiple = T),      
+                        selectInput("Exploreselectexperiment","Select Experiment",Maindata$tab$ExperimentID,multiple = T),
+                        radioButtons("Exploreselectsampletypemethod","Select Sample Type",list("Keyword Match"="Keyword","Exact Match"="Exact")),
+                        conditionalPanel(condition="input.Exploreselectsampletypemethod=='Keyword'",
+                                   textInput("Exploreselectsampletypekeyword","Enter Keyword (Use '_' to replace space)")),
+                        conditionalPanel(condition="input.Exploreselectsampletypemethod=='Exact'",
+                              selectInput("Exploreselectsampletypeexact","Select Sample Type",Maindata$tab$SampleType,multiple = T))
+            )
+      })
+
+      observe({
+            if (!is.null(input$Exploreselectsampletypemethod)) {
+                  if (input$Exploreselectsampletypemethod == "Keyword") {
+                        if (is.null(input$Exploreselectsample) & is.null(input$Exploreselectexperiment) & nchar(input$Exploreselectsampletypekeyword)==0) {
+                              Maindata$Exploreselected <- NULL
+                        } else {
+                              Maindata$Exploreselected <- Maindata$tab$SampleID %in% input$Exploreselectsample | Maindata$tab$ExperimentID %in% input$Exploreselectexperiment | grepl(input$Exploreselectsampletypekeyword,Maindata$tab$SampleType)
+                        }
+                  } else {
+                        if (is.null(input$Exploreselectsample) & is.null(input$Exploreselectexperiment) & is.null(input$Exploreselectsampletypeexact)) {
+                              Maindata$Exploreselected <- NULL
+                        } else {
+                              Maindata$Exploreselected <- Maindata$tab$SampleID %in% input$Exploreselectsample | Maindata$tab$ExperimentID %in% input$Exploreselectexperiment | Maindata$tab$SampleType %in% input$Exploreselectsampletypeexact      
+                        }
+                  }      
+            }
+      })
+            
+      output$Exploreplot <- renderUI({
+            if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) != 0) {
+                  if (Maindata$dim == 1) {
+                        tagList(
+                              plotOutput("Exploreplotoneone",height=300),
+                              plotOutput("Exploreplotonetwo",height=300)
+                        )
+                  } else if (Maindata$dim == 2) {
+                        div(align="center",
+                            plotOutput("Exploreplottwo",width=900,height=900)
+                        )
+                  } else {
+                        tagList(
+                              plotOutput("Exploreplotthree")
+                        )
+                  }
+            }      
+      })
+      
+      output$Exploreplotoneone <- renderPlot({
+            if (Maindata$dim == 1) {
+                  hist(Maindata$GSCAscore,xlab="Sample Score",xlim=range(Maindata$GSCAscore),main="All samples in the compendium",cex.main=2,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=20))
+            }
+      })
+      
+      output$Exploreplotonetwo <- renderPlot({
+            if (Maindata$dim == 1 && !is.null(Maindata$Exploreselected))
+                  hist(Maindata$GSCAscore[Maindata$Exploreselected],xlim=range(Maindata$GSCAscore),main="Selected Samples",xlab="Sample Score",cex.main=2,,breaks=seq(min(Maindata$GSCAscore),max(Maindata$GSCAscore),length.out=20))
+      })
+      
+      output$Exploreplottwo <- renderPlot({  
+            if (Maindata$dim == 2) {
+                  plot(Maindata$GSCAscore[1,],Maindata$GSCAscore[2,],pch=20,xlab=Maindata$genesetname[1],cex=0.7,ylab=Maindata$genesetname[2],cex.lab=1.5,ylim=c(min(Maindata$GSCAscore[2,]),1.15*max(Maindata$GSCAscore[2,])))
+                  if (!is.null(Maindata$Exploreselected)) {
+                        points(Maindata$GSCAscore[1,Maindata$Exploreselected],Maindata$GSCAscore[2,Maindata$Exploreselected],col=COLORS[1],pch=STYLES[1],bg=COLORS[1])
+                        legend("topright",legend=c("Selected Samples","Not Selected Samples"),pch=c(STYLES[1],20),pt.bg=c(COLORS[1],"black"),col=c(COLORS[1],"black"),cex=0.8)
+                  }
+            }
+      })
+      
+      output$Exploreplotthree <- renderPlot({
+            if (Maindata$dim >= 3) {
+                  par(oma=c(0.5,0,0.5,max(nchar(Maindata$genesetname))/1.5))
+                  if (!is.null(Maindata$Exploreselected)) {
+                        colcolorall <- rep("cyan",ncol(Maindata$GSCAscore))
+                        colcolorall[Maindata$Exploreselected] <- "blue"      
+                        heatmap.2(Maindata$GSCAscore,col=bluered(100),symbreaks=F,Colv=as.dendrogram(Maindata$GSCAclust),dendrogram="none",trace="none",Rowv=F,labCol=NA,ColSideColors=colcolorall,useRaster=T)
+                        legend("bottomleft",legend=c("Selected Samples","Not Selected Samples"),lwd=1,col=c("blue","cyan"))
+                  } else {
+                        heatmap.2(Maindata$GSCAscore,col=bluered(100),symbreaks=F,Colv=as.dendrogram(Maindata$GSCAclust),dendrogram="none",trace="none",Rowv=F,labCol=NA,useRaster=T)
+                  }
+            }
+      })
+      
+      output$Exploreannotable <- renderDataTable({
+            if (input$Explorealltf) {
+                  Maindata$tab   
+            } else {
+                  Maindata$tab[Maindata$Exploreselected,]      
+            }
+      })
+      
+      
       ######  Mainmethod : GSCA  ######
       
       #When reentering GSCA page, GSCAmethod should be set to GSCAdefault
@@ -563,7 +720,7 @@ shinyServer(function(input, output, session) {
       
       #Calculating GSCA Score and hclust dendrogram if there are more than three genesets
       observe({
-            if (input$Mainmethod=='GSCA') {
+            if (input$Mainmethod=='GSCA' | input$Mainmethod=='Explore') {
                   isolate({
                         if (!is.null(Maindata$genedata) && nrow(Maindata$genedata) != 0) {
                               scoremat <- matrix(0,nrow=Maindata$dim,ncol=nrow(Maindata$tab))
@@ -574,10 +731,24 @@ shinyServer(function(input, output, session) {
                                     currentgeneset <- Maindata$genedata[Maindata$genedata[,1] == singlegeneset,]
                                     if (input$Summarycompmethod=='available') {
                                           path <- system.file("extdata",package=paste0(input$Summarycompselect,"Expr"))
-                                          tmpgeneexpr <- t(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,match(currentgeneset[,2],Maindata$geneid))))/1000
+                                          geneid <- Maindata$geneid
+                                          if (is.matrix(geneid)) {
+                                                tmpgeneexpr <- NULL
+                                                for (h5id in unique(geneid[,2])) {
+                                                      h5gene <- geneid[geneid[,2]==h5id,1]
+                                                      currenth5gene <- intersect(h5gene,currentgeneset[,2])
+                                                      if (length(currenth5gene) > 0) 
+                                                            tmpgeneexpr <- rbind(tmpgeneexpr,t(h5read(paste0(path,"/data",h5id,".h5"),"expr",index=list(NULL,match(currenth5gene,h5gene))))/1000)
+                                                }
+                                          } else {
+                                                tmpgeneexpr <- t(h5read(paste0(path,"/data.h5"),"expr",index=list(NULL,match(currentgeneset[,2],Maindata$geneid))))/1000
+                                          }
+                                          if (!is.null(Maindata$maprateselect)) {
+                                                tmpgeneexpr <- tmpgeneexpr[,Maindata$maprateselect,drop=F]
+                                          }
                                     } else {
                                           tmpgeneexpr <- Maindata$uploadgeneexpr[currentgeneset[,2],,drop=F]
-                                    }        
+                                    }       
                                     if (input$Summarycompscale) {                              
                                           if(input$Summarycompscalemet=="zmuv") {
                                                 tmpgeneexpr <- t(apply(tmpgeneexpr,1,scale))   
