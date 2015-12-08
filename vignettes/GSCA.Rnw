@@ -150,6 +150,12 @@ As mentioned earlier, if in the initial GSCA analysis, the argument, \texttt{dir
 
 \bibliographystyle{apalike}
 \begin{thebibliography}{99}
+
+\bibitem{GSCA}
+Ji, Z., Vokes, S. A., Dang, C. V., and Ji, H. (2015)
+\newblock Turning publicly available gene expression data into discoveries using gene set context analysis
+\newblock {\em Nucl. Acids Res.}, gkv873.
+
 \bibitem{Barrett2007}
 Barrett T., Troup D.B., Whilhite S.E., et al. (2007)
 \newblock NCBI GEO: mining tens of millions of expression profiles -- database

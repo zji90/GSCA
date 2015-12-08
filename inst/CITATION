@@ -1,0 +1,9 @@
+bibentry(bibtype = "Article",
+         title = "Turning publicly available gene expression data into discoveries using gene set context analysis",
+         author = c(person("Zhicheng", "Ji"),
+                    person("Steven.A.", "Vokes"),
+                    person("Chi.V.", "Dang"),
+                    person("Hongkai", "Ji")),
+         year = 2015,
+         journal = "Nucleic Acids Res. gkv873")
+	
