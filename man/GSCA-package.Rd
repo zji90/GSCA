@@ -16,8 +16,8 @@ GSCA takes as input several lists of activated and repressed genes. Though the i
 \tabular{ll}{
 Package: \tab GSCA\cr
 Type: \tab Package\cr
-Version: \tab 0.99.1\cr
-Date: \tab 2014-2-9\cr
+Version: \tab 2.0.0\cr
+Date: \tab 2015-12-8\cr
 License: \tab GPL-2\cr
 }
 }

@@ -393,23 +393,6 @@ shinyServer(function(input, output, session) {
                                     Maindata$oritab <- scRNAseqmousetab
                               }
                         }
-#                         path <- system.file("extdata",package="GSCA")
-#                         if (input$Summarycompselect=="moe4302") {
-#                               load(paste0(path,"/tabGPL1261.rda"))                                    
-#                         } else if (input$Summarycompselect=="hgu133a") {
-#                               load(paste0(path,"/tabGPL96.rda"))                                    
-#                         } else if (input$Summarycompselect=="hgu133Plus2") {
-#                               load(paste0(path,"/tabGPL570.rda"))                                    
-#                         } else if (input$Summarycompselect=="hgu133A2") {
-#                               load(paste0(path,"/tabGPL571.rda"))                                    
-#                         }
-#                         if (input$Summaryannooptions=="Multiple") {
-#                               Maindata$tab <- tab
-#                         } else if (input$Summaryannooptions=="Disjoint") {
-#                               Maindata$tab <- Maindata$oritab
-#                         } else {
-#                               Maindata$tab <- rbind(tab,Maindata$oritab)
-#                         }                                    
                         Maindata$tab <- Maindata$oritab
                   }
             } else {

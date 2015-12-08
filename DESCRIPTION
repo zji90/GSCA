@@ -1,8 +1,8 @@
 Package: GSCA
 Type: Package
 Title: GSCA: Gene Set Context Analysis
-Version: 1.7.0
-Date: 2015-1-6
+Version: 2.0.0
+Date: 2015-12-8
 Author: Zhicheng Ji, Hongkai Ji
 Maintainer: Zhicheng Ji <zji4@jhu.edu>
 Description: GSCA takes as input several lists of activated and
